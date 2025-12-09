@@ -1,5 +1,5 @@
 # Multi-stage build for Next.js Frontend
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
@@ -27,10 +27,16 @@ ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S -D -H -u 1001 -h /app -s /sbin/nologin -G nodejs nextjs
 
+# Copy package files
+COPY --from=builder /app/package*.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production && npm cache clean --force
+
 # Copy built assets from builder
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/next.config.mjs ./next.config.mjs
 
 # Set correct ownership
 RUN chown -R nextjs:nodejs /app
@@ -44,5 +50,5 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Start the application
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
 
