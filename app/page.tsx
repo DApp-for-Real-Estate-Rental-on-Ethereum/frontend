@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { RecommendedProperties } from "@/components/recommendations/RecommendedProperties"
 import { Heart, MapPin, Star, DollarSign, Users, Layers, Leaf, Shield, Target } from "lucide-react"
 
 export default function HomePage() {
@@ -29,7 +30,7 @@ export default function HomePage() {
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
+    if (!url) return "/houses_placeholder.png"
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url
     }
@@ -66,8 +67,8 @@ export default function HomePage() {
         (property) =>
           property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           property.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          property.address.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          property.address.country.toLowerCase().includes(searchTerm.toLowerCase()),
+          (property.address?.city || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (property.address?.country || "").toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
     setFilteredProperties(filtered)
@@ -85,6 +86,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+
       <section className="bg-background py-20 lg:py-32">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -130,6 +132,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Recommended Properties Section - Only visible to logged-in users */}
+      <RecommendedProperties />
+
       <section id="properties-section" className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 bg-secondary/30">
         {isFetching ? (
           <div className="flex justify-center py-20">
@@ -160,6 +165,11 @@ export default function HomePage() {
                         alt={property.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.srcset = ""
+                          target.src = "/houses_placeholder.png"
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -189,7 +199,7 @@ export default function HomePage() {
                         <div className="flex items-center text-muted-foreground text-sm">
                           <MapPin className="w-4 h-4 mr-2 text-primary" />
                           <span className="line-clamp-1">
-                            {property.address.city}, {property.address.country}
+                            {property.address ? `${property.address.city}, ${property.address.country}` : "Location not available"}
                           </span>
                         </div>
                       </div>
@@ -200,11 +210,11 @@ export default function HomePage() {
                             <span className="text-2xl font-bold text-primary">
                               {property.dailyPrice?.toFixed(4) || property.price?.toFixed(4) || "N/A"}
                             </span>
-                            <span className="text-sm text-muted-foreground font-medium">ETH / day</span>
+                            <span className="text-sm text-muted-foreground font-medium">MAD / day</span>
                           </div>
                           {property.depositAmount && property.depositAmount > 0 && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              Deposit: {property.depositAmount.toFixed(4)} ETH
+                              Deposit: {property.depositAmount.toFixed(0)} MAD
                             </p>
                           )}
                         </div>

@@ -14,8 +14,8 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login } = useAuth()
-  const [email, setEmail] = useState("poster@example.com")
-  const [password, setPassword] = useState("password123")
+  const [email, setEmail] = useState("nitixaj335@roratu.com")
+  const [password, setPassword] = useState("Test123@")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
@@ -43,17 +43,7 @@ export default function LoginPage() {
     }
   }
 
-  const loginAsAdmin = async () => {
-    setIsLoading(true)
-    try {
-      await login("admin@example.com", "admin123")
-      router.push("/admin")
-    } catch (err) {
-      setError("Admin login failed")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
@@ -118,44 +108,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Demo Accounts</span>
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Button
-              type="button"
-              onClick={async () => {
-                setIsLoading(true)
-                try {
-                  await login("poster@example.com", "password123")
-                  router.push("/post-property")
-                } catch (err) {
-                  setError("Login failed")
-                } finally {
-                  setIsLoading(false)
-                }
-              }}
-              className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-              disabled={isLoading}
-            >
-              Become a Host (Demo)
-            </Button>
-            <Button
-              type="button"
-              onClick={loginAsAdmin}
-              variant="outline"
-              className="w-full bg-transparent"
-              disabled={isLoading}
-            >
-              Login as Admin (Demo)
-            </Button>
-          </div>
 
           <p className="text-center text-sm text-gray-600 mt-6">
             Don't have an account?{" "}

@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { 
-  Building2, 
-  Users, 
-  Calendar, 
+import {
+  Building2,
+  Users,
+  Calendar,
   BarChart3,
   AlertTriangle,
   FileText,
-  ChevronDown 
+  ChevronDown
 } from "lucide-react"
 
 interface AdminNavBarProps {
@@ -105,11 +105,10 @@ export function AdminNavBar({ activeSection, onSectionChange }: AdminNavBarProps
             <div key={section.id} className="flex-1 relative overflow-visible">
               <button
                 onClick={() => handleSectionClick(section.id)}
-                className={`w-full px-3 py-3 text-center transition-colors ${
-                  isActive
+                className={`w-full px-3 py-3 text-center transition-colors ${isActive
                     ? "bg-teal-600 text-white"
                     : "hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 <div className="flex flex-col items-center gap-1.5">
                   <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-gray-600"}`} />
@@ -117,9 +116,8 @@ export function AdminNavBar({ activeSection, onSectionChange }: AdminNavBarProps
                     {section.label}
                   </span>
                   <ChevronDown
-                    className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""} ${
-                      isActive ? "text-white" : "text-gray-600"
-                    }`}
+                    className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""} ${isActive ? "text-white" : "text-gray-600"
+                      }`}
                   />
                 </div>
               </button>
@@ -132,11 +130,10 @@ export function AdminNavBar({ activeSection, onSectionChange }: AdminNavBarProps
                       <button
                         key={subSection.id}
                         onClick={() => handleSubSectionClick(subSection.id)}
-                        className={`w-full px-4 py-2.5 text-left text-xs transition-colors ${
-                          activeSection === subSection.id
+                        className={`w-full px-4 py-2.5 text-left text-xs transition-colors ${activeSection === subSection.id
                             ? "bg-teal-50 text-teal-700 font-semibold"
                             : "text-gray-700 hover:bg-gray-50"
-                        }`}
+                          }`}
                       >
                         {subSection.label}
                       </button>

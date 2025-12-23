@@ -34,7 +34,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
-  
+
   // Dialog states
   const [approveDialogOpen, setApproveDialogOpen] = useState(false)
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
@@ -79,10 +79,10 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
 
       setLoadingHostInfo(true)
       try {
-        const userId = typeof selectedProperty.userId === 'string' 
-          ? parseInt(selectedProperty.userId) 
+        const userId = typeof selectedProperty.userId === 'string'
+          ? parseInt(selectedProperty.userId)
           : selectedProperty.userId
-        
+
         if (isNaN(userId)) {
           setHostInfo(null)
           return
@@ -118,11 +118,11 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
-        setLightboxImageIndex((prev) => 
+        setLightboxImageIndex((prev) =>
           prev === 0 ? selectedProperty.propertyImages!.length - 1 : prev - 1
         )
       } else if (e.key === 'ArrowRight') {
-        setLightboxImageIndex((prev) => 
+        setLightboxImageIndex((prev) =>
           prev === selectedProperty.propertyImages!.length - 1 ? 0 : prev + 1
         )
       } else if (e.key === 'Escape') {
@@ -140,14 +140,14 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
       setError("")
       // Get all properties with all statuses for admin
       const data = await apiClient.properties.getAllForAdmin()
-      
+
       // Ensure data is an array
       if (!Array.isArray(data)) {
         setError("Invalid response format from server")
         setProperties([])
         return
       }
-      
+
       setProperties(data)
     } catch (err: any) {
       setError(err.message || "Failed to load properties")
@@ -185,7 +185,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
       )
     }
 
-    
+
     setFilteredProperties(filtered)
   }
 
@@ -285,7 +285,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
+    if (!url) return "/houses_placeholder.png"
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url
     }
@@ -371,89 +371,125 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
                 {filteredProperties
                   .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                   .map((property) => {
-                  const imageUrl = getPropertyImage(property)
-                  const isLoading = actionLoading[property.id]
+                    const imageUrl = getPropertyImage(property)
+                    const isLoading = actionLoading[property.id]
 
-                  return (
-                    <TableRow key={property.id} className="hover:bg-gray-50">
-                      <TableCell>
-                        <div className="relative w-16 h-16 bg-gray-200 rounded overflow-hidden">
-                          {imageUrl ? (
-                            <Image
-                              src={getImageUrl(imageUrl)}
-                              alt={property.title}
-                              fill
-                              className="object-cover"
-                              onError={(e) => {
-                                ;(e.target as HTMLImageElement).src = "/placeholder.jpg"
-                              }}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                              No Image
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-[200px]">
-                          <p className="font-semibold text-gray-900 truncate">{property.title}</p>
-                          <p className="text-xs text-gray-500 line-clamp-2 mt-1">
-                            {property.description}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
-                          <span className="truncate max-w-[150px]">
-                            {property.address?.city}, {property.address?.address}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-600">
-                          {property.type?.type || "N/A"}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <span className="font-semibold text-teal-600">
-                            {property.dailyPrice?.toFixed(4) || property.price?.toFixed(4) || "N/A"} ETH/day
-                          </span>
-                          {property.depositAmount && property.depositAmount > 0 && (
-                            <span className="text-xs font-semibold text-orange-600">
-                              Deposit: {property.depositAmount.toFixed(4)} ETH
+                    return (
+                      <TableRow key={property.id} className="hover:bg-gray-50">
+                        <TableCell>
+                          <div className="relative w-16 h-16 bg-gray-200 rounded overflow-hidden">
+                            {imageUrl ? (
+                              <Image
+                                src={getImageUrl(imageUrl)}
+                                alt={property.title}
+                                fill
+                                className="object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = "/houses_placeholder.png"
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                                No Image
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[200px]">
+                            <p className="font-semibold text-gray-900 truncate">{property.title}</p>
+                            <p className="text-xs text-gray-500 line-clamp-2 mt-1">
+                              {property.description}
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center text-sm text-gray-600">
+                            <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
+                            <span className="truncate max-w-[150px]">
+                              {property.address?.city}, {property.address?.address}
                             </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm text-gray-600">
-                          <div>{property.capacity} guests</div>
-                          {property.numberOfBedrooms && (
-                            <div className="text-xs text-gray-500">
-                              {property.numberOfBedrooms} bedrooms
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(property.status)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedProperty(property)
-                              setViewDialogOpen(true)
-                            }}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm text-gray-600">
+                            {property.type?.type || "N/A"}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold text-teal-600">
+                              {property.dailyPrice?.toFixed(4) || property.price?.toFixed(4) || "N/A"} ETH/day
+                            </span>
+                            {property.depositAmount && property.depositAmount > 0 && (
+                              <span className="text-xs font-semibold text-orange-600">
+                                Deposit: {property.depositAmount.toFixed(4)} ETH
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm text-gray-600">
+                            <div>{property.capacity} guests</div>
+                            {property.numberOfBedrooms && (
+                              <div className="text-xs text-gray-500">
+                                {property.numberOfBedrooms} bedrooms
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(property.status)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedProperty(property)
+                                setViewDialogOpen(true)
+                              }}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
 
-                          {property.status === "PENDING_APPROVAL" && (
-                            <>
+                            {property.status === "PENDING_APPROVAL" && (
+                              <>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedProperty(property)
+                                    setApproveDialogOpen(true)
+                                  }}
+                                  disabled={isLoading}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  {isLoading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <CheckCircle className="w-4 h-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedProperty(property)
+                                    setRejectDialogOpen(true)
+                                  }}
+                                  disabled={isLoading}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  {isLoading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <XCircle className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              </>
+                            )}
+
+                            {property.status === "DISAPPROVED" && (
                               <Button
                                 variant="default"
                                 size="sm"
@@ -463,6 +499,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
                                 }}
                                 disabled={isLoading}
                                 className="bg-green-600 hover:bg-green-700"
+                                title="Approve Property"
                               >
                                 {isLoading ? (
                                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -470,88 +507,51 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
                                   <CheckCircle className="w-4 h-4" />
                                 )}
                               </Button>
+                            )}
+
+                            {(property.status === "APPROVED" || filter === "approved") && property.status === "APPROVED" && (
                               <Button
                                 variant="default"
                                 size="sm"
                                 onClick={() => {
                                   setSelectedProperty(property)
-                                  setRejectDialogOpen(true)
+                                  setSuspendDialogOpen(true)
                                 }}
                                 disabled={isLoading}
-                                className="bg-red-600 hover:bg-red-700"
+                                className="bg-orange-600 hover:bg-orange-700"
+                                title="Suspend Property"
                               >
                                 {isLoading ? (
                                   <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
-                                  <XCircle className="w-4 h-4" />
+                                  <Ban className="w-4 h-4" />
                                 )}
                               </Button>
-                            </>
-                          )}
+                            )}
 
-                          {property.status === "DISAPPROVED" && (
-                            <Button
-                              variant="default"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedProperty(property)
-                                setApproveDialogOpen(true)
-                              }}
-                              disabled={isLoading}
-                              className="bg-green-600 hover:bg-green-700"
-                              title="Approve Property"
-                            >
-                              {isLoading ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <CheckCircle className="w-4 h-4" />
-                              )}
-                            </Button>
-                          )}
-
-                          {(property.status === "APPROVED" || filter === "approved") && property.status === "APPROVED" && (
-                            <Button
-                              variant="default"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedProperty(property)
-                                setSuspendDialogOpen(true)
-                              }}
-                              disabled={isLoading}
-                              className="bg-orange-600 hover:bg-orange-700"
-                              title="Suspend Property"
-                            >
-                              {isLoading ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <Ban className="w-4 h-4" />
-                              )}
-                            </Button>
-                          )}
-
-                          {property.status === "SUSPENDED" && (
-                            <Button
-                              variant="default"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedProperty(property)
-                                setRevokeDialogOpen(true)
-                              }}
-                              disabled={isLoading}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              {isLoading ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <RotateCcw className="w-4 h-4" />
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
+                            {property.status === "SUSPENDED" && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedProperty(property)
+                                  setRevokeDialogOpen(true)
+                                }}
+                                disabled={isLoading}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                {isLoading ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <RotateCcw className="w-4 h-4" />
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
               </TableBody>
             </Table>
           </div>
@@ -778,7 +778,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Basic Information */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -855,8 +855,8 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
                                 role === "ADMIN"
                                   ? "bg-purple-100 text-purple-800 border-purple-200"
                                   : role === "POSTER" || role === "HOST"
-                                  ? "bg-teal-100 text-teal-800 border-teal-200"
-                                  : "bg-gray-100 text-gray-800 border-gray-200"
+                                    ? "bg-teal-100 text-teal-800 border-teal-200"
+                                    : "bg-gray-100 text-gray-800 border-gray-200"
                               }
                             >
                               {role}
@@ -893,7 +893,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
 
       {/* Image Lightbox Modal */}
       {lightboxOpen && selectedProperty && selectedProperty.propertyImages && selectedProperty.propertyImages.length > 0 && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
           onClick={() => setLightboxOpen(false)}
         >
@@ -911,7 +911,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                setLightboxImageIndex((prev) => 
+                setLightboxImageIndex((prev) =>
                   prev === 0 ? selectedProperty.propertyImages!.length - 1 : prev - 1
                 )
               }}
@@ -923,7 +923,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
           )}
 
           {/* Image */}
-          <div 
+          <div
             className="relative max-w-7xl max-h-[90vh] mx-4"
             onClick={(e) => e.stopPropagation()}
           >
@@ -935,7 +935,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
               className="object-contain max-h-[90vh] w-auto"
               sizes="90vw"
             />
-            
+
             {/* Image Counter */}
             {selectedProperty.propertyImages.length > 1 && (
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm">
@@ -949,7 +949,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                setLightboxImageIndex((prev) => 
+                setLightboxImageIndex((prev) =>
                   prev === selectedProperty.propertyImages!.length - 1 ? 0 : prev + 1
                 )
               }}

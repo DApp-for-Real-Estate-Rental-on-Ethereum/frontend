@@ -311,7 +311,7 @@ export default function PropertyDetailPage() {
 
     // Helper function to build full image URL
     const getImageUrl = (url: string | null | undefined) => {
-        if (!url) return "/placeholder.jpg"
+        if (!url) return "/houses_placeholder.png"
         // If URL starts with http, return as is
         if (url.startsWith("http://") || url.startsWith("https://")) {
             return url
@@ -556,6 +556,11 @@ export default function PropertyDetailPage() {
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                                 sizes="(max-width: 768px) 100vw, 50vw"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.srcset = ""
+                                    target.src = "/houses_placeholder.png"
+                                }}
                             />
                             {images.length > 1 && (
                                 <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1.5 rounded-lg text-sm backdrop-blur-sm">
@@ -582,6 +587,11 @@ export default function PropertyDetailPage() {
                                         fill
                                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                                         sizes="(max-width: 768px) 50vw, 25vw"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.srcset = ""
+                                            target.src = "/houses_placeholder.png"
+                                        }}
                                     />
                                     {i === 3 && images.length > 5 && (
                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
@@ -719,7 +729,7 @@ export default function PropertyDetailPage() {
                                     <span className="text-3xl font-bold text-teal-600">
                                         {property.dailyPrice?.toFixed(4) || property.price?.toFixed(4) || "N/A"}
                                     </span>
-                                    <span className="text-lg font-semibold text-teal-600">ETH</span>
+                                    <span className="text-lg font-semibold text-teal-600">MAD</span>
                                     <span className="text-sm text-gray-500">/night</span>
                                 </div>
                                 {property.depositAmount && property.depositAmount > 0 && (
@@ -727,7 +737,7 @@ export default function PropertyDetailPage() {
                                         <div className="flex items-baseline gap-2">
                                             <span className="text-sm text-gray-600">Deposit:</span>
                                             <span className="text-lg font-semibold text-orange-600">
-                                                {property.depositAmount.toFixed(4)} ETH
+                                                {property.depositAmount.toFixed(0)} MAD
                                             </span>
                                         </div>
                                     </div>
@@ -844,25 +854,25 @@ export default function PropertyDetailPage() {
                                 <div className="mb-6 space-y-3">
                                     <div className="flex justify-between text-gray-600">
                                         <span className="underline">
-                                            {propertyInfo?.pricePerNight?.toFixed(4)} ETH x {Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24))} nights
+                                            {propertyInfo?.pricePerNight?.toFixed(0)} MAD x {Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24))} nights
                                         </span>
-                                        <span>{basePrice?.toFixed(4)} ETH</span>
+                                        <span>{basePrice?.toFixed(0)} MAD</span>
                                     </div>
                                     {discountInfo && (
                                         <div className="flex justify-between text-teal-600 font-medium">
                                             <span>Long stay discount ({discountInfo.percent}%)</span>
-                                            <span>-{discountInfo.amount.toFixed(4)} ETH</span>
+                                            <span>-{discountInfo.amount.toFixed(0)} MAD</span>
                                         </div>
                                     )}
-                                    {property.depositAmount > 0 && (
+                                    {(property.depositAmount || 0) > 0 && (
                                         <div className="flex justify-between text-gray-600">
                                             <span>Deposit</span>
-                                            <span>{property.depositAmount.toFixed(4)} ETH</span>
+                                            <span>{(property.depositAmount || 0).toFixed(0)} MAD</span>
                                         </div>
                                     )}
                                     <div className="border-t pt-3 flex justify-between font-bold text-lg text-gray-900">
                                         <span>Total</span>
-                                        <span>{(finalPrice + (property.depositAmount || 0)).toFixed(4)} ETH</span>
+                                        <span>{(finalPrice + (property.depositAmount || 0)).toFixed(0)} MAD</span>
                                     </div>
                                 </div>
                             )}
@@ -878,12 +888,12 @@ export default function PropertyDetailPage() {
                                             type="number"
                                             value={requestedPrice}
                                             onChange={(e) => setRequestedPrice(e.target.value)}
-                                            placeholder="Enter amount in ETH"
+                                            placeholder="Enter amount in MAD"
                                             className="w-full pl-3 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                             step="0.0001"
                                             min="0"
                                         />
-                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">ETH</span>
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">MAD</span>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">
                                         Owner allows price negotiation for this property

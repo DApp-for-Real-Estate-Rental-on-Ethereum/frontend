@@ -47,7 +47,7 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
       setIsLoading(true)
       setError("")
       const data = await apiClient.bookings.getConfirmedBookingsByOwner(parseInt(String(ownerId)))
-      
+
       // Fetch property details for each booking
       const bookingsWithProperties = await Promise.all(
         data.map(async (booking: Booking) => {
@@ -59,13 +59,13 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
           }
         })
       )
-      
+
       setBookings(bookingsWithProperties)
-      
+
       // Fetch tenant phone numbers for CONFIRMED, TENANT_CHECKED_OUT, and COMPLETED bookings
-      const bookingsWithPhone = bookingsWithProperties.filter((b) => 
-        b.status === "CONFIRMED" || 
-        b.status === "TENANT_CHECKED_OUT" || 
+      const bookingsWithPhone = bookingsWithProperties.filter((b) =>
+        b.status === "CONFIRMED" ||
+        b.status === "TENANT_CHECKED_OUT" ||
         b.status === "COMPLETED"
       )
       if (bookingsWithPhone.length > 0) {
@@ -81,12 +81,12 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
   const fetchTenantPhoneNumbers = async (bookings: BookingWithProperty[]) => {
     try {
       const phoneNumbersMap: { [key: number]: string | null } = {}
-      
+
       await Promise.all(
         bookings.map(async (booking) => {
           try {
             setLoadingTenantPhones((prev) => ({ ...prev, [booking.id]: true }))
-            
+
             // Get tenant info by userId
             const tenantId = booking.userId
             try {
@@ -107,7 +107,7 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
           }
         })
       )
-      
+
       setTenantPhoneNumbers((prev) => ({ ...prev, ...phoneNumbersMap }))
     } catch (err) {
     }
@@ -144,7 +144,7 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
+    if (!url) return "/houses_placeholder.png"
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url
     }
@@ -216,7 +216,7 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
                     <span className="text-xl font-bold text-green-600">
                       {booking.totalPrice?.toFixed(4) || "N/A"}
                     </span>
-                    <span className="text-sm font-semibold text-gray-600">ETH</span>
+                    <span className="text-sm font-semibold text-gray-600">MAD</span>
                   </div>
                 </div>
               </div>
@@ -258,25 +258,25 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
                     <span className="font-semibold text-gray-900">{nights} {nights === 1 ? "night" : "nights"}</span>
                   </div>
                   {/* Tenant Phone Number - Show for CONFIRMED, TENANT_CHECKED_OUT, and COMPLETED bookings */}
-                  {(booking.status === "CONFIRMED" || 
-                    booking.status === "TENANT_CHECKED_OUT" || 
+                  {(booking.status === "CONFIRMED" ||
+                    booking.status === "TENANT_CHECKED_OUT" ||
                     booking.status === "COMPLETED") && (
-                    <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200">
-                      <div className="flex items-center text-gray-600">
-                        <Phone className="w-4 h-4 mr-2 text-teal-600" />
-                        <span>Tenant Phone</span>
+                      <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200">
+                        <div className="flex items-center text-gray-600">
+                          <Phone className="w-4 h-4 mr-2 text-teal-600" />
+                          <span>Tenant Phone</span>
+                        </div>
+                        <span className="font-semibold text-gray-900">
+                          {loadingTenantPhones[booking.id] ? (
+                            <Loader2 className="w-4 h-4 animate-spin inline" />
+                          ) : tenantPhoneNumbers[booking.id] ? (
+                            tenantPhoneNumbers[booking.id]
+                          ) : (
+                            "N/A"
+                          )}
+                        </span>
                       </div>
-                      <span className="font-semibold text-gray-900">
-                        {loadingTenantPhones[booking.id] ? (
-                          <Loader2 className="w-4 h-4 animate-spin inline" />
-                        ) : tenantPhoneNumbers[booking.id] ? (
-                          tenantPhoneNumbers[booking.id]
-                        ) : (
-                          "N/A"
-                        )}
-                      </span>
-                    </div>
-                  )}
+                    )}
                 </div>
 
                 {/* Actions */}
@@ -305,7 +305,7 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-gray-900">Booking Details</DialogTitle>
           </DialogHeader>
-          
+
           {viewingBooking && (
             <div className="space-y-6 mt-4">
               {/* Property Image */}
@@ -358,7 +358,7 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
                   <div className="flex items-baseline justify-between">
                     <span className="text-sm font-medium text-gray-700">Total Price</span>
                     <span className="text-xl font-bold text-green-700">
-                      {viewingBooking.totalPrice?.toFixed(4) || "N/A"} ETH
+                      {viewingBooking.totalPrice?.toFixed(0) || "N/A"} MAD
                     </span>
                   </div>
                 </div>

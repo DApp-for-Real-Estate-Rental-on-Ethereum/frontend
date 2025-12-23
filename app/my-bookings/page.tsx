@@ -677,7 +677,7 @@ export default function MyBookingsPage() {
               <span className="text-2xl font-bold text-teal-600">
                 {booking.totalPrice?.toFixed(4) || "N/A"}
               </span>
-              <span className="text-sm font-semibold text-gray-600">ETH</span>
+              <span className="text-sm font-semibold text-gray-600">MAD</span>
             </div>
             {booking.requestedNegotiationPercent && booking.requestedNegotiationPercent > 0 && (
               <p className="text-xs text-yellow-600 font-medium mt-1">
@@ -1439,7 +1439,7 @@ export default function MyBookingsPage() {
                   editingBooking.status === "PENDING_NEGOTIATION") && (
                   <div>
                     <Label htmlFor="requestedPrice" className="text-sm font-semibold text-gray-700">
-                      Requested Price (ETH) *
+                      Requested Price (MAD) *
                     </Label>
                     <Input
                       id="requestedPrice"
@@ -1596,7 +1596,7 @@ export default function MyBookingsPage() {
                     <div className="flex items-baseline justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">Total Price</span>
                       <span className="text-xl font-bold text-teal-700">
-                        {viewingBooking.totalPrice?.toFixed(4) || "N/A"} ETH
+                        {viewingBooking.totalPrice?.toFixed(0) || "N/A"} MAD
                       </span>
                     </div>
                     {viewingBooking.longStayDiscountPercent && viewingBooking.longStayDiscountPercent > 0 && (

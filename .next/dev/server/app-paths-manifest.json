@@ -1,8 +1,9 @@
 {
+  "/api/recommendations/[...path]/route": "app/api/recommendations/[...path]/route.js",
   "/page": "app/page.js",
   "/login/page": "app/login/page.js",
-  "/my-bookings/page": "app/my-bookings/page.js",
-  "/host-dashboard/page": "app/host-dashboard/page.js",
+  "/property/[id]/page": "app/property/[id]/page.js",
   "/properties/page": "app/properties/page.js",
-  "/profile/page": "app/profile/page.js"
+  "/host-dashboard/page": "app/host-dashboard/page.js",
+  "/my-bookings/page": "app/my-bookings/page.js"
 }

@@ -47,7 +47,7 @@ export function CompletedBookings({ ownerId }: CompletedBookingsProps) {
       // Get all bookings and filter for completed ones
       const allBookings = await apiClient.bookings.getByOwnerId(parseInt(String(ownerId)))
       const completed = allBookings.filter((b: any) => b.status === "COMPLETED")
-      
+
       // Fetch property details for each booking
       const bookingsWithProperties = await Promise.all(
         completed.map(async (booking: Booking) => {
@@ -59,7 +59,7 @@ export function CompletedBookings({ ownerId }: CompletedBookingsProps) {
           }
         })
       )
-      
+
       setBookings(bookingsWithProperties)
     } catch (err: any) {
       setError(err.message || "Failed to load completed bookings")
@@ -99,7 +99,7 @@ export function CompletedBookings({ ownerId }: CompletedBookingsProps) {
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
+    if (!url) return "/houses_placeholder.png"
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url
     }
@@ -238,7 +238,7 @@ export function CompletedBookings({ ownerId }: CompletedBookingsProps) {
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-gray-900">Completed Booking Details</DialogTitle>
           </DialogHeader>
-          
+
           {viewingBooking && (
             <div className="space-y-6 mt-4">
               {/* Property Image */}

@@ -418,7 +418,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                   <div className="mb-4 space-y-1">
                     {complaint.refundAmount && (
                       <div className="text-sm font-semibold text-green-600">
-                        Refund: {complaint.refundAmount.toFixed(2)} ETH
+                        Refund: {complaint.refundAmount.toFixed(2)} MAD
                       </div>
                     )}
                     {complaint.penaltyPoints && (

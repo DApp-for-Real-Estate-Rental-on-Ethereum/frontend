@@ -21,7 +21,7 @@ export default function AdminPage() {
       router.push("/login")
       return
     }
-    
+
     if (user && !user.roles?.includes("ADMIN")) {
       router.push("/")
       return
@@ -62,76 +62,76 @@ export default function AdminPage() {
         {/* Content Section */}
         <div className="mt-8">
           {/* Properties Sections */}
-          {(activeSection === "all-properties" || 
-            activeSection === "pending-approval" || 
+          {(activeSection === "all-properties" ||
+            activeSection === "pending-approval" ||
             activeSection === "approved" ||
             activeSection === "suspended" ||
             activeSection === "disapproved") && (
-            <PropertiesManagement 
-              filter={
-                activeSection === "pending-approval" ? "pending-approval" :
-                activeSection === "approved" ? "approved" :
-                activeSection === "suspended" ? "suspended" :
-                activeSection === "disapproved" ? "disapproved" :
-                "all-properties"
-              }
-            />
-          )}
+              <PropertiesManagement
+                filter={
+                  activeSection === "pending-approval" ? "pending-approval" :
+                    activeSection === "approved" ? "approved" :
+                      activeSection === "suspended" ? "suspended" :
+                        activeSection === "disapproved" ? "disapproved" :
+                          "all-properties"
+                }
+              />
+            )}
 
           {/* Users Sections */}
-          {(activeSection === "all-users" || 
-            activeSection === "admins" || 
+          {(activeSection === "all-users" ||
+            activeSection === "admins" ||
             activeSection === "hosts" ||
             activeSection === "tenants" ||
             activeSection === "disabled") && (
-            <UsersManagement 
-              filter={
-                activeSection === "admins" ? "admins" :
-                activeSection === "hosts" ? "hosts" :
-                activeSection === "tenants" ? "tenants" :
-                activeSection === "disabled" ? "disabled" :
-                "all-users"
-              }
-            />
-          )}
+              <UsersManagement
+                filter={
+                  activeSection === "admins" ? "admins" :
+                    activeSection === "hosts" ? "hosts" :
+                      activeSection === "tenants" ? "tenants" :
+                        activeSection === "disabled" ? "disabled" :
+                          "all-users"
+                }
+              />
+            )}
 
           {/* Bookings Sections */}
-          {(activeSection === "all-bookings" || 
-            activeSection === "pending-payment" || 
+          {(activeSection === "all-bookings" ||
+            activeSection === "pending-payment" ||
             activeSection === "active" ||
             activeSection === "completed" ||
             activeSection === "cancelled") && (
-            <BookingsManagement 
-              filter={
-                activeSection === "pending-payment" ? "pending-payment" :
-                activeSection === "active" ? "active" :
-                activeSection === "completed" ? "completed" :
-                activeSection === "cancelled" ? "cancelled" :
-                "all-bookings"
-              }
-            />
-          )}
+              <BookingsManagement
+                filter={
+                  activeSection === "pending-payment" ? "pending-payment" :
+                    activeSection === "active" ? "active" :
+                      activeSection === "completed" ? "completed" :
+                        activeSection === "cancelled" ? "cancelled" :
+                          "all-bookings"
+                }
+              />
+            )}
 
           {/* Reclamations Sections */}
-          {(activeSection === "all-reclamations" || 
-            activeSection === "open-reclamations" || 
+          {(activeSection === "all-reclamations" ||
+            activeSection === "open-reclamations" ||
             activeSection === "in-review-reclamations" ||
             activeSection === "resolved-reclamations" ||
             activeSection === "rejected-reclamations") && (
-            <ReclamationsManagement 
-              filter={
-                activeSection === "open-reclamations" ? "open-reclamations" :
-                activeSection === "in-review-reclamations" ? "in-review-reclamations" :
-                activeSection === "resolved-reclamations" ? "resolved-reclamations" :
-                activeSection === "rejected-reclamations" ? "rejected-reclamations" :
-                "all-reclamations"
-              }
-            />
-          )}
+              <ReclamationsManagement
+                filter={
+                  activeSection === "open-reclamations" ? "open-reclamations" :
+                    activeSection === "in-review-reclamations" ? "in-review-reclamations" :
+                      activeSection === "resolved-reclamations" ? "resolved-reclamations" :
+                        activeSection === "rejected-reclamations" ? "rejected-reclamations" :
+                          "all-reclamations"
+                }
+              />
+            )}
 
           {/* Other Sections - Placeholder */}
-          {!(activeSection === "all-properties" || 
-            activeSection === "pending-approval" || 
+          {!(activeSection === "all-properties" ||
+            activeSection === "pending-approval" ||
             activeSection === "suspended" ||
             activeSection === "all-users" ||
             activeSection === "admins" ||
@@ -148,32 +148,32 @@ export default function AdminPage() {
             activeSection === "in-review-reclamations" ||
             activeSection === "resolved-reclamations" ||
             activeSection === "rejected-reclamations") && (
-            <Card className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                {activeSection === "overview" && "Overview"}
-                {activeSection === "all-users" && "All Users"}
-                {activeSection === "tenants" && "Tenants"}
-                {activeSection === "hosts" && "Hosts"}
-                {activeSection === "disabled" && "Disabled Accounts"}
-                {activeSection === "all-bookings" && "All Bookings"}
-                {activeSection === "pending-payment" && "Pending Payment"}
-                {activeSection === "active" && "Active Bookings"}
-                {activeSection === "completed" && "Completed Bookings"}
-                {activeSection === "cancelled" && "Cancelled Bookings"}
-                {activeSection === "all-transactions" && "All Transactions"}
-                {activeSection === "pending" && "Pending Transactions"}
-                {activeSection === "success" && "Successful Transactions"}
-                {activeSection === "failed" && "Failed Transactions"}
-                {activeSection === "settings" && "Blockchain Settings"}
-                {activeSection === "escrows" && "Active Escrows"}
-                {activeSection === "contracts" && "Contract Information"}
-                {activeSection === "revenue" && "Revenue Statistics"}
-                {activeSection === "reports" && "Reports"}
-                {activeSection === "all-disputes" && "All Disputes"}
-                {activeSection === "resolved" && "Resolved Disputes"}
-              </h2>
-            </Card>
-          )}
+              <Card className="p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  {activeSection === "overview" && "Overview"}
+                  {activeSection === "all-users" && "All Users"}
+                  {activeSection === "tenants" && "Tenants"}
+                  {activeSection === "hosts" && "Hosts"}
+                  {activeSection === "disabled" && "Disabled Accounts"}
+                  {activeSection === "all-bookings" && "All Bookings"}
+                  {activeSection === "pending-payment" && "Pending Payment"}
+                  {activeSection === "active" && "Active Bookings"}
+                  {activeSection === "completed" && "Completed Bookings"}
+                  {activeSection === "cancelled" && "Cancelled Bookings"}
+                  {activeSection === "all-transactions" && "All Transactions"}
+                  {activeSection === "pending" && "Pending Transactions"}
+                  {activeSection === "success" && "Successful Transactions"}
+                  {activeSection === "failed" && "Failed Transactions"}
+                  {activeSection === "settings" && "Blockchain Settings"}
+                  {activeSection === "escrows" && "Active Escrows"}
+                  {activeSection === "contracts" && "Contract Information"}
+                  {activeSection === "revenue" && "Revenue Statistics"}
+                  {activeSection === "reports" && "Reports"}
+                  {activeSection === "all-disputes" && "All Disputes"}
+                  {activeSection === "resolved" && "Resolved Disputes"}
+                </h2>
+              </Card>
+            )}
         </div>
       </div>
     </div>

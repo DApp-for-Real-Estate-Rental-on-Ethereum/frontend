@@ -59,11 +59,11 @@ export function CheckoutRequests({ ownerId, onUpdate }: CheckoutRequestsProps) {
       setIsLoading(true)
       setError("")
       const data = await apiClient.bookings.getCurrentBookingsByOwner(parseInt(String(ownerId)))
-      
+
       const checkoutRequests = data.filter((booking: Booking) => {
         return booking.status === "TENANT_CHECKED_OUT"
       })
-      
+
       // Fetch property details for each booking
       const bookingsWithProperties = await Promise.all(
         checkoutRequests.map(async (booking: Booking) => {
@@ -75,7 +75,7 @@ export function CheckoutRequests({ ownerId, onUpdate }: CheckoutRequestsProps) {
           }
         })
       )
-      
+
       setBookings(bookingsWithProperties)
     } catch (err: any) {
       setError(err.message || "Failed to load checkout requests")
@@ -94,7 +94,7 @@ export function CheckoutRequests({ ownerId, onUpdate }: CheckoutRequestsProps) {
 
     try {
       const booking = bookings.find(b => b.id === bookingId)
-      
+
       if (!booking) {
         setError("Booking not found")
         return
@@ -113,17 +113,17 @@ export function CheckoutRequests({ ownerId, onUpdate }: CheckoutRequestsProps) {
       if (isNaN(ownerIdNum)) {
         throw new Error("Invalid owner ID. Please refresh the page and try again.")
       }
-      
+
       // Use the dedicated owner endpoint
       await apiClient.bookings.ownerConfirmCheckout(bookingId, ownerIdNum)
-      
+
       try {
         await apiClient.payments.completeBooking(bookingId)
         toast.success("Booking completed successfully on blockchain")
       } catch (blockchainErr: any) {
         toast.warning("Booking marked as completed, but blockchain transaction failed. Please contact support.")
       }
-      
+
       toast.success("Checkout confirmed successfully")
       await fetchBookings()
       if (onUpdate) onUpdate()
@@ -138,7 +138,7 @@ export function CheckoutRequests({ ownerId, onUpdate }: CheckoutRequestsProps) {
 
   const fetchReclamations = async () => {
     if (!user?.id) return
-    
+
     try {
       const reclamationsMap: { [key: number]: any } = {}
       const currentUserId = parseInt(String(user.id))
@@ -229,7 +229,7 @@ export function CheckoutRequests({ ownerId, onUpdate }: CheckoutRequestsProps) {
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
+    if (!url) return "/houses_placeholder.png"
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url
     }
@@ -300,7 +300,7 @@ export function CheckoutRequests({ ownerId, onUpdate }: CheckoutRequestsProps) {
                     <span className="text-xl font-bold text-purple-600">
                       {booking.totalPrice?.toFixed(4) || "N/A"}
                     </span>
-                    <span className="text-sm font-semibold text-gray-600">ETH</span>
+                    <span className="text-sm font-semibold text-gray-600">MAD</span>
                   </div>
                 </div>
               </div>
@@ -412,7 +412,7 @@ export function CheckoutRequests({ ownerId, onUpdate }: CheckoutRequestsProps) {
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-gray-900">Checkout Request Details</DialogTitle>
           </DialogHeader>
-          
+
           {viewingBooking && (
             <div className="space-y-6 mt-4">
               {viewingBooking.property && getPropertyImage(viewingBooking.property) && (
@@ -462,7 +462,7 @@ export function CheckoutRequests({ ownerId, onUpdate }: CheckoutRequestsProps) {
                   <div className="flex items-baseline justify-between">
                     <span className="text-sm font-medium text-gray-700">Total Price</span>
                     <span className="text-xl font-bold text-purple-700">
-                      {viewingBooking.totalPrice?.toFixed(4) || "N/A"} ETH
+                      {viewingBooking.totalPrice?.toFixed(0) || "N/A"} MAD
                     </span>
                   </div>
                 </div>

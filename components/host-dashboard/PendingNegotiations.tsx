@@ -48,7 +48,7 @@ export function PendingNegotiations({ ownerId, onUpdate }: PendingNegotiationsPr
       setIsLoading(true)
       setError("")
       const data = await apiClient.bookings.getPendingNegotiations(parseInt(String(ownerId)))
-      
+
       // Fetch property details for each booking
       const bookingsWithProperties = await Promise.all(
         data.map(async (booking: Booking) => {
@@ -60,7 +60,7 @@ export function PendingNegotiations({ ownerId, onUpdate }: PendingNegotiationsPr
           }
         })
       )
-      
+
       setBookings(bookingsWithProperties)
     } catch (err: any) {
       setError(err.message || "Failed to load pending negotiations")
@@ -138,7 +138,7 @@ export function PendingNegotiations({ ownerId, onUpdate }: PendingNegotiationsPr
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
+    if (!url) return "/houses_placeholder.png"
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url
     }
@@ -315,7 +315,7 @@ export function PendingNegotiations({ ownerId, onUpdate }: PendingNegotiationsPr
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-gray-900">Negotiation Details</DialogTitle>
           </DialogHeader>
-          
+
           {viewingBooking && (
             <div className="space-y-6 mt-4">
               {/* Property Image */}

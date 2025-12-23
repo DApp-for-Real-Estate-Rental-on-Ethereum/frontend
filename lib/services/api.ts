@@ -24,6 +24,7 @@ import type {
   PropertyType,
   User,
   VerificationRequest,
+  TenantRiskResponse,
 } from "@/lib/types"
 
 // Configuration from environment variables
@@ -35,8 +36,8 @@ const USE_GATEWAY = process.env.NEXT_PUBLIC_USE_GATEWAY !== "false" // Default t
 // Fallback URLs for individual services (used if USE_GATEWAY is false)
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"
 const PROPERTY_API_BASE_URL = process.env.NEXT_PUBLIC_PROPERTY_API_BASE_URL || "http://localhost:8081"
-const BOOKING_API_BASE_URL = USE_GATEWAY 
-  ? GATEWAY_URL 
+const BOOKING_API_BASE_URL = USE_GATEWAY
+  ? GATEWAY_URL
   : (process.env.NEXT_PUBLIC_BOOKING_API_BASE_URL || "http://localhost:8083")
 const PAYMENT_API_BASE_URL = process.env.NEXT_PUBLIC_PAYMENT_API_BASE_URL || "http://localhost:8085"
 const RECLAMATION_API_BASE_URL = process.env.NEXT_PUBLIC_RECLAMATION_API_BASE_URL || "http://localhost:8091"
@@ -69,7 +70,7 @@ function decodeJWT(token: string): { userId?: string; roles?: string[] } | null 
     // Decode payload (base64url)
     const payload = parts[1]
     const decoded = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")))
-    
+
     return {
       userId: decoded.sub || decoded.subject, // JWT subject contains userId
       roles: decoded.roles || [],
@@ -121,7 +122,7 @@ function getAuthHeaders(): Record<string, string> {
     "X-User-Roles": roles.join(","),
     ...(token && { Authorization: `Bearer ${token}` }),
   }
-  
+
   return headers
 }
 
@@ -134,7 +135,7 @@ function getServiceUrl(service: 'auth' | 'users' | 'properties' | 'bookings' | '
     // All services go through the Gateway
     return GATEWAY_URL
   }
-  
+
   // Fallback to individual service URLs
   switch (service) {
     case 'auth':
@@ -160,7 +161,7 @@ function getServiceUrl(service: 'auth' | 'users' | 'properties' | 'bookings' | '
  */
 function buildUrl(path: string, service: 'auth' | 'users' | 'properties' | 'bookings' | 'payments' | 'reclamations' | 'admin-reclamations' = 'users'): string {
   const baseUrl = getServiceUrl(service)
-  
+
   if (USE_GATEWAY) {
     // Gateway routes preserve the full path
     // Path should already include /api/v1/... or /api/... prefix
@@ -168,7 +169,7 @@ function buildUrl(path: string, service: 'auth' | 'users' | 'properties' | 'book
     if (path.startsWith('/api/')) {
       return `${baseUrl}${path}`
     }
-    
+
     // Add appropriate prefix based on service
     if (service === 'auth' || service === 'users') {
       return `${baseUrl}/api/v1${path}`
@@ -181,10 +182,10 @@ function buildUrl(path: string, service: 'auth' | 'users' | 'properties' | 'book
     } else if (service === 'reclamations' || service === 'admin-reclamations') {
       return `${baseUrl}/api${path}`
     }
-    
+
     return `${baseUrl}${path}`
   }
-  
+
   // For direct service calls, add version prefix
   const basePath = `/api/${API_VERSION}`
   return `${baseUrl}${basePath}${path}`
@@ -194,7 +195,7 @@ function buildUrl(path: string, service: 'auth' | 'users' | 'properties' | 'book
  * Generic fetch wrapper with error handling
  */
 async function request<T>(
-  path: string, 
+  path: string,
   options: RequestInit & { requiresAuth?: boolean; service?: 'auth' | 'users' | 'properties' | 'bookings' | 'payments' | 'reclamations' | 'admin-reclamations' } = {}
 ): Promise<T> {
   const { requiresAuth = true, service = 'users', ...fetchOptions } = options
@@ -216,7 +217,7 @@ async function request<T>(
     if (!response.ok) {
       let errorData: any = {}
       let responseText = ""
-      
+
       try {
         responseText = await response.text()
         if (responseText) {
@@ -230,19 +231,19 @@ async function request<T>(
       } catch (textError) {
         errorData = { message: `Failed to read response: ${textError}` }
       }
-      
+
       // If errorData is still empty, create a default error
       if (Object.keys(errorData).length === 0) {
-        errorData = { 
+        errorData = {
           message: `HTTP ${response.status}: ${response.statusText}`,
           status: response.status,
           statusText: response.statusText
         }
       }
-      
+
       // Extract error message from ErrorResponse format (used by user-service)
       // ErrorResponse has: timestamp, status, error, message, path
-      const errorMessage = 
+      const errorMessage =
         errorData.message ||           // ErrorResponse.message
         errorData.error ||             // ErrorResponse.error (error title)
         errorData.detail ||            // Standard Spring error format
@@ -250,11 +251,11 @@ async function request<T>(
         (Array.isArray(errorData.errors) ? errorData.errors.join(", ") : null) || // Validation errors array
         (typeof errorData === 'string' ? errorData : null) ||
         `API Error: ${response.status} ${response.statusText}`
-      
+
       const apiError = new Error(errorMessage)
-      ;(apiError as any).status = response.status
-      ;(apiError as any).errorData = errorData
-      ;(apiError as any).responseText = responseText
+        ; (apiError as any).status = response.status
+        ; (apiError as any).errorData = errorData
+        ; (apiError as any).responseText = responseText
       throw apiError
     }
 
@@ -282,10 +283,10 @@ async function request<T>(
       const connectionError = new Error(
         `Cannot connect to backend server at ${API_BASE_URL}. Please make sure the backend is running.`
       )
-      ;(connectionError as any).isConnectionError = true
+        ; (connectionError as any).isConnectionError = true
       throw connectionError
     }
-    
+
     throw error
   }
 }
@@ -343,7 +344,7 @@ export const apiClient = {
       }
       // Use property-service URL for property endpoints
       const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties`
-      
+
       try {
         const response = await fetch(url, {
           method: "GET",
@@ -364,7 +365,7 @@ export const apiClient = {
           const connectionError = new Error(
             `Cannot connect to property-service backend at ${PROPERTY_API_BASE_URL}. Please make sure the backend is running.`
           )
-          ;(connectionError as any).isConnectionError = true
+            ; (connectionError as any).isConnectionError = true
           throw connectionError
         }
         throw error
@@ -379,7 +380,7 @@ export const apiClient = {
       // Use Gateway or property-service URL for admin endpoint
       const url = buildUrl("/properties/admin/all", 'properties')
       const authHeaders = getAuthHeaders()
-      
+
       try {
         const response = await fetch(url, {
           method: "GET",
@@ -396,7 +397,7 @@ export const apiClient = {
         }
 
         const data = await response.json()
-        
+
         // Ensure data is an array
         if (!Array.isArray(data)) {
           // If it's an error object, throw it
@@ -406,14 +407,14 @@ export const apiClient = {
           // Otherwise return empty array
           return []
         }
-        
+
         return data
       } catch (error: any) {
         if (error?.message?.includes("Failed to fetch") || error?.message?.includes("ERR_CONNECTION_REFUSED")) {
           const connectionError = new Error(
             `Cannot connect to property-service backend at ${PROPERTY_API_BASE_URL}. Please make sure the backend is running.`
           )
-          ;(connectionError as any).isConnectionError = true
+            ; (connectionError as any).isConnectionError = true
           throw connectionError
         }
         throw error
@@ -427,7 +428,7 @@ export const apiClient = {
       }
       // Use property-service URL for property endpoints
       const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}`
-      
+
       try {
         const response = await fetch(url, {
           method: "GET",
@@ -447,7 +448,7 @@ export const apiClient = {
           const connectionError = new Error(
             `Cannot connect to property-service backend at ${PROPERTY_API_BASE_URL}. Please make sure the backend is running.`
           )
-          ;(connectionError as any).isConnectionError = true
+            ; (connectionError as any).isConnectionError = true
           throw connectionError
         }
         throw error
@@ -477,7 +478,7 @@ export const apiClient = {
         }
 
         const data = await response.json()
-        
+
         // Ensure data is an array
         if (!Array.isArray(data)) {
           // If it's an error object, throw it
@@ -487,14 +488,14 @@ export const apiClient = {
           // Otherwise return empty array
           return []
         }
-        
+
         return data
       } catch (error: any) {
         if (error?.message?.includes("Failed to fetch") || error?.message?.includes("ERR_CONNECTION_REFUSED") || error?.message?.includes("CORS")) {
           const connectionError = new Error(
             `Cannot connect to property-service backend at ${PROPERTY_API_BASE_URL}. Please make sure the backend is running.`
           )
-          ;(connectionError as any).isConnectionError = true
+            ; (connectionError as any).isConnectionError = true
           throw connectionError
         }
         throw error
@@ -550,7 +551,7 @@ export const apiClient = {
       }
       // Use property-service URL for property endpoints
       const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}`
-      
+
       try {
         const response = await fetch(url, {
           method: "PUT",
@@ -580,7 +581,7 @@ export const apiClient = {
           const connectionError = new Error(
             `Cannot connect to property-service backend at ${PROPERTY_API_BASE_URL}. Please make sure the backend is running.`
           )
-          ;(connectionError as any).isConnectionError = true
+            ; (connectionError as any).isConnectionError = true
           throw connectionError
         }
         throw error
@@ -594,7 +595,7 @@ export const apiClient = {
       }
       // Use property-service URL for property endpoints
       const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}`
-      
+
       try {
         const response = await fetch(url, {
           method: "DELETE",
@@ -615,7 +616,7 @@ export const apiClient = {
           const connectionError = new Error(
             `Cannot connect to property-service backend at ${PROPERTY_API_BASE_URL}. Please make sure the backend is running.`
           )
-          ;(connectionError as any).isConnectionError = true
+            ; (connectionError as any).isConnectionError = true
           throw connectionError
         }
         throw error
@@ -788,6 +789,119 @@ export const apiClient = {
       }
     },
 
+    /**
+     * Get AI-powered price suggestion for a property and date range.
+     * This calls property-service, which forwards the request to the pricing model API.
+     */
+    async predictPrice(
+      propertyId: string,
+      checkInDate: string,
+      checkOutDate: string,
+    ): Promise<{
+      predictedPriceMad: number
+      predictedPriceUsd: number
+      confidenceIntervalLower: number
+      confidenceIntervalUpper: number
+      city: string
+      season: string
+      modelVersion: string
+      predictionTimestamp: string
+      currentPriceMad?: number
+      priceDifferencePercent?: number
+      recommendation?: string
+    }> {
+      if (USE_MOCK_API) {
+        // Lightweight mock for UI development
+        return {
+          predictedPriceMad: 430,
+          predictedPriceUsd: 43,
+          confidenceIntervalLower: 380,
+          confidenceIntervalUpper: 480,
+          city: "casablanca",
+          season: "summer",
+          modelVersion: "1.0",
+          predictionTimestamp: new Date().toISOString(),
+          currentPriceMad: 400,
+          priceDifferencePercent: 7.5,
+          recommendation: "INCREASE",
+        }
+      }
+
+      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${propertyId}/predict-price`
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify({
+          propertyId,
+          checkInDate,
+          checkOutDate,
+        }),
+      })
+
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        const message =
+          data?.message ||
+          data?.error ||
+          (typeof data === "string" ? data : null) ||
+          `Failed to get price suggestion: ${response.status}`
+        throw new Error(message)
+      }
+
+      return data
+    },
+  },
+
+  // ==================== TENANT RISK ====================
+  risk: {
+    getTenantRiskScore: async (tenantId: number): Promise<TenantRiskResponse> => {
+      try {
+        // Use local Next.js proxy
+        const response = await fetch(`/api/tenant-risk/${tenantId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`ML API Error: ${response.status} ${response.statusText}`)
+        }
+
+        return response.json()
+      } catch (error) {
+        console.error("Error fetching risk score:", error)
+        throw error
+      }
+    },
+  },
+
+  recommendations: {
+    getForTenant: async (tenantId: number, maxResults: number = 3): Promise<any> => {
+      try {
+        const response = await fetch(`/api/recommendations/tenant/${tenantId}?max_results=${maxResults}`);
+        if (!response.ok) throw new Error("Failed to fetch recommendations");
+        return response.json();
+      } catch (error) {
+        console.error("Error fetching recommendations:", error);
+        throw error;
+      }
+    },
+    getSimilar: async (propertyId: string, maxResults: number = 3): Promise<any> => {
+      try {
+        const response = await fetch(`/api/recommendations/similar/${propertyId}?max_results=${maxResults}`);
+        if (!response.ok) throw new Error("Failed to fetch similar properties");
+        return response.json();
+      } catch (error) {
+        console.error("Error fetching similar properties:", error);
+        throw error;
+      }
+    }
   },
 
   // ==================== VERIFICATION REQUESTS ====================
@@ -932,7 +1046,7 @@ export const apiClient = {
       } catch (err) {
         // If admin endpoint fails, fallback to regular endpoint
       }
-      
+
       // Fallback to regular endpoint
       return request(`/users/${userId}`, {
         method: "GET",
@@ -962,16 +1076,16 @@ export const apiClient = {
       if (USE_MOCK_API) {
         return { url: "/placeholder-user.jpg" }
       }
-      
+
       const formData = new FormData()
       formData.append("file", file)
-      
+
       const headers = getAuthHeaders()
       // Remove Content-Type header to let browser set it with boundary for multipart/form-data
       delete headers["Content-Type"]
-      
+
       const url = buildUrl("/users/me/profile-picture")
-      
+
       const response = await fetch(url, {
         method: "PUT",
         headers,
@@ -981,7 +1095,7 @@ export const apiClient = {
       if (!response.ok) {
         let errorData: any = {}
         let responseText = ""
-        
+
         try {
           responseText = await response.text()
           if (responseText) {
@@ -994,16 +1108,16 @@ export const apiClient = {
         } catch {
           errorData = { message: `HTTP ${response.status}: ${response.statusText}` }
         }
-        
-        const errorMessage = 
+
+        const errorMessage =
           errorData.message ||
           errorData.error ||
           errorData.raw ||
           `API Error: ${response.status} ${response.statusText}`
-        
+
         const apiError = new Error(errorMessage)
-        ;(apiError as any).status = response.status
-        ;(apiError as any).errorData = errorData
+          ; (apiError as any).status = response.status
+          ; (apiError as any).errorData = errorData
         throw apiError
       }
 
@@ -1144,7 +1258,7 @@ export const apiClient = {
         await new Promise((resolve) => setTimeout(resolve, 1000))
         return { message: "User registered successfully" }
       }
-      
+
       try {
         const requestBody = {
           firstName: data.firstName,
@@ -1155,8 +1269,8 @@ export const apiClient = {
           phoneNumber: data.phoneNumber, // Should be 10-15 digits only
           ...(data.role && { role: data.role }),
         }
-        
-        
+
+
         return await request("/auth/register", {
           method: "POST",
           body: JSON.stringify(requestBody),
@@ -1351,7 +1465,7 @@ export const apiClient = {
           const connectionError = new Error(
             `Cannot connect to booking-service backend at ${BOOKING_API_BASE_URL}. Please make sure the backend is running.`
           )
-          ;(connectionError as any).isConnectionError = true
+            ; (connectionError as any).isConnectionError = true
           throw connectionError
         }
         throw error
@@ -1392,7 +1506,7 @@ export const apiClient = {
       })
 
       const responseData = await response.json()
-      
+
       if (!response.ok) {
         // If status is "rejected", return the response data instead of throwing
         if (responseData.status === "rejected") {
@@ -1584,7 +1698,7 @@ export const apiClient = {
           const connectionError = new Error(
             `Cannot connect to booking-service backend at ${BOOKING_API_BASE_URL}. Please make sure the backend is running.`
           )
-          ;(connectionError as any).isConnectionError = true
+            ; (connectionError as any).isConnectionError = true
           throw connectionError
         }
         throw error
@@ -1650,9 +1764,9 @@ export const apiClient = {
         const errorData = await response.json().catch(() => ({}))
         const errorMessage = errorData.message || errorData.error || `Failed to update booking: ${response.status}`
         const error = new Error(errorMessage)
-        // Add status and error code for better error handling
-        ;(error as any).status = response.status
-        ;(error as any).errorCode = errorData.error
+          // Add status and error code for better error handling
+          ; (error as any).status = response.status
+          ; (error as any).errorCode = errorData.error
         throw error
       }
 
@@ -2159,10 +2273,10 @@ export const apiClient = {
           // If response is not JSON, use status text
           errorData = { message: response.statusText || `Server error: ${response.status}` }
         }
-        
+
         const errorMessage = errorData.message || errorData.error || errorText || `Failed to complete booking: ${response.status}`
-        
-        
+
+
         throw new Error(errorMessage)
       }
 
@@ -2311,7 +2425,7 @@ export const apiClient = {
       }
 
       const url = `${RECLAMATION_API_BASE_URL}/api/reclamations/booking/${bookingId}/complainant/${complainantId}`
-      
+
       try {
         const response = await fetch(url, {
           method: "GET",
@@ -2729,6 +2843,30 @@ export const apiClient = {
 
       return response.json()
     },
+  },
+
+
+
+  // ==================== MARKET TRENDS ====================
+  marketTrends: {
+    async getAllCities(periodMonths: number = 12) {
+      if (USE_MOCK_API) return { trends: [], insights: [] };
+      const response = await fetch(`/api/market-trends/all-cities?period_months=${periodMonths}`);
+      if (!response.ok) throw new Error("Failed to fetch market trends");
+      return response.json();
+    },
+    async getCityTrends(city: string, periodMonths: number = 12) {
+      if (USE_MOCK_API) return { data_points: [] };
+      const response = await fetch(`/api/market-trends/city/${city}?period_months=${periodMonths}`);
+      if (!response.ok) throw new Error(`Failed to fetch trends for ${city}`);
+      return response.json();
+    },
+    async getInsights(city: string) {
+      if (USE_MOCK_API) return [];
+      const response = await fetch(`/api/market-trends/insights/${city}`);
+      if (!response.ok) throw new Error(`Failed to fetch insights for ${city}`);
+      return response.json();
+    }
   },
 }
 

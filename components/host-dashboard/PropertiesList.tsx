@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { apiClient } from "@/lib/services/api"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Loader2, MapPin, Edit, Trash2, Plus, Eye, Bed, Bath, Users, Wifi, Star, Send, X, EyeOff, Ban } from "lucide-react"
+import { Loader2, MapPin, Edit, Trash2, Plus, Eye, Bed, Bath, Users, Wifi, Star, Send, X, EyeOff } from "lucide-react"
 import Image from "next/image"
 import type { Property } from "@/lib/types"
 import { AddPropertyForm } from "./AddPropertyForm"
@@ -33,6 +33,23 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [showAllDescription, setShowAllDescription] = useState(false)
   const [showAllAmenities, setShowAllAmenities] = useState(false)
+  const [aiCheckInDate, setAiCheckInDate] = useState("")
+  const [aiCheckOutDate, setAiCheckOutDate] = useState("")
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState("")
+  const [aiResult, setAiResult] = useState<{
+    predictedPriceMad: number
+    predictedPriceUsd: number
+    confidenceIntervalLower: number
+    confidenceIntervalUpper: number
+    city: string
+    season: string
+    modelVersion: string
+    predictionTimestamp: string
+    currentPriceMad?: number
+    priceDifferencePercent?: number
+    recommendation?: string
+  } | null>(null)
 
   useEffect(() => {
     fetchProperties()
@@ -42,19 +59,30 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
     filterProperties()
   }, [properties, filter])
 
+  // Reset AI suggestion state when closing / changing viewed property
+  useEffect(() => {
+    if (!viewModalOpen) {
+      setAiCheckInDate("")
+      setAiCheckOutDate("")
+      setAiResult(null)
+      setAiError("")
+      setAiLoading(false)
+    }
+  }, [viewModalOpen])
+
   const fetchProperties = async () => {
     try {
       setIsLoading(true)
       setError("")
       const data = await apiClient.properties.getMyProperties()
-      
+
       // Ensure data is an array
       if (!Array.isArray(data)) {
         setError("Invalid response format from server")
         setProperties([])
         return
       }
-      
+
       setProperties(data)
     } catch (err: any) {
       setError(err.message || "Failed to load properties")
@@ -91,7 +119,7 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
     // TODO: Implement proper delete functionality
     alert("Delete functionality is currently disabled.")
     return
-    
+
     // Original code (commented out for now):
     // if (!window.confirm("Are you sure you want to delete this property? This action cannot be undone.")) {
     //   return
@@ -179,7 +207,7 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
 
   const getActionButtons = (property: Property) => {
     const status = property.status.toUpperCase()
-    const buttons: JSX.Element[] = []
+    const buttons: React.JSX.Element[] = []
 
     // Common buttons for all statuses
     buttons.push(
@@ -333,7 +361,7 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
+    if (!url) return "/houses_placeholder.png"
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url
     }
@@ -358,6 +386,36 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
 
     const config = statusConfig[status.toUpperCase()] || { label: status, className: "bg-gray-100 text-gray-800 border-gray-200" }
     return <Badge className={config.className}>{config.label}</Badge>
+  }
+
+  const handleGetAiPriceSuggestion = async () => {
+    if (!viewingProperty) return
+    setAiError("")
+    setAiResult(null)
+
+    if (!aiCheckInDate || !aiCheckOutDate) {
+      setAiError("Please select both check-in and check-out dates.")
+      return
+    }
+
+    if (aiCheckInDate >= aiCheckOutDate) {
+      setAiError("Check-out date must be after check-in date.")
+      return
+    }
+
+    try {
+      setAiLoading(true)
+      const result = await apiClient.properties.predictPrice(
+        viewingProperty.id,
+        aiCheckInDate,
+        aiCheckOutDate,
+      )
+      setAiResult(result)
+    } catch (err: any) {
+      setAiError(err?.message || "Failed to get AI price suggestion")
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   if (isLoading) {
@@ -389,8 +447,8 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
             {properties.length === 0 ? "No properties yet" : "No properties found"}
           </h2>
           <p className="text-gray-600 mb-6">
-            {properties.length === 0 
-              ? "Start by adding your first property!" 
+            {properties.length === 0
+              ? "Start by adding your first property!"
               : `No properties with status: ${filter}`}
           </p>
         </Card>
@@ -425,14 +483,14 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
                         <span className="text-xl font-bold text-teal-600">
                           {property.dailyPrice?.toFixed(4) || property.price?.toFixed(4) || "N/A"}
                         </span>
-                        <span className="text-sm font-semibold text-gray-600">ETH/day</span>
+                        <span className="text-sm font-semibold text-gray-600">MAD/day</span>
                       </div>
                       {property.depositAmount && property.depositAmount > 0 && (
                         <div className="flex items-baseline gap-1">
                           <span className="text-sm font-semibold text-orange-600">
                             {property.depositAmount.toFixed(4)}
                           </span>
-                          <span className="text-xs text-gray-500">ETH deposit</span>
+                          <span className="text-xs text-gray-500">MAD deposit</span>
                         </div>
                       )}
                     </div>
@@ -457,14 +515,14 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Price</span>
                       <span className="font-semibold text-teal-600">
-                        {property.dailyPrice?.toFixed(4) || property.price?.toFixed(4) || "N/A"} ETH/day
+                        {property.dailyPrice?.toFixed(0) || property.price?.toFixed(0) || "N/A"} MAD/day
                       </span>
                     </div>
                     {property.depositAmount && property.depositAmount > 0 && (
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Deposit</span>
                         <span className="font-semibold text-orange-600">
-                          {property.depositAmount.toFixed(4)} ETH
+                          {property.depositAmount.toFixed(0)} MAD
                         </span>
                       </div>
                     )}
@@ -532,7 +590,7 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-gray-900">Property Details</DialogTitle>
           </DialogHeader>
-          
+
           {viewingProperty && (
             <div className="space-y-6 mt-4">
               {/* Image Gallery Grid */}
@@ -548,11 +606,11 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
                   }
                   return property.propertyImages
                 }
-                
+
                 const images = getAllImages(viewingProperty)
                 const mainImage = images[0]
                 const otherImages = images.slice(1, 5)
-                
+
                 return images.length > 0 ? (
                   <div className="grid grid-cols-4 grid-rows-2 gap-3 h-[400px]">
                     {/* Main Large Image */}
@@ -647,8 +705,90 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
                   <span className="text-3xl font-bold text-gray-900">
                     {viewingProperty.dailyPrice ? `${viewingProperty.dailyPrice}` : viewingProperty.price ? `${viewingProperty.price}` : "N/A"}
                   </span>
-                  <span className="text-lg font-semibold text-teal-600">ETH</span>
+                  <span className="text-lg font-semibold text-teal-600">MAD</span>
                   <span className="text-sm text-gray-500">/day</span>
+                </div>
+                <div className="mt-4 space-y-3">
+                  <p className="text-sm font-semibold text-gray-800">
+                    AI Price Suggestion (per night)
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                    <div className="space-y-1">
+                      <label className="block text-xs font-medium text-gray-600">
+                        Check-in date
+                      </label>
+                      <input
+                        type="date"
+                        value={aiCheckInDate}
+                        onChange={(e) => setAiCheckInDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-xs font-medium text-gray-600">
+                        Check-out date
+                      </label>
+                      <input
+                        type="date"
+                        value={aiCheckOutDate}
+                        onChange={(e) => setAiCheckOutDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleGetAiPriceSuggestion}
+                      disabled={aiLoading}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-teal-600 text-white text-sm font-semibold hover:bg-teal-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {aiLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Getting suggestion...
+                        </>
+                      ) : (
+                        <>
+                          <Star className="w-4 h-4" />
+                          Get AI suggestion
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  {aiError && (
+                    <p className="text-xs text-red-600">{aiError}</p>
+                  )}
+                  {aiResult && (
+                    <div className="mt-2 rounded-lg border border-teal-200 bg-teal-50 p-3 text-xs text-gray-800 space-y-1">
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-semibold text-teal-700">
+                          {aiResult.predictedPriceMad.toFixed(0)} MAD
+                        </span>
+                        <span className="text-gray-500">≈ {aiResult.predictedPriceUsd.toFixed(2)} USD / night</span>
+                      </div>
+                      <p className="text-gray-600">
+                        Confidence interval: {aiResult.confidenceIntervalLower.toFixed(0)} –{" "}
+                        {aiResult.confidenceIntervalUpper.toFixed(0)} MAD
+                      </p>
+                      {typeof aiResult.currentPriceMad === "number" && (
+                        <p className="text-gray-600">
+                          Current price (platform): {aiResult.currentPriceMad.toFixed(0)} MAD{" "}
+                          {typeof aiResult.priceDifferencePercent === "number" && (
+                            <span className="ml-1">
+                              ({aiResult.priceDifferencePercent.toFixed(2)}%)
+                            </span>
+                          )}
+                        </p>
+                      )}
+                      {aiResult.recommendation && (
+                        <p className="font-semibold text-teal-800">
+                          Recommendation: {aiResult.recommendation}
+                        </p>
+                      )}
+                      <p className="text-gray-500">
+                        Model {aiResult.modelVersion} • {aiResult.city}, {aiResult.season}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -659,8 +799,8 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
                     <MapPin className="w-5 h-5 text-teal-600" />
                     <div>
                       <p className="font-semibold">{viewingProperty.address.city}, {viewingProperty.address.country}</p>
-                      {viewingProperty.address.street && (
-                        <p className="text-sm text-gray-600">{viewingProperty.address.street}</p>
+                      {viewingProperty.address.address && (
+                        <p className="text-sm text-gray-600">{viewingProperty.address.address}</p>
                       )}
                     </div>
                   </div>
@@ -674,7 +814,7 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
                   <p className="whitespace-pre-line">{viewingProperty.description}</p>
                 </div>
                 {viewingProperty.description && viewingProperty.description.length > 200 && (
-                  <button 
+                  <button
                     onClick={() => setShowAllDescription(!showAllDescription)}
                     className="mt-4 text-teal-600 font-semibold underline hover:text-teal-700"
                   >
@@ -696,7 +836,7 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
                     ))}
                   </div>
                   {viewingProperty.amenities.length > 8 && (
-                    <button 
+                    <button
                       onClick={() => setShowAllAmenities(!showAllAmenities)}
                       className="mt-4 px-6 py-2 border border-gray-900 rounded-lg hover:bg-gray-50 transition-colors"
                     >
@@ -710,7 +850,7 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
               {viewingProperty.type && (
                 <div className="pb-6 border-b">
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">Property Type</h2>
-                  <p className="text-gray-700">{viewingProperty.type.name}</p>
+                  <p className="text-gray-700">{viewingProperty.type.type}</p>
                 </div>
               )}
 

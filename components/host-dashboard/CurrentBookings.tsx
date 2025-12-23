@@ -43,6 +43,9 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
   const [viewModalOpen, setViewModalOpen] = useState(false)
   const [viewingBooking, setViewingBooking] = useState<BookingWithProperty | null>(null)
   const [reclamations, setReclamations] = useState<{ [key: number]: any }>({})
+  // State for tenant risk scores
+  const [tenantRiskScores, setTenantRiskScores] = useState<{ [key: number]: any }>({})
+  const [loadingRiskScores, setLoadingRiskScores] = useState<{ [key: number]: boolean }>({})
   const [tenantPhoneNumbers, setTenantPhoneNumbers] = useState<{ [key: number]: string | null }>({})
   const [loadingTenantPhones, setLoadingTenantPhones] = useState<{ [key: number]: boolean }>({})
 
@@ -52,26 +55,89 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
 
   useEffect(() => {
     // Fetch reclamations for all bookings
+    const bookingsWithConfirmed = bookings.filter((b) =>
+      b.status === "CONFIRMED" ||
+      b.status === "TENANT_CHECKED_OUT" ||
+      b.status === "COMPLETED"
+    )
+
     if (bookings.length > 0) {
       fetchReclamations()
     }
-    // Fetch tenant phone numbers for CONFIRMED, TENANT_CHECKED_OUT, and COMPLETED bookings
-    const bookingsWithPhone = bookings.filter((b) => 
-      b.status === "CONFIRMED" || 
-      b.status === "TENANT_CHECKED_OUT" || 
-      b.status === "COMPLETED"
-    )
-    if (bookingsWithPhone.length > 0) {
-      fetchTenantPhoneNumbers(bookingsWithPhone)
+
+    // Fetch tenant phone numbers
+    if (bookingsWithConfirmed.length > 0) {
+      fetchTenantPhoneNumbers(bookingsWithConfirmed)
+      fetchRiskScores(bookingsWithConfirmed)
     }
   }, [bookings])
+
+  const fetchRiskScores = async (bookings: BookingWithProperty[]) => {
+    try {
+      const uniqueTenantIds = Array.from(new Set(bookings.map(b => b.userId)));
+
+      uniqueTenantIds.forEach(async (tenantId) => {
+        if (!tenantId) return;
+
+        try {
+          setLoadingRiskScores(prev => ({ ...prev, [tenantId]: true }));
+          // @ts-ignore - risk service added recently
+          if (apiClient.risk && apiClient.risk.getTenantRiskScore) {
+            // @ts-ignore
+            const score = await apiClient.risk.getTenantRiskScore(Number(tenantId));
+            setTenantRiskScores(prev => ({ ...prev, [tenantId]: score }));
+          }
+        } catch (err) {
+          console.error(`Failed to fetch risk score for tenant ${tenantId}`, err);
+        } finally {
+          setLoadingRiskScores(prev => ({ ...prev, [tenantId]: false }));
+        }
+      });
+    } catch (err) {
+      console.error("Error fetching risk scores", err);
+    }
+  }
+
+  const getRiskBadge = (riskData: any) => {
+    if (!riskData) return null;
+
+    const { risk_band, trust_score } = riskData;
+
+    let colorClass = "bg-gray-100 text-gray-800 border-gray-200";
+    let icon = <CheckCircle className="w-3 h-3 mr-1" />;
+
+    switch (risk_band) {
+      case "LOW":
+        colorClass = "bg-green-100 text-green-800 border-green-200";
+        break;
+      case "MEDIUM":
+        colorClass = "bg-yellow-100 text-yellow-800 border-yellow-200";
+        icon = <AlertTriangle className="w-3 h-3 mr-1" />;
+        break;
+      case "HIGH":
+        colorClass = "bg-orange-100 text-orange-800 border-orange-200";
+        icon = <AlertTriangle className="w-3 h-3 mr-1" />;
+        break;
+      case "CRITICAL":
+        colorClass = "bg-red-100 text-red-800 border-red-200";
+        icon = <X className="w-3 h-3 mr-1" />;
+        break;
+    }
+
+    return (
+      <Badge className={`${colorClass} ml-2 flex items-center`}>
+        {icon}
+        Trust: {trust_score}/100 ({risk_band})
+      </Badge>
+    );
+  }
 
   const fetchBookings = async () => {
     try {
       setIsLoading(true)
       setError("")
       const data = await apiClient.bookings.getCurrentBookingsByOwner(parseInt(String(ownerId)))
-      
+
       // Fetch property details for each booking
       const bookingsWithProperties = await Promise.all(
         data.map(async (booking: Booking) => {
@@ -83,7 +149,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
           }
         })
       )
-      
+
       setBookings(bookingsWithProperties)
     } catch (err: any) {
       setError(err.message || "Failed to load current bookings")
@@ -103,7 +169,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
     try {
       // Find the booking to check its status
       const booking = bookings.find(b => b.id === bookingId)
-      
+
       if (!booking) {
         setError("Booking not found")
         return
@@ -119,11 +185,11 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
       if (isNaN(ownerIdNum)) {
         throw new Error("Invalid owner ID. Please refresh the page and try again.")
       }
-      
+
       // Use the dedicated owner endpoint to confirm checkout
       await apiClient.bookings.ownerConfirmCheckout(bookingId, ownerIdNum)
       toast.success("Checkout confirmed successfully")
-      
+
       // Then, complete booking on blockchain (distributes funds)
       try {
         console.log("🔗 Attempting to complete booking on blockchain...")
@@ -133,7 +199,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
       } catch (blockchainErr: any) {
         // Extract user-friendly error message
         let errorMessage = blockchainErr?.message || blockchainErr?.toString() || "Unknown error"
-        
+
         // Simplify error messages for common issues
         if (errorMessage.includes("Contract not found") || errorMessage.includes("Please deploy")) {
           errorMessage = "Blockchain contract not found. Please contact support to deploy the contract."
@@ -145,19 +211,19 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
           // Truncate very long error messages
           errorMessage = errorMessage.substring(0, 100) + "..."
         }
-        
+
         // Only log detailed error in development
         if (process.env.NODE_ENV === 'development') {
           console.error("❌ Blockchain completion error:", blockchainErr)
         } else {
           console.error("❌ Blockchain completion failed:", errorMessage)
         }
-        
+
         toast.error(`Blockchain transaction failed: ${errorMessage}`)
         setError(`Checkout confirmed, but blockchain transaction failed: ${errorMessage}`)
         // Don't throw - allow the operation to continue even if blockchain fails
       }
-      
+
       await fetchBookings()
       if (onUpdate) onUpdate()
     } catch (err: any) {
@@ -169,7 +235,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
 
   const fetchReclamations = async () => {
     if (!user?.id) return
-    
+
     try {
       const reclamationsMap: { [key: number]: any } = {}
       // Use current user ID (could be admin or host) to fetch reclamations
@@ -203,12 +269,12 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
   const fetchTenantPhoneNumbers = async (bookings: BookingWithProperty[]) => {
     try {
       const phoneNumbersMap: { [key: number]: string | null } = {}
-      
+
       await Promise.all(
         bookings.map(async (booking) => {
           try {
             setLoadingTenantPhones((prev) => ({ ...prev, [booking.id]: true }))
-            
+
             // Get tenant info by userId
             const tenantId = booking.userId
             try {
@@ -229,7 +295,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
           }
         })
       )
-      
+
       setTenantPhoneNumbers((prev) => ({ ...prev, ...phoneNumbersMap }))
     } catch (err) {
     }
@@ -297,7 +363,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
+    if (!url) return "/houses_placeholder.png"
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url
     }
@@ -356,6 +422,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
         {bookings.map((booking) => {
           const imageUrl = getPropertyImage(booking.property)
           const nights = calculateNights(booking.checkInDate, booking.checkOutDate)
+          const riskData = tenantRiskScores[booking.userId];
 
           return (
             <Card key={booking.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300">
@@ -374,7 +441,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
                     <MapPin className="w-16 h-16 text-teal-300" />
                   </div>
                 )}
-                <div className="absolute top-4 right-4">
+                <div className="absolute top-4 right-4 flex gap-2">
                   {getStatusBadge(booking.status)}
                 </div>
                 <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg">
@@ -382,7 +449,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
                     <span className="text-xl font-bold text-teal-600">
                       {booking.totalPrice?.toFixed(4) || "N/A"}
                     </span>
-                    <span className="text-sm font-semibold text-gray-600">ETH</span>
+                    <span className="text-sm font-semibold text-gray-600">MAD</span>
                   </div>
                 </div>
               </div>
@@ -398,6 +465,14 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
                     <span className="line-clamp-1">
                       {booking.property.address.city}, {booking.property.address.country}
                     </span>
+                  </div>
+                )}
+
+                {/* Risk Score Badge */}
+                {riskData && (
+                  <div className="mb-4">
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Tenant Risk</span>
+                    {getRiskBadge(riskData)}
                   </div>
                 )}
 
@@ -424,25 +499,25 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
                     <span className="font-semibold text-gray-900">{nights} {nights === 1 ? "night" : "nights"}</span>
                   </div>
                   {/* Tenant Phone Number - Show for CONFIRMED, TENANT_CHECKED_OUT, and COMPLETED bookings */}
-                  {(booking.status === "CONFIRMED" || 
-                    booking.status === "TENANT_CHECKED_OUT" || 
+                  {(booking.status === "CONFIRMED" ||
+                    booking.status === "TENANT_CHECKED_OUT" ||
                     booking.status === "COMPLETED") && (
-                    <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200">
-                      <div className="flex items-center text-gray-600">
-                        <Phone className="w-4 h-4 mr-2 text-teal-600" />
-                        <span>Tenant Phone</span>
+                      <div className="flex items-center justify-between text-sm pt-2 border-t border-gray-200">
+                        <div className="flex items-center text-gray-600">
+                          <Phone className="w-4 h-4 mr-2 text-teal-600" />
+                          <span>Tenant Phone</span>
+                        </div>
+                        <span className="font-semibold text-gray-900">
+                          {loadingTenantPhones[booking.id] ? (
+                            <Loader2 className="w-4 h-4 animate-spin inline" />
+                          ) : tenantPhoneNumbers[booking.id] ? (
+                            tenantPhoneNumbers[booking.id]
+                          ) : (
+                            "N/A"
+                          )}
+                        </span>
                       </div>
-                      <span className="font-semibold text-gray-900">
-                        {loadingTenantPhones[booking.id] ? (
-                          <Loader2 className="w-4 h-4 animate-spin inline" />
-                        ) : tenantPhoneNumbers[booking.id] ? (
-                          tenantPhoneNumbers[booking.id]
-                        ) : (
-                          "N/A"
-                        )}
-                      </span>
-                    </div>
-                  )}
+                    )}
                 </div>
 
                 {/* Actions */}
@@ -559,7 +634,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-gray-900">Booking Details</DialogTitle>
           </DialogHeader>
-          
+
           {viewingBooking && (
             <div className="space-y-6 mt-4">
               {/* Property Image */}
@@ -612,7 +687,7 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
                   <div className="flex items-baseline justify-between">
                     <span className="text-sm font-medium text-gray-700">Total Price</span>
                     <span className="text-xl font-bold text-teal-700">
-                      {viewingBooking.totalPrice?.toFixed(4) || "N/A"} ETH
+                      {viewingBooking.totalPrice?.toFixed(0) || "N/A"} MAD
                     </span>
                   </div>
                 </div>

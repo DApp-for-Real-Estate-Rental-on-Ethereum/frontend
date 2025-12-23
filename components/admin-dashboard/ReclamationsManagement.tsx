@@ -621,7 +621,7 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                       {reclamation.refundAmount ? (
                         <div className="flex items-center gap-1 text-green-600 font-semibold">
                           <DollarSign className="w-4 h-4" />
-                          <span>{reclamation.refundAmount.toFixed(2)} ETH</span>
+                          <span>{reclamation.refundAmount.toFixed(2)} MAD</span>
                         </div>
                       ) : reclamation.status === "OPEN" || reclamation.status === "IN_REVIEW" ? (
                         <div className="flex items-center gap-1 text-gray-500 text-xs">
@@ -901,7 +901,7 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                         <div>
                           <span className="text-xs text-blue-700">Expected Refund:</span>
                           <p className="text-sm text-blue-900 font-semibold">
-                            {expected.refund > 0 ? `${expected.refund.toFixed(2)} ETH` : "N/A"}
+                            {expected.refund > 0 ? `${expected.refund.toFixed(2)} MAD` : "N/A"}
                           </p>
                         </div>
                         <div>
@@ -922,7 +922,7 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                 <div>
                   <label className="text-sm font-medium text-gray-700">Refund Amount</label>
                   <p className="text-sm text-green-600 font-semibold">
-                    {selectedReclamation.refundAmount.toFixed(2)} ETH
+                    {selectedReclamation.refundAmount.toFixed(2)} MAD
                   </p>
                 </div>
               )}
@@ -1202,7 +1202,7 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                     return (
                       <div className="mt-2 text-xs">
                         <p className="text-yellow-800">
-                          Expected: <strong>{expected.refund > 0 ? `${expected.refund.toFixed(2)} ETH refund` : "No refund"}</strong> and <strong>{expected.penaltyPoints} penalty points</strong>
+                          Expected: <strong>{expected.refund > 0 ? `${expected.refund.toFixed(2)} MAD refund` : "No refund"}</strong> and <strong>{expected.penaltyPoints} penalty points</strong>
                         </p>
                       </div>
                     )

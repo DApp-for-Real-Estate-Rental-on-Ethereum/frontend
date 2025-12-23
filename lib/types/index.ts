@@ -136,3 +136,75 @@ export interface UpdatePropertyRequest {
 export interface ApprovePropertyRequest {
   isApproved: boolean
 }
+
+export interface TenantRiskFeatures {
+  n_bookings_total: number
+  n_completed_bookings: number
+  n_cancelled_bookings: number
+  avg_booking_value: number
+  avg_stay_length_days: number
+  recent_bookings_last_6m: number
+  n_reclamations_as_target: number
+  n_reclamations_low: number
+  n_reclamations_medium: number
+  n_reclamations_high: number
+  n_reclamations_critical: number
+  n_reclamations_open: number
+  n_reclamations_resolved_against_user: number
+  total_penalty_points: number
+  total_refund_amount: number
+  n_transactions_total: number
+  n_transactions_success: number
+  n_transactions_failed: number
+  failed_transaction_rate: number
+  avg_transaction_amount: number
+  user_rating: number
+  user_score: number
+  user_penalty_points: number
+  is_suspended: boolean
+  account_age_days: number
+  has_verified_profile: boolean
+}
+
+export interface TenantRiskResponse {
+  tenant_id: number
+  trust_score: number
+  risk_band: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+  risk_probability: number
+  top_factors: string[]
+  features: TenantRiskFeatures
+}
+
+// Market Trends Types
+export interface TrendDataPoint {
+  period: string; // YYYY-MM
+  avg_price_mad: number;
+  occupancy_rate: number;
+  n_bookings: number;
+  n_cancellations: number;
+  avg_stay_length_days: number;
+}
+
+export interface CityTrendResponse {
+  city: string;
+  period_start: string;
+  period_end: string;
+  data_points: TrendDataPoint[];
+  trend_direction: "RISING" | "STABLE" | "DECLINING";
+  price_change_percent: number;
+  avg_occupancy: number;
+}
+
+export interface MarketInsight {
+  city: string;
+  insight_type: "PRICE_FORECAST" | "OCCUPANCY_FORECAST" | "SEASONALITY";
+  message: string;
+  confidence: number;
+  data: any;
+}
+
+export interface MarketTrendsResponse {
+  trends: CityTrendResponse[];
+  insights: MarketInsight[];
+  generated_at: string;
+}

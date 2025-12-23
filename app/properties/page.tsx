@@ -55,7 +55,7 @@ export default function PropertiesPage() {
         const checkOut = new Date(checkOutDate)
         checkIn.setHours(0, 0, 0, 0)
         checkOut.setHours(0, 0, 0, 0)
-        
+
         if (checkOut <= checkIn) {
           setFilteredProperties(filtered)
           setIsSearching(false)
@@ -66,16 +66,16 @@ export default function PropertiesPage() {
           filtered.map(async (property) => {
             try {
               const bookings = await apiClient.bookings.getConfirmedBookingsByProperty(String(property.id))
-              
+
               const hasOverlap = bookings.some((booking: Booking) => {
                 const bookingCheckIn = new Date(booking.checkInDate)
                 const bookingCheckOut = new Date(booking.checkOutDate)
                 bookingCheckIn.setHours(0, 0, 0, 0)
                 bookingCheckOut.setHours(0, 0, 0, 0)
-                
+
                 return checkIn < bookingCheckOut && checkOut > bookingCheckIn
               })
-              
+
               return !hasOverlap
             } catch (error) {
               return true
@@ -183,7 +183,7 @@ export default function PropertiesPage() {
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
+    if (!url) return "/houses_placeholder.png"
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url
     }
@@ -243,7 +243,7 @@ export default function PropertiesPage() {
                     className="w-full px-0 py-1 border-0 focus:outline-none text-base text-gray-600 placeholder-gray-400"
                   />
                 </div>
-                <Button 
+                <Button
                   onClick={handleSearch}
                   disabled={isSearching}
                   className="bg-teal-600 hover:bg-teal-700 h-12 w-12 rounded-full p-0 flex-shrink-0 disabled:opacity-50"
@@ -293,6 +293,11 @@ export default function PropertiesPage() {
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.srcset = ""
+                            target.src = "/houses_placeholder.png"
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
@@ -335,13 +340,13 @@ export default function PropertiesPage() {
                             <span className="text-3xl font-bold text-teal-600">
                               {property.dailyPrice?.toFixed(4) || property.price?.toFixed(4) || "N/A"}
                             </span>
-                            <span className="text-lg font-semibold text-teal-600">ETH</span>
+                            <span className="text-lg font-semibold text-teal-600">MAD</span>
                             <span className="text-sm text-gray-500 ml-1">/day</span>
                           </div>
                           {property.depositAmount && property.depositAmount > 0 && (
                             <div className="flex items-baseline gap-2">
                               <span className="text-base font-semibold text-orange-600">
-                                Deposit: {property.depositAmount.toFixed(4)} ETH
+                                Deposit: {property.depositAmount.toFixed(0)} MAD
                               </span>
                             </div>
                           )}

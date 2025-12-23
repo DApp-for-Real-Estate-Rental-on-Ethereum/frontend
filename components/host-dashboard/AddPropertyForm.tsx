@@ -502,7 +502,8 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
       }
 
       // Create mode
-      const coverImageName = images[0]?.name || null
+      // coverImageName is optional string in backend DTO – use undefined when no image
+      const coverImageName = images[0]?.name
 
       const createRequest = {
         title: formData.title.trim(),
@@ -524,7 +525,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
           longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
         },
         amenities: [],
-        coverImageName: coverImageName,
+        coverImageName,
         discountPlan: (discountPlans.fiveDays || discountPlans.fifteenDays || discountPlans.oneMonth) ? {
           ...(discountPlans.fiveDays && { fiveDays: 10 }),
           ...(discountPlans.fifteenDays && { fifteenDays: 15 }),
@@ -568,6 +569,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
         description: "",
         typeId: "1",
         dailyPrice: "",
+        depositAmount: "",
         negotiationPercentage: "",
         capacity: "",
         numberOfBedrooms: "",
@@ -577,6 +579,8 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
         city: "",
         country: "Morocco",
         zipCode: "",
+        latitude: "",
+        longitude: "",
       })
       setImages([])
       setImagePreview([])
@@ -717,7 +721,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Daily Price (ETH) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Daily Price (MAD) *</label>
                 <input
                   type="number"
                   name="dailyPrice"
@@ -729,13 +733,13 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                   placeholder="0.05"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Price per day in Ethereum (ETH)</p>
+                    <p className="text-xs text-gray-500 mt-1">Price per day in Moroccan Dirham (MAD)</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Deposit Amount (ETH) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Deposit Amount (MAD) *</label>
                 <input
                   type="number"
                   name="depositAmount"
@@ -747,7 +751,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                   placeholder="0.1"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Security deposit amount in Ethereum (ETH)</p>
+                    <p className="text-xs text-gray-500 mt-1">Security deposit amount in Moroccan Dirham (MAD)</p>
               </div>
             </div>
 
@@ -902,7 +906,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
             <h3 className="text-lg font-semibold text-gray-900">Location</h3>
             <Button
               type="button"
-              onClick={getCurrentLocation}
+              onClick={() => getCurrentLocation()}
               disabled={isGettingLocation}
               variant="outline"
               size="sm"
@@ -998,6 +1002,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                 description: "",
                 typeId: "1",
                 dailyPrice: "",
+                depositAmount: "",
                 negotiationPercentage: "",
                 capacity: "",
                 numberOfBedrooms: "",
@@ -1007,6 +1012,8 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                 city: "",
                 country: "Morocco",
                 zipCode: "",
+                latitude: "",
+                longitude: "",
               })
               setImages([])
               setImagePreview([])

@@ -240,7 +240,7 @@ export function Calendar({ ownerId }: CalendarProps) {
                   </div>
                   <div className="text-right">
                     <div className="font-bold text-teal-600">
-                      {booking.totalPrice?.toFixed(4)} ETH
+                      {booking.totalPrice?.toFixed(0)} MAD
                     </div>
                   </div>
                 </div>
