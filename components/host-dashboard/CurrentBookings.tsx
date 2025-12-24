@@ -81,12 +81,10 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
 
         try {
           setLoadingRiskScores(prev => ({ ...prev, [tenantId]: true }));
-          // @ts-ignore - risk service added recently
-          if (apiClient.risk && apiClient.risk.getTenantRiskScore) {
-            // @ts-ignore
-            const score = await apiClient.risk.getTenantRiskScore(Number(tenantId));
-            setTenantRiskScores(prev => ({ ...prev, [tenantId]: score }));
-          }
+          setLoadingRiskScores(prev => ({ ...prev, [tenantId]: true }));
+
+          const score = await apiClient.risk.getTenantRiskScore(Number(tenantId));
+          setTenantRiskScores(prev => ({ ...prev, [tenantId]: score }));
         } catch (err) {
           console.error(`Failed to fetch risk score for tenant ${tenantId}`, err);
         } finally {
@@ -103,32 +101,73 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
 
     const { risk_band, trust_score } = riskData;
 
-    let colorClass = "bg-gray-100 text-gray-800 border-gray-200";
-    let icon = <CheckCircle className="w-3 h-3 mr-1" />;
+    // Determine colors
+    let colorClass = "text-gray-600";
+    let bgClass = "bg-gray-50";
+    let borderClass = "border-gray-200";
+    let progressColor = "#4b5563"; // gray-600
 
-    switch (risk_band) {
-      case "LOW":
-        colorClass = "bg-green-100 text-green-800 border-green-200";
-        break;
-      case "MEDIUM":
-        colorClass = "bg-yellow-100 text-yellow-800 border-yellow-200";
-        icon = <AlertTriangle className="w-3 h-3 mr-1" />;
-        break;
-      case "HIGH":
-        colorClass = "bg-orange-100 text-orange-800 border-orange-200";
-        icon = <AlertTriangle className="w-3 h-3 mr-1" />;
-        break;
-      case "CRITICAL":
-        colorClass = "bg-red-100 text-red-800 border-red-200";
-        icon = <X className="w-3 h-3 mr-1" />;
-        break;
+    if (trust_score >= 80) {
+      colorClass = "text-emerald-600";
+      bgClass = "bg-emerald-50";
+      borderClass = "border-emerald-100";
+      progressColor = "#059669"; // emerald-600
+    } else if (trust_score >= 50) {
+      colorClass = "text-amber-600";
+      bgClass = "bg-amber-50";
+      borderClass = "border-amber-100";
+      progressColor = "#d97706"; // amber-600
+    } else {
+      colorClass = "text-rose-600";
+      bgClass = "bg-rose-50";
+      borderClass = "border-rose-100";
+      progressColor = "#e11d48"; // rose-600
     }
 
+    // SVG Config for Circle
+    const radius = 18;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (trust_score / 100) * circumference;
+
     return (
-      <Badge className={`${colorClass} ml-2 flex items-center`}>
-        {icon}
-        Trust: {trust_score}/100 ({risk_band})
-      </Badge>
+      <div className={`mt-3 p-4 rounded-xl border ${borderClass} ${bgClass} flex items-center justify-between`}>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Tenant Trust Score</p>
+          <div className="flex items-center gap-2">
+            <span className={`text-2xl font-black ${colorClass}`}>
+              {trust_score}
+            </span>
+            <Badge className={`${colorClass} bg-white/80 border-0 shadow-sm backdrop-blur-sm`}>
+              {risk_band} RISK
+            </Badge>
+          </div>
+        </div>
+
+        {/* Progress Ring */}
+        <div className="relative w-12 h-12 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90">
+            {/* Background Circle */}
+            <circle
+              cx="24" cy="24" r={radius}
+              fill="transparent"
+              stroke="currentColor"
+              strokeWidth="4"
+              className="text-white/50"
+            />
+            {/* Progress Circle */}
+            <circle
+              cx="24" cy="24" r={radius}
+              fill="transparent"
+              stroke={progressColor}
+              strokeWidth="4"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+              className="transition-all duration-1000 ease-out"
+            />
+          </svg>
+        </div>
+      </div>
     );
   }
 
@@ -469,11 +508,9 @@ export function CurrentBookings({ ownerId, onUpdate }: CurrentBookingsProps) {
                 )}
 
                 {/* Risk Score Badge */}
+                {/* Risk Score Display */}
                 {riskData && (
-                  <div className="mb-4">
-                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Tenant Risk</span>
-                    {getRiskBadge(riskData)}
-                  </div>
+                  getRiskBadge(riskData)
                 )}
 
                 <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">

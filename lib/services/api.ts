@@ -39,21 +39,22 @@ const PROPERTY_API_BASE_URL = process.env.NEXT_PUBLIC_PROPERTY_API_BASE_URL || "
 const BOOKING_API_BASE_URL = USE_GATEWAY
   ? GATEWAY_URL
   : (process.env.NEXT_PUBLIC_BOOKING_API_BASE_URL || "http://localhost:8083")
-const PAYMENT_API_BASE_URL = process.env.NEXT_PUBLIC_PAYMENT_API_BASE_URL || "http://localhost:8085"
+const PAYMENT_API_BASE_URL = USE_GATEWAY
+  ? GATEWAY_URL
+  : (process.env.NEXT_PUBLIC_PAYMENT_API_BASE_URL || "http://localhost:8085")
 const RECLAMATION_API_BASE_URL = process.env.NEXT_PUBLIC_RECLAMATION_API_BASE_URL || "http://localhost:8091"
 const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || "v1"
 const AUTH_TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_STORAGE_KEY || "derent5_auth_token"
 const USER_DATA_KEY = process.env.NEXT_PUBLIC_USER_STORAGE_KEY || "derent5_user_data"
 // USE_MOCK_API is true if explicitly set to "true", otherwise false (use real API)
-const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_MOCK_API === "true"
+const USE_MOCK_API = false // process.env.NEXT_PUBLIC_USE_MOCK_API === "true"
 
 // Only import mock API if needed (tree-shake when not used)
-let mockApiClient: typeof import("@/lib/mock-api").mockApi | null = null
+let mockApiClient: any = null
 
 async function getMockApi() {
   if (!mockApiClient) {
-    const { mockApi } = await import("@/lib/mock-api")
-    mockApiClient = mockApi
+    throw new Error("Mock API has been removed")
   }
   return mockApiClient
 }
@@ -1494,6 +1495,7 @@ export const apiClient = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           userId: typeof data.userId === "string" ? parseInt(data.userId) : data.userId,
@@ -2100,6 +2102,7 @@ export const apiClient = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({ bookingId }),
       })
@@ -2141,6 +2144,7 @@ export const apiClient = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
       })
 
@@ -2173,6 +2177,7 @@ export const apiClient = {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({ userId, walletAddress }),
       })
@@ -2196,6 +2201,7 @@ export const apiClient = {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({ txHash }),
       })
@@ -2226,6 +2232,7 @@ export const apiClient = {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          ...getAuthHeaders(),
         },
       })
 
@@ -2844,7 +2851,6 @@ export const apiClient = {
       return response.json()
     },
   },
-
 
 
   // ==================== MARKET TRENDS ====================

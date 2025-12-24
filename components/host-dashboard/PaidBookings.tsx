@@ -5,7 +5,7 @@ import { apiClient } from "@/lib/services/api"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Calendar, Clock, MapPin, Eye, CheckCircle, Phone } from "lucide-react"
+import { Loader2, Calendar, Clock, MapPin, Eye, CheckCircle, Phone, AlertTriangle, X } from "lucide-react"
 import Image from "next/image"
 import type { Property } from "@/lib/types"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -37,6 +37,9 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
   const [viewingBooking, setViewingBooking] = useState<BookingWithProperty | null>(null)
   const [tenantPhoneNumbers, setTenantPhoneNumbers] = useState<{ [key: number]: string | null }>({})
   const [loadingTenantPhones, setLoadingTenantPhones] = useState<{ [key: number]: boolean }>({})
+  // State for tenant risk scores
+  const [tenantRiskScores, setTenantRiskScores] = useState<{ [key: number]: any }>({})
+  const [loadingRiskScores, setLoadingRiskScores] = useState<{ [key: number]: boolean }>({})
 
   useEffect(() => {
     fetchBookings()
@@ -69,13 +72,114 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
         b.status === "COMPLETED"
       )
       if (bookingsWithPhone.length > 0) {
-        await fetchTenantPhoneNumbers(bookingsWithPhone)
+        fetchTenantPhoneNumbers(bookingsWithPhone)
+        fetchRiskScores(bookingsWithPhone)
       }
     } catch (err: any) {
       setError(err.message || "Failed to load paid bookings")
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const fetchRiskScores = async (bookings: BookingWithProperty[]) => {
+    try {
+      const uniqueTenantIds = Array.from(new Set(bookings.map(b => b.userId)));
+
+      uniqueTenantIds.forEach(async (tenantId) => {
+        if (!tenantId) return;
+
+        try {
+          setLoadingRiskScores(prev => ({ ...prev, [tenantId]: true }));
+
+          if (apiClient.risk && apiClient.risk.getTenantRiskScore) {
+            const score = await apiClient.risk.getTenantRiskScore(Number(tenantId));
+            setTenantRiskScores(prev => ({ ...prev, [tenantId]: score }));
+          }
+        } catch (err) {
+          console.error(`Failed to fetch risk score for tenant ${tenantId}`, err);
+        } finally {
+          setLoadingRiskScores(prev => ({ ...prev, [tenantId]: false }));
+        }
+      });
+    } catch (err) {
+      console.error("Error fetching risk scores", err);
+    }
+  }
+
+  const getRiskBadge = (riskData: any) => {
+    if (!riskData) return null;
+
+    const { risk_band, trust_score } = riskData;
+
+    // Determine colors
+    let colorClass = "text-gray-600";
+    let bgClass = "bg-gray-50";
+    let borderClass = "border-gray-200";
+    let progressColor = "#4b5563"; // gray-600
+
+    if (trust_score >= 80) {
+      colorClass = "text-emerald-600";
+      bgClass = "bg-emerald-50";
+      borderClass = "border-emerald-100";
+      progressColor = "#059669"; // emerald-600
+    } else if (trust_score >= 50) {
+      colorClass = "text-amber-600";
+      bgClass = "bg-amber-50";
+      borderClass = "border-amber-100";
+      progressColor = "#d97706"; // amber-600
+    } else {
+      colorClass = "text-rose-600";
+      bgClass = "bg-rose-50";
+      borderClass = "border-rose-100";
+      progressColor = "#e11d48"; // rose-600
+    }
+
+    // SVG Config for Circle
+    const radius = 18;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (trust_score / 100) * circumference;
+
+    return (
+      <div className={`mt-3 p-4 rounded-xl border ${borderClass} ${bgClass} flex items-center justify-between`}>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Tenant Trust Score</p>
+          <div className="flex items-center gap-2">
+            <span className={`text-2xl font-black ${colorClass}`}>
+              {trust_score}
+            </span>
+            <Badge className={`${colorClass} bg-white/80 border-0 shadow-sm backdrop-blur-sm`}>
+              {risk_band} RISK
+            </Badge>
+          </div>
+        </div>
+
+        {/* Progress Ring */}
+        <div className="relative w-12 h-12 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90">
+            {/* Background Circle */}
+            <circle
+              cx="24" cy="24" r={radius}
+              fill="transparent"
+              stroke="currentColor"
+              strokeWidth="4"
+              className="text-white/50"
+            />
+            {/* Progress Circle */}
+            <circle
+              cx="24" cy="24" r={radius}
+              fill="transparent"
+              stroke={progressColor}
+              strokeWidth="4"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+              className="transition-all duration-1000 ease-out"
+            />
+          </svg>
+        </div>
+      </div>
+    );
   }
 
   const fetchTenantPhoneNumbers = async (bookings: BookingWithProperty[]) => {
@@ -233,6 +337,12 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
                       {booking.property.address.city}, {booking.property.address.country}
                     </span>
                   </div>
+                )}
+
+                {/* Risk Score Badge */}
+                {/* Risk Score Display */}
+                {tenantRiskScores[booking.userId] && (
+                  getRiskBadge(tenantRiskScores[booking.userId])
                 )}
 
                 <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">

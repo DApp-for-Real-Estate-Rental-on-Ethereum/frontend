@@ -39,23 +39,30 @@ export function Header() {
           <nav className="hidden md:flex items-center gap-2 flex-1 justify-center">
             {/* Navigation Links - Always visible */}
             <Link href="/">
-              <Button 
-                variant="ghost" 
-                className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${
-                  isActive("/") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
-                }`}
+              <Button
+                variant="ghost"
+                className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${isActive("/") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
+                  }`}
               >
                 Home
               </Button>
             </Link>
             <Link href="/properties">
-              <Button 
-                variant="ghost" 
-                className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${
-                  isActive("/properties") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
-                }`}
+              <Button
+                variant="ghost"
+                className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${isActive("/properties") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
+                  }`}
               >
                 Properties
+              </Button>
+            </Link>
+            <Link href="/dashboard/market">
+              <Button
+                variant="ghost"
+                className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${isActive("/dashboard/market") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
+                  }`}
+              >
+                Market Trends
               </Button>
             </Link>
 
@@ -63,11 +70,10 @@ export function Header() {
               <>
                 {/* Authenticated User Links */}
                 <Link href="/my-bookings">
-                  <Button 
-                    variant="ghost" 
-                    className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${
-                      isActive("/my-bookings") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
-                    }`}
+                  <Button
+                    variant="ghost"
+                    className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${isActive("/my-bookings") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
+                      }`}
                   >
                     My Bookings
                   </Button>
@@ -77,9 +83,8 @@ export function Header() {
                   <Link href="/host-dashboard">
                     <Button
                       variant="ghost"
-                      className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${
-                        isActive("/host-dashboard") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
-                      }`}
+                      className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${isActive("/host-dashboard") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
+                        }`}
                     >
                       Host Dashboard
                     </Button>
@@ -88,11 +93,10 @@ export function Header() {
 
                 {isAdmin && (
                   <Link href="/admin">
-                    <Button 
-                      variant="ghost" 
-                      className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${
-                        isActive("/admin") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
-                      }`}
+                    <Button
+                      variant="ghost"
+                      className={`text-gray-700 hover:text-teal-600 hover:bg-teal-50 ${isActive("/admin") ? "text-teal-600 border-b-2 border-teal-600 rounded-none pb-1" : ""
+                        }`}
                     >
                       Admin Dashboard
                     </Button>
@@ -111,8 +115,8 @@ export function Header() {
             ) : (
               <>
                 {/* Guest User Links */}
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => router.push("/login")}
                   className="border-gray-300 hover:bg-gray-50"
                 >
@@ -169,8 +173,8 @@ export function Header() {
                     )}
                     <div className="text-sm hidden lg:block">
                       <p className="font-medium text-gray-900">
-                        {user?.firstName && user?.lastName 
-                          ? `${user.firstName} ${user.lastName}` 
+                        {user?.firstName && user?.lastName
+                          ? `${user.firstName} ${user.lastName}`
                           : user?.firstName || user?.email?.split("@")[0] || "User"}
                       </p>
                       <p className="text-gray-500 text-xs">
@@ -224,6 +228,13 @@ export function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Properties
+              </Link>
+              <Link
+                href="/dashboard/market"
+                className="block px-4 py-2.5 text-gray-700 hover:bg-teal-50 hover:text-teal-600 rounded-lg transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Market Trends
               </Link>
 
               {isAuthenticated ? (
@@ -315,8 +326,8 @@ export function Header() {
                     )}
                     <div>
                       <p className="font-medium text-sm">
-                        {user?.firstName && user?.lastName 
-                          ? `${user.firstName} ${user.lastName}` 
+                        {user?.firstName && user?.lastName
+                          ? `${user.firstName} ${user.lastName}`
                           : user?.firstName || user?.email?.split("@")[0] || "User"}
                       </p>
                       <p className="text-gray-500 text-xs">

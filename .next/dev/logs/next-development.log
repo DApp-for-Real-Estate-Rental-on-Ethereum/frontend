@@ -1,105 +1,112 @@
-[00:00:05.977] Server  LOG      ✓ Ready in 4.9s
-[00:00:09.078] Server  LOG      ○ Compiling /login ...
-[00:00:18.425] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:00:02.965] Server  LOG      ✓ Ready in 2.6s
+[00:00:50.207] Server  LOG      ○ Compiling / ...
+[00:00:52.776] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:26.837] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[00:00:34.416] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[00:01:17.811] Browser LOG     🔍 Fetching reclamation by bookingId and complainantId: 2200 4
-[00:01:17.811] Browser LOG     ✅ Found reclamation by bookingId: null
-[00:42:20.617] Browser WARN    Image with src "http://localhost:3000/logo1.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[00:44:31.904] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[00:47:18.331] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[00:47:18.331] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:05:29.623] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:01:26.837] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:10:21.278] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:05:29.623] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:05:32.950] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:10:21.278] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:21:03.103] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:22:06.639] Browser WARN    Image with src "http://localhost:3000/logo1.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:22:24.353] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:22:24.353] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:29:18.424] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:05:32.950] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:05:32.950] Browser WARN    Image with src "http://localhost:3000/logo1.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:07:31.755] Server  LOG      ○ Compiling /dashboard/market ...
-[01:07:36.759] Server  WARN     ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
-[01:07:39.479] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:29:18.424] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:30:45.814] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:07:39.479] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:07:39.479] Browser ERROR   Failed to fetch market trends: {}
-[01:08:54.514] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:30:45.814] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:31:04.500] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:08:54.514] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:09:40.999] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:31:04.500] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:32:11.202] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:32:11.202] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:32:35.736] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:35.736] Browser LOG     🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:35.736] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:35.736] Browser LOG     🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:35.736] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:35.736] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:35.736] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:35.736] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:35.736] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:35.736] Browser LOG     🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:35.737] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:35.737] Browser LOG     🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:35.737] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:35.737] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:35.737] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:35.737] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:38.699] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:38.699] Browser LOG     🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:38.699] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:38.699] Browser LOG     🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:38.699] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:38.699] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:38.699] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:38.699] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:47.932] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:47.932] Browser LOG     🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:47.932] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:47.933] Browser LOG     🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:47.933] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:47.933] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:47.933] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:47.933] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:48.043] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:48.043] Browser LOG     🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:48.043] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:48.043] Browser LOG     🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:48.043] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:48.043] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:48.043] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:48.043] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:48.889] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:48.889] Browser LOG     🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:48.889] Browser LOG     🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:48.889] Browser LOG     🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:32:48.889] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":1,"status":"RESOLVED","statusCheck":false,"statusType":"string","statusValue":"\"RESOLVED\""}
+[00:32:48.889] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":1,"isMyComplaints":true,"isOpen":false,"originalStatus":"RESOLVED","statusValue":"RESOLVED","willShowEdit":false}
+[00:32:48.889] Browser LOG     [2;38;2;124;124;124m%s[0m 🔍 Reclamation Debug: {"canEdit":false,"filter":"my-complaints","id":2,"status":"IN_REVIEW","statusCheck":false,"statusType":"string","statusValue":"\"IN_REVIEW\""}
+[00:32:48.889] Browser LOG     [2;38;2;124;124;124m%s[0m 🔧 Edit Button Logic: {"id":2,"isMyComplaints":true,"isOpen":false,"originalStatus":"IN_REVIEW","statusValue":"IN_REVIEW","willShowEdit":false}
+[00:33:04.671] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:33:04.671] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[00:34:47.389] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:09:41.000] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:10:09.667] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:34:47.389] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:34:56.724] Server  LOG      ○ Compiling /dashboard/market ...
+[00:34:58.935] Server  WARN     ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:35:02.023] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:10:09.667] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:14:21.454] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:35:02.023] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:44:55.921] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:14:21.454] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:15:38.834] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:15:38.834] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:15:52.953] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:44:55.922] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:45:46.648] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:15:52.953] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:19:25.548] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:45:46.648] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:47:13.850] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:19:25.548] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:19:40.025] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:47:13.850] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:49:22.909] Server  LOG      ○ Compiling /property/[id] ...
+[00:53:13.572] Browser ERROR   uncaughtError: ChunkLoadError: Loading chunk app/dashboard/market/page failed.
+(error: http://localhost:3000/_next/undefined)
+[00:56:44.516] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:56:44.516] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:19:40.025] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:19:42.318] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[00:56:44.731] Browser WARN    Image with src "http://localhost:3000/logo1.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:56:52.618] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[01:09:47.635] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:09:47.635] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:09:52.131] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:09:52.131] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:26:19.133] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:19:42.318] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:19:43.663] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+[01:26:19.133] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[01:28:38.075] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
 Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:19:43.663] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:19:43.663] Browser WARN    Image with src "http://localhost:3000/logo1.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:19:50.855] Server  LOG      ○ Compiling /property/[id] ...
-[01:29:12.622] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:29:12.622] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:30:02.373] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:30:02.373] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:30:25.590] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:30:25.590] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:31:01.972] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:31:01.972] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:31:01.972] Browser WARN    Image with src "http://localhost:3000/logo1.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:31:57.993] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:31:57.993] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:34:10.660] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:34:10.660] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:34:15.847] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:34:15.847] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:34:18.296] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:34:18.296] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:34:18.296] Browser WARN    Image with src "http://localhost:3000/logo1.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:35:08.195] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:35:08.195] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:35:15.079] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:35:15.079] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:35:15.079] Browser WARN    Image with src "http://localhost:3000/logo1.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:35:58.879] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:37:44.099] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:37:44.099] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:42:10.595] Browser WARN    Image with src "/logo.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
-[01:42:10.595] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:42:14.987] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:44:52.330] Browser WARN    Image with src "http://localhost:3000/logo1.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
-[01:49:51.041] Server  LOG      ○ Compiling /host-dashboard ...
-[01:50:14.024] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:50:14.025] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:50:23.207] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:50:23.207] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:50:44.645] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:50:44.645] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
-[01:51:18.913] Server  LOG      ○ Compiling /my-bookings ...
-[01:53:56.411] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[01:28:38.075] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[01:31:05.316] Browser WARN    Image with src "http://localhost:3000/logo.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[01:31:43.807] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:31:43.807] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.

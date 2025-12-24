@@ -1,9 +1,10 @@
 {
-  "/api/recommendations/[...path]/route": "app/api/recommendations/[...path]/route.js",
-  "/page": "app/page.js",
-  "/login/page": "app/login/page.js",
-  "/property/[id]/page": "app/property/[id]/page.js",
-  "/properties/page": "app/properties/page.js",
+  "/api/tenant-risk/[tenantId]/route": "app/api/tenant-risk/[tenantId]/route.js",
+  "/api/market-trends/[...path]/route": "app/api/market-trends/[...path]/route.js",
+  "/my-bookings/page": "app/my-bookings/page.js",
   "/host-dashboard/page": "app/host-dashboard/page.js",
-  "/my-bookings/page": "app/my-bookings/page.js"
+  "/dashboard/market/page": "app/dashboard/market/page.js",
+  "/page": "app/page.js",
+  "/property/[id]/page": "app/property/[id]/page.js",
+  "/properties/page": "app/properties/page.js"
 }

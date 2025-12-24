@@ -1,0 +1,1 @@
+{"c":["app/layout","app/page","app/login/page","app/properties/page","app/my-bookings/page","app/host-dashboard/page","app/dashboard/market/page","app/property/[id]/page","webpack"],"r":["_app-pages-browser_lib_mock-api_ts"],"m":["(app-pages-browser)/./lib/mock-api.ts","(app-pages-browser)/./lib/mock-data.ts"]}

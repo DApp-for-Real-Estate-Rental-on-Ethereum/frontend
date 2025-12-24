@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useContext, createContext } from "react"
 import type { User, UserRole } from "@/lib/types"
-import { mockUsers } from "@/lib/mock-data"
 import { apiClient } from "@/lib/services/api"
 
 const AUTH_TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_STORAGE_KEY || "derent5_auth_token"
@@ -77,17 +76,17 @@ export function useAuth(): UseAuthReturn {
     try {
       // Try real API first
       const response = await apiClient.auth.login(email, password)
-      
+
       // Store token
       const token = response.token
       localStorage.setItem("token", token)
       localStorage.setItem(AUTH_TOKEN_KEY, token)
-      
+
       // Decode JWT to get userId and roles
       const tokenParts = token.split(".")
       let userId = ""
       let roles: UserRole[] = ["USER"]
-      
+
       try {
         if (tokenParts.length === 3) {
           const payload = JSON.parse(atob(tokenParts[1].replace(/-/g, "+").replace(/_/g, "/")))
@@ -106,11 +105,11 @@ export function useAuth(): UseAuthReturn {
       } catch (decodeError) {
         console.error("Failed to decode JWT:", decodeError)
       }
-      
+
       // Fetch full user data from /api/v1/users/me
       try {
         const userData = await apiClient.users.getMe()
-        
+
         // Use roles from API if available, otherwise use roles from JWT
         let finalRoles = roles
         if (userData.roles && userData.roles.length > 0) {
@@ -121,7 +120,7 @@ export function useAuth(): UseAuthReturn {
             return r as UserRole
           })
         }
-        
+
         const fullUser: User = {
           id: userId,
           email: userData.email,
@@ -134,7 +133,7 @@ export function useAuth(): UseAuthReturn {
           verified: true, // If user can login, they are verified
           walletAddress: userData.walletAddress || undefined, // Add walletAddress from API
         }
-        
+
         localStorage.setItem("user", JSON.stringify(fullUser))
         localStorage.setItem(USER_DATA_KEY, JSON.stringify(fullUser))
         setUser(fullUser)
@@ -152,36 +151,14 @@ export function useAuth(): UseAuthReturn {
         localStorage.setItem(USER_DATA_KEY, JSON.stringify(basicUser))
         setUser(basicUser)
       }
-      
+
       setToken(token)
-      
+
       // Dispatch custom event to notify other components
       window.dispatchEvent(new Event("auth-state-changed"))
-    } catch (apiError) {
-      // Fallback to mock for development
-      let authenticatedUser: User | null = null
-
-      if (email === "admin@example.com") {
-        authenticatedUser = mockUsers.admin
-      } else if (email === "poster@example.com") {
-        authenticatedUser = mockUsers.poster
-      } else {
-        throw apiError || new Error("Invalid credentials")
-      }
-
-      const mockToken = `token-${Date.now()}`
-      localStorage.setItem("user", JSON.stringify(authenticatedUser))
-      localStorage.setItem("token", mockToken)
-      localStorage.setItem(USER_DATA_KEY, JSON.stringify(authenticatedUser))
-      localStorage.setItem(AUTH_TOKEN_KEY, mockToken)
-      localStorage.setItem("userId", authenticatedUser.id)
-      localStorage.setItem("userRoles", JSON.stringify(authenticatedUser.roles))
-
-      setUser(authenticatedUser)
-      setToken(mockToken)
-      
-      // Dispatch custom event to notify other components
-      window.dispatchEvent(new Event("auth-state-changed"))
+    } catch (apiError: any) {
+      console.error("Login failed:", apiError)
+      throw new Error(apiError.message || "Login failed")
     }
   }
 
@@ -198,7 +175,7 @@ export function useAuth(): UseAuthReturn {
     localStorage.removeItem("userRoles")
     setUser(null)
     setToken(null)
-    
+
     // Dispatch custom event to notify other components
     window.dispatchEvent(new Event("auth-state-changed"))
   }
