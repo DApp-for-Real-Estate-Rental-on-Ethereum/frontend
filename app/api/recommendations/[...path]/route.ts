@@ -7,7 +7,7 @@ export async function GET(
 ) {
     const { path } = await params;
     const pathString = path.join("/");
-    const ML_API_URL = "http://localhost:8002";
+    const ML_API_URL = process.env.AI_API_URL || "http://localhost:8002";
 
     // Capture query parameters from the original request
     const searchParams = request.nextUrl.searchParams.toString();

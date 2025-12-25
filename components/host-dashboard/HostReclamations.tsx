@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { apiClient } from "@/lib/services/api"
+import { apiClient, GATEWAY_URL } from "@/lib/services/api"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,7 +20,8 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import Image from "next/image"
 
-const RECLAMATION_API_BASE_URL = process.env.NEXT_PUBLIC_RECLAMATION_API_BASE_URL || "http://localhost:8091"
+// Use GATEWAY_URL for file access (comes from environment variables at build time)
+const RECLAMATION_API_BASE_URL = GATEWAY_URL
 
 interface HostReclamationsProps {
   ownerId: string | number
@@ -43,7 +44,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
   const [phoneNumbers, setPhoneNumbers] = useState<{ [key: number]: string | null }>({})
   const [loadingData, setLoadingData] = useState<{ [key: number]: boolean }>({})
   const [attachments, setAttachments] = useState<{ [key: number]: any[] }>({})
-  
+
   // View/Edit Dialog State
   const [viewDialogOpen, setViewDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -69,7 +70,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
         data = await apiClient.reclamations.getComplaintsAgainstMe(ownerId)
       }
       setReclamations(data || [])
-      
+
       // Fetch property and phone number data for each reclamation
       if (data && data.length > 0) {
         await fetchReclamationDetails(data)
@@ -86,12 +87,12 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
     try {
       const propertiesMap: { [key: number]: any } = {}
       const phoneNumbersMap: { [key: number]: string | null } = {}
-      
+
       await Promise.all(
         reclamations.map(async (complaint) => {
           try {
             setLoadingData((prev) => ({ ...prev, [complaint.id]: true }))
-            
+
             // Fetch booking to get propertyId
             try {
               const booking = await apiClient.bookings.getById(complaint.bookingId)
@@ -102,7 +103,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                   propertiesMap[complaint.id] = property
                 } catch (err) {
                 }
-                
+
                 // Fetch phone number - for complaints against me, get complainant phone
                 if (filter === "complaints-against-me") {
                   try {
@@ -120,7 +121,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
           }
         })
       )
-      
+
       setProperties((prev) => ({ ...prev, ...propertiesMap }))
       setPhoneNumbers((prev) => ({ ...prev, ...phoneNumbersMap }))
     } catch (err) {
@@ -169,7 +170,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
         filename = att.filePath.split('/').pop() || att.filePath
       }
       filename = filename.replace(/\\/g, '/').split('/').pop() || filename
-      
+
       // Use regular endpoint for images
       const imageUrl = `${RECLAMATION_API_BASE_URL}/api/reclamations/files/${reclamation.id}/${encodeURIComponent(filename)}`
       console.log("📸 Edit dialog - Image URL:", imageUrl, "from filePath:", att.filePath)
@@ -213,18 +214,18 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
       const existingImageCount = editImages.filter(img => !img.file && img.url).length
       const newImageFiles = editImages.filter(img => img.file).map(img => img.file!)
       const totalImages = existingImageCount + newImageFiles.length
-      
+
       // If total images exceed 3, show error
       if (totalImages > 3) {
         toast.error("Maximum 3 images allowed")
         setUpdating(false)
         return
       }
-      
+
       // If user removed all images or added new ones, send all images (new files only)
       // Backend will replace all old images with new ones
       const imagesToSend = newImageFiles.length > 0 ? newImageFiles : undefined
-      
+
       await apiClient.reclamations.update(
         selectedReclamation.id,
         ownerId,
@@ -344,7 +345,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
           const property = properties[complaint.id]
           const phoneNumber = phoneNumbers[complaint.id]
           const isLoadingDetails = loadingData[complaint.id]
-          
+
           // Debug: Log complaint data for my-complaints
           if (filter === "my-complaints") {
             console.log("🔍 Reclamation Debug:", {
@@ -357,7 +358,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
               statusValue: JSON.stringify(complaint.status)
             })
           }
-          
+
           return (
             <Card key={complaint.id} className="p-6 hover:shadow-lg transition-shadow">
               <div className="flex flex-col h-full">
@@ -367,17 +368,17 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                     <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 flex-1">{complaint.title}</h3>
                   </div>
                   {/* Status and Severity - Only for my-complaints */}
-                {filter === "my-complaints" && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {getStatusBadge(complaint.status)}
-                    {getSeverityBadge(complaint.severity)}
-                  </div>
-                )}
+                  {filter === "my-complaints" && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {getStatusBadge(complaint.status)}
+                      {getSeverityBadge(complaint.severity)}
+                    </div>
+                  )}
                 </div>
-                
+
                 {/* Description */}
                 <p className="text-gray-600 mb-4 text-sm line-clamp-3 flex-1">{complaint.description}</p>
-                
+
                 {/* Property Info - Only for my-complaints */}
                 {filter === "my-complaints" && property && (
                   <div className="mb-4 p-3 bg-gray-50 rounded-lg">
@@ -393,7 +394,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                     )}
                   </div>
                 )}
-                
+
                 {/* Phone Number - Only for complaints-against-me */}
                 {filter === "complaints-against-me" && phoneNumber && (
                   <div className="mb-4 p-3 bg-teal-50 rounded-lg">
@@ -404,7 +405,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Type - Only for my-complaints */}
                 {filter === "my-complaints" && (
                   <div className="mb-4">
@@ -412,7 +413,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                     <span className="text-xs font-medium text-gray-700">{getTypeLabel(complaint.type)}</span>
                   </div>
                 )}
-                
+
                 {/* Refund and Penalty - Only for my-complaints */}
                 {filter === "my-complaints" && (
                   <div className="mb-4 space-y-1">
@@ -428,7 +429,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                     )}
                   </div>
                 )}
-                
+
                 {/* Resolution Notes - Only for my-complaints */}
                 {filter === "my-complaints" && complaint.resolutionNotes && (
                   <div className="mb-4 p-3 bg-blue-50 rounded-lg">
@@ -436,7 +437,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                     <p className="text-xs text-blue-700">{complaint.resolutionNotes}</p>
                   </div>
                 )}
-                
+
                 {/* Actions */}
                 <div className="flex gap-2 mt-auto pt-4 border-t border-gray-200">
                   <Button
@@ -451,17 +452,17 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                   {(() => {
                     // Check if we're in my-complaints filter
                     const isMyComplaints = filter === "my-complaints"
-                    
+
                     // Get status value - handle both string and object
                     let statusValue = complaint.status
                     if (typeof statusValue === "object" && statusValue !== null) {
                       statusValue = (statusValue as any).name || (statusValue as any).value || String(statusValue)
                     }
                     statusValue = String(statusValue || "").trim().toUpperCase()
-                    
+
                     // Check if status is OPEN
                     const isOpen = statusValue === "OPEN"
-                    
+
                     // Log for debugging
                     if (isMyComplaints) {
                       console.log("🔧 Edit Button Logic:", {
@@ -473,7 +474,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                         willShowEdit: isMyComplaints && isOpen
                       })
                     }
-                    
+
                     // Show edit buttons only if: my-complaints AND status is OPEN
                     if (isMyComplaints && isOpen) {
                       return (
@@ -526,14 +527,14 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
               {filter === "my-complaints" ? "View your reclamation" : "View reclamation against you"}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedReclamation && (
             <div className="space-y-4">
               <div>
                 <Label className="text-sm font-medium text-gray-700">Title</Label>
                 <p className="text-sm text-gray-900 mt-1">{selectedReclamation.title}</p>
               </div>
-              
+
               <div>
                 <Label className="text-sm font-medium text-gray-700">Description</Label>
                 <p className="text-sm text-gray-900 whitespace-pre-wrap mt-1">{selectedReclamation.description}</p>
@@ -559,11 +560,11 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                       }
                       // Remove any backslashes (Windows paths)
                       filename = filename.replace(/\\/g, '/').split('/').pop() || filename
-                      
+
                       // Try regular endpoint first, fallback to admin endpoint
                       const imageUrl = `${RECLAMATION_API_BASE_URL}/api/reclamations/files/${selectedReclamation.id}/${encodeURIComponent(filename)}`
                       console.log("🖼️ Image URL:", imageUrl, "from filePath:", attachment.filePath, "filename:", filename)
-                      
+
                       return (
                         <div key={attachment.id || index} className="relative">
                           <img
@@ -618,7 +619,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
               Update title, description, and images. Only OPEN reclamations can be edited.
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedReclamation && (
             <div className="space-y-4">
               <div>
@@ -630,7 +631,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                   placeholder="Enter reclamation title"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="edit-description">Description *</Label>
                 <Textarea

@@ -167,7 +167,9 @@ export default function PropertyDetailPage() {
                 try {
                     const userIdNum = parseInt(user.id)
                     if (!isNaN(userIdNum)) {
-                        const BOOKING_API_BASE_URL = process.env.NEXT_PUBLIC_BOOKING_API_BASE_URL || "http://localhost:8083"
+                        const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8090";
+                        const USE_GATEWAY = process.env.NEXT_PUBLIC_USE_GATEWAY !== "false";
+                        const BOOKING_API_BASE_URL = USE_GATEWAY ? GATEWAY_URL : (process.env.NEXT_PUBLIC_BOOKING_API_BASE_URL || "http://localhost:8083");
                         await fetch(`${BOOKING_API_BASE_URL}/api/bookings/init`, {
                             method: "POST",
                             headers: {

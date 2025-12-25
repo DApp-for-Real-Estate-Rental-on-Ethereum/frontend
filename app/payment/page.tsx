@@ -15,9 +15,27 @@ import { toast } from "sonner"
 const HARDHAT_CHAIN_ID = "0x7a69"
 const ARBITRUM_ONE_CHAIN_ID = "0xa4b1"
 
+// MAD to ETH conversion rate (1 ETH ≈ 35,000 MAD)
+const MAD_TO_ETH_RATE = 35000
+
+// Helper function to convert MAD to ETH
+function madToEth(madAmount: number): number {
+  return madAmount / MAD_TO_ETH_RATE
+}
+
+// Helper function to format MAD amount
+function formatMad(amount: number): string {
+  return `${amount.toLocaleString('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MAD`
+}
+
+// Helper function to format ETH amount
+function formatEth(amount: number): string {
+  return `${amount.toFixed(6)} ETH`
+}
+
 declare global {
   interface Window {
-    ethereum?: any
+    ethereum?: EthereumProvider | undefined
   }
 }
 
@@ -262,12 +280,12 @@ export default function PaymentPage() {
     if (!bookingDetails.ownerWalletAddress || bookingDetails.ownerWalletAddress === "N/A") return false
     if (!networkName || networkName === "Not connected") return false
     if (!isCorrectNetwork) return false
-    const totalPrice = bookingDetails.totalPrice || 0
-    if (!totalPrice || totalPrice <= 0) return false
+    const totalPriceMadVal = bookingDetails.totalPrice || 0
+    if (!totalPriceMadVal || totalPriceMadVal <= 0) return false
     if (gasEstimate === null || gasEstimate === undefined) return false
     if (walletBalance === null || walletBalance === undefined) return false
-    const totalNeeded = totalPrice + gasEstimate
-    if (walletBalance < totalNeeded) return false
+    const totalNeededEth = madToEth(totalPriceMadVal) + gasEstimate
+    if (walletBalance < totalNeededEth) return false
     if (typeof window === "undefined" || !window.ethereum) return false
     return true
   }
@@ -415,7 +433,7 @@ export default function PaymentPage() {
         data: txData,
         gasLimit: gasEstimate + (gasEstimate / BigInt(10)), // Add 10% buffer
       }
-      
+
       console.log(`📤 Sending transaction: to=${intentData.to}, value=${valueBigNumber.toString()}, gasLimit=${txRequest.gasLimit.toString()}`)
       toast.info("Sending transaction... Please confirm in MetaMask.")
       const tx = await signer.sendTransaction(txRequest)
@@ -446,7 +464,7 @@ export default function PaymentPage() {
         // Internal JSON-RPC error - provide more specific error message
         const errorDetails = e.data || e.error || {}
         const rpcError = errorDetails.message || errorDetails.error || e.message || "Unknown error"
-        
+
         if (rpcError.includes("execution reverted") || rpcError.includes("revert")) {
           errorMessage = `Transaction reverted by contract. Possible reasons:\n- Booking already exists\n- Incorrect payment amount\n- Invalid wallet address\n- Contract validation failed\n\nDetails: ${rpcError}`
         } else if (rpcError.includes("gas") || rpcError.includes("out of gas")) {
@@ -456,7 +474,7 @@ export default function PaymentPage() {
         } else {
           errorMessage = `Internal JSON-RPC error. This might be due to:\n- Insufficient balance\n- Invalid contract address\n- Network mismatch\n- Invalid transaction data\n- Contract execution error\n\nDetails: ${rpcError}`
         }
-        
+
         console.error("❌ JSON-RPC Error Details:", {
           code: e.code,
           message: e.message,
@@ -516,13 +534,16 @@ export default function PaymentPage() {
     )
   }
 
-  const totalPrice = bookingDetails?.totalPrice || 0
+  const totalPriceMad = bookingDetails?.totalPrice || 0
+  const propertyPriceMad = bookingDetails?.propertyPrice || 0
+  const totalPriceEth = madToEth(totalPriceMad)
+  const propertyPriceEth = madToEth(propertyPriceMad)
   const nights =
     bookingDetails?.checkInDate && bookingDetails?.checkOutDate
       ? Math.ceil(
-          (new Date(bookingDetails.checkOutDate).getTime() - new Date(bookingDetails.checkInDate).getTime()) /
-            (1000 * 60 * 60 * 24)
-        )
+        (new Date(bookingDetails.checkOutDate).getTime() - new Date(bookingDetails.checkInDate).getTime()) /
+        (1000 * 60 * 60 * 24)
+      )
       : 0
 
   const currentWalletAddress = walletAddress || bookingDetails?.userWalletAddress
@@ -570,28 +591,27 @@ export default function PaymentPage() {
                           <Input
                             value={currentWalletAddress}
                             readOnly
-                            className={`mt-1 font-mono text-sm ${
-                              bookingDetails?.userWalletAddress &&
-                              currentWalletAddress?.toLowerCase() !==
+                            className={`mt-1 font-mono text-sm ${bookingDetails?.userWalletAddress &&
+                                currentWalletAddress?.toLowerCase() !==
                                 bookingDetails.userWalletAddress.toLowerCase()
                                 ? bookingDetails.ownerWalletAddress &&
                                   currentWalletAddress?.toLowerCase() ===
-                                    bookingDetails.ownerWalletAddress.toLowerCase()
+                                  bookingDetails.ownerWalletAddress.toLowerCase()
                                   ? "border-red-500 bg-red-50"
                                   : "border-yellow-500 bg-yellow-50"
                                 : "border-green-500 bg-green-50"
-                            }`}
+                              }`}
                           />
                           {bookingDetails?.userWalletAddress &&
                             currentWalletAddress?.toLowerCase() ===
-                              bookingDetails.userWalletAddress.toLowerCase() && (
+                            bookingDetails.userWalletAddress.toLowerCase() && (
                               <p className="text-xs text-green-700 mt-1">
                                 ✅ Correct tenant wallet connected
                               </p>
                             )}
                           {bookingDetails?.ownerWalletAddress &&
                             currentWalletAddress?.toLowerCase() ===
-                              bookingDetails.ownerWalletAddress.toLowerCase() && (
+                            bookingDetails.ownerWalletAddress.toLowerCase() && (
                               <p className="text-xs text-red-700 mt-1 font-semibold">
                                 ❌ ERROR: You are connected with the HOST&apos;s wallet! Please
                                 switch to the tenant wallet above.
@@ -600,9 +620,9 @@ export default function PaymentPage() {
                           {bookingDetails?.userWalletAddress &&
                             bookingDetails?.ownerWalletAddress &&
                             currentWalletAddress?.toLowerCase() !==
-                              bookingDetails.userWalletAddress.toLowerCase() &&
+                            bookingDetails.userWalletAddress.toLowerCase() &&
                             currentWalletAddress?.toLowerCase() !==
-                              bookingDetails.ownerWalletAddress.toLowerCase() && (
+                            bookingDetails.ownerWalletAddress.toLowerCase() && (
                               <p className="text-xs text-yellow-700 mt-1">
                                 ⚠️ WARNING: This wallet doesn&apos;t match the required tenant
                                 wallet. Payment will be deducted from this wallet.
@@ -639,16 +659,18 @@ export default function PaymentPage() {
                         </div>
 
                         <div>
-                          <Label className="text-sm font-medium text-gray-700">Amount in ETH</Label>
-                          <Input
-                            value={
-                              totalPrice > 0
-                                ? `${totalPrice.toFixed(6)} ETH`
-                                : "0.000000 ETH"
-                            }
-                            readOnly
-                            className="mt-1"
-                          />
+                          <Label className="text-sm font-medium text-gray-700">Amount</Label>
+                          <div className="mt-1 p-3 bg-gray-50 rounded-md border">
+                            <p className="text-lg font-semibold text-gray-900">
+                              {formatMad(totalPriceMad)}
+                            </p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              ≈ {formatEth(totalPriceEth)}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              Rate: 1 ETH = {MAD_TO_ETH_RATE.toLocaleString()} MAD
+                            </p>
+                          </div>
                         </div>
 
                         <div>
@@ -662,32 +684,30 @@ export default function PaymentPage() {
                                 : "Checking..."
                             }
                             readOnly
-                            className={`mt-1 ${
-                              walletBalance !== null &&
-                              totalPrice > 0 &&
-                              walletBalance < totalPrice + gasEstimate
+                            className={`mt-1 ${walletBalance !== null &&
+                                totalPriceEth > 0 &&
+                                walletBalance < totalPriceEth + gasEstimate
                                 ? "border-red-500"
                                 : ""
-                            }`}
+                              }`}
                           />
                           {walletBalance === null && (
                             <p className="text-xs text-gray-500 mt-1">
                               ⏳ Loading balance...
                             </p>
                           )}
-                          {walletBalance !== null && totalPrice > 0 && (
+                          {walletBalance !== null && totalPriceEth > 0 && (
                             <p
-                              className={`text-xs mt-1 ${
-                                walletBalance >= totalPrice + gasEstimate
+                              className={`text-xs mt-1 ${walletBalance >= totalPriceEth + gasEstimate
                                   ? "text-green-600"
                                   : "text-red-600"
-                              }`}
+                                }`}
                             >
-                              {walletBalance >= totalPrice + gasEstimate
+                              {walletBalance >= totalPriceEth + gasEstimate
                                 ? "✓ Sufficient balance"
-                                : `✗ Insufficient balance. You need ${(totalPrice + gasEstimate).toFixed(
-                                    6
-                                  )} ETH`}
+                                : `✗ Insufficient balance. You need ${(totalPriceEth + gasEstimate).toFixed(
+                                  6
+                                )} ETH`}
                             </p>
                           )}
                         </div>
@@ -774,8 +794,8 @@ export default function PaymentPage() {
                           )}
                           {(!bookingDetails?.ownerWalletAddress ||
                             bookingDetails?.ownerWalletAddress === "N/A") && (
-                            <li>• Property owner wallet address is missing</li>
-                          )}
+                              <li>• Property owner wallet address is missing</li>
+                            )}
                           {(!networkName || networkName === "Not connected") && (
                             <li>• Connect to a supported network</li>
                           )}
@@ -784,23 +804,23 @@ export default function PaymentPage() {
                           )}
                           {(!bookingDetails?.totalPrice ||
                             bookingDetails.totalPrice <= 0) && (
-                            <li>• Booking price is invalid</li>
-                          )}
+                              <li>• Booking price is invalid</li>
+                            )}
                           {(gasEstimate === null || gasEstimate === undefined) && (
                             <li>• Gas estimate is being calculated</li>
                           )}
                           {(walletBalance === null ||
                             walletBalance === undefined) && (
-                            <li>• Wallet balance is being checked</li>
-                          )}
+                              <li>• Wallet balance is being checked</li>
+                            )}
                           {walletBalance !== null &&
                             walletBalance !== undefined &&
                             bookingDetails &&
                             bookingDetails.totalPrice > 0 &&
-                            walletBalance < bookingDetails.totalPrice + gasEstimate && (
+                            walletBalance < madToEth(bookingDetails.totalPrice) + gasEstimate && (
                               <li>
                                 • Insufficient balance. You need{" "}
-                                {(bookingDetails.totalPrice + gasEstimate).toFixed(6)} ETH
+                                {(madToEth(bookingDetails.totalPrice) + gasEstimate).toFixed(6)} ETH (≈ {formatMad(bookingDetails.totalPrice)})
                               </li>
                             )}
                           {!hasEthereum && (
@@ -844,7 +864,7 @@ export default function PaymentPage() {
                         if (
                           walletBalance !== null &&
                           bookingDetails &&
-                          walletBalance < bookingDetails.totalPrice + gasEstimate
+                          walletBalance < madToEth(bookingDetails.totalPrice) + gasEstimate
                         )
                           reasons.push("Insufficient balance")
                         if (!hasEthereum) reasons.push("MetaMask not installed")
@@ -894,10 +914,10 @@ export default function PaymentPage() {
                       <p className="text-base text-gray-900">
                         {bookingDetails.checkInDate
                           ? new Date(bookingDetails.checkInDate).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })
                           : "N/A"}
                       </p>
                     </div>
@@ -910,10 +930,10 @@ export default function PaymentPage() {
                       <p className="text-base text-gray-900">
                         {bookingDetails.checkOutDate
                           ? new Date(bookingDetails.checkOutDate).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })
                           : "N/A"}
                       </p>
                     </div>
@@ -935,20 +955,31 @@ export default function PaymentPage() {
                 <div className="border-t pt-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Price details</h3>
                   <div className="space-y-3">
-                    {nights > 0 && bookingDetails.propertyPrice > 0 && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">
-                          {nights} {nights === 1 ? "night" : "nights"} ×{" "}
-                          {bookingDetails.propertyPrice.toFixed(6)} ETH
-                        </span>
-                        <span className="text-gray-900">
-                          {(bookingDetails.propertyPrice * nights).toFixed(6)} ETH
-                        </span>
+                    {nights > 0 && propertyPriceMad > 0 && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">
+                            {nights} {nights === 1 ? "night" : "nights"} × {formatMad(propertyPriceMad)}
+                          </span>
+                          <span className="text-gray-900">
+                            {formatMad(propertyPriceMad * nights)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>≈ {formatEth(propertyPriceEth)} per night</span>
+                          <span>≈ {formatEth(propertyPriceEth * nights)}</span>
+                        </div>
                       </div>
                     )}
-                    <div className="flex justify-between text-base font-semibold pt-3 border-t">
-                      <span className="text-gray-900">Total</span>
-                      <span className="text-gray-900">{totalPrice.toFixed(6)} ETH</span>
+                    <div className="pt-3 border-t space-y-1">
+                      <div className="flex justify-between text-base font-semibold">
+                        <span className="text-gray-900">Total</span>
+                        <span className="text-gray-900">{formatMad(totalPriceMad)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-teal-600">
+                        <span>ETH equivalent</span>
+                        <span className="font-medium">≈ {formatEth(totalPriceEth)}</span>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Configuration for the ML Service
-const ML_SERVICE_URL = "http://localhost:8002";
+const ML_SERVICE_URL = process.env.AI_API_URL || "http://localhost:8002";
 
 export async function GET(
     request: NextRequest,

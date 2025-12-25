@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { apiClient } from "@/lib/services/api"
+import { apiClient, GATEWAY_URL } from "@/lib/services/api"
 
-// Get reclamation API base URL from environment
-const RECLAMATION_API_BASE_URL = process.env.NEXT_PUBLIC_RECLAMATION_API_BASE_URL || "http://localhost:8091"
+// Use GATEWAY_URL for file access (comes from environment variables at build time)
+const RECLAMATION_API_BASE_URL = GATEWAY_URL
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -26,12 +26,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { 
-  Loader2, 
-  Eye, 
-  Search, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Loader2,
+  Eye,
+  Search,
+  CheckCircle,
+  XCircle,
   AlertCircle,
   FileText,
   Clock,
@@ -107,7 +107,7 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
       setError("")
 
       let data: Reclamation[] = []
-      
+
       if (filter === "open-reclamations") {
         data = await apiClient.adminReclamations.getByStatus("OPEN")
       } else if (filter === "in-review-reclamations") {
@@ -595,13 +595,12 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-medium">{getTypeLabel(reclamation.type)}</span>
-                        <Badge 
-                          variant="outline" 
-                          className={`text-xs ${
-                            reclamation.complainantRole === "GUEST" 
-                              ? "border-blue-500 text-blue-700 bg-blue-50" 
-                              : "border-purple-500 text-purple-700 bg-purple-50"
-                          }`}
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${reclamation.complainantRole === "GUEST"
+                            ? "border-blue-500 text-blue-700 bg-blue-50"
+                            : "border-purple-500 text-purple-700 bg-purple-50"
+                            }`}
                         >
                           {reclamation.complainantRole}
                         </Badge>
@@ -634,14 +633,14 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                     </TableCell>
                     <TableCell>
                       {reclamation.penaltyPoints !== undefined && reclamation.penaltyPoints !== null ? (
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={
-                            reclamation.penaltyPoints >= 15 
-                              ? "border-red-500 text-red-700 bg-red-50" 
+                            reclamation.penaltyPoints >= 15
+                              ? "border-red-500 text-red-700 bg-red-50"
                               : reclamation.penaltyPoints >= 10
-                              ? "border-orange-500 text-orange-700 bg-orange-50"
-                              : ""
+                                ? "border-orange-500 text-orange-700 bg-orange-50"
+                                : ""
                           }
                         >
                           {reclamation.penaltyPoints} pts
@@ -671,34 +670,34 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
-                        
+
                         {/* Actions for OPEN status */}
                         {reclamation.status === "OPEN" && (
                           <>
                             {/* Severity Button - Only for types that need severity */}
-                            {reclamation.type !== "ACCESS_ISSUE" && 
-                             reclamation.type !== "NOT_AS_DESCRIBED" && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedReclamation(reclamation)
-                                  setSeverityDialogOpen(true)
-                                  setSelectedSeverity(reclamation.severity)
-                                }}
-                                disabled={actionLoading[`severity-${reclamation.id}`]}
-                                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-300"
-                                title="Update Severity"
-                              >
-                                {actionLoading[`severity-${reclamation.id}`] ? (
-                                  <Loader2 className="w-4 h-4 animate-spin mr-1" />
-                                ) : (
-                                  <AlertCircle className="w-4 h-4 mr-1" />
-                                )}
-                                <span className="text-xs">Severity</span>
-                              </Button>
-                            )}
-                            
+                            {reclamation.type !== "ACCESS_ISSUE" &&
+                              reclamation.type !== "NOT_AS_DESCRIBED" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedReclamation(reclamation)
+                                    setSeverityDialogOpen(true)
+                                    setSelectedSeverity(reclamation.severity)
+                                  }}
+                                  disabled={actionLoading[`severity-${reclamation.id}`]}
+                                  className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-300"
+                                  title="Update Severity"
+                                >
+                                  {actionLoading[`severity-${reclamation.id}`] ? (
+                                    <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                                  ) : (
+                                    <AlertCircle className="w-4 h-4 mr-1" />
+                                  )}
+                                  <span className="text-xs">Severity</span>
+                                </Button>
+                              )}
+
                             {/* Review Button - Available for all OPEN reclamations */}
                             <Button
                               variant="outline"
@@ -717,34 +716,34 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                             </Button>
                           </>
                         )}
-                        
+
                         {/* Actions for IN_REVIEW status */}
                         {reclamation.status === "IN_REVIEW" && (
                           <>
                             {/* Severity Button - Also available in IN_REVIEW for types that need it */}
-                            {reclamation.type !== "ACCESS_ISSUE" && 
-                             reclamation.type !== "NOT_AS_DESCRIBED" && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedReclamation(reclamation)
-                                  setSeverityDialogOpen(true)
-                                  setSelectedSeverity(reclamation.severity)
-                                }}
-                                disabled={actionLoading[`severity-${reclamation.id}`]}
-                                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-300"
-                                title="Update Severity"
-                              >
-                                {actionLoading[`severity-${reclamation.id}`] ? (
-                                  <Loader2 className="w-4 h-4 animate-spin mr-1" />
-                                ) : (
-                                  <AlertCircle className="w-4 h-4 mr-1" />
-                                )}
-                                <span className="text-xs">Severity</span>
-                              </Button>
-                            )}
-                            
+                            {reclamation.type !== "ACCESS_ISSUE" &&
+                              reclamation.type !== "NOT_AS_DESCRIBED" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedReclamation(reclamation)
+                                    setSeverityDialogOpen(true)
+                                    setSelectedSeverity(reclamation.severity)
+                                  }}
+                                  disabled={actionLoading[`severity-${reclamation.id}`]}
+                                  className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-300"
+                                  title="Update Severity"
+                                >
+                                  {actionLoading[`severity-${reclamation.id}`] ? (
+                                    <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                                  ) : (
+                                    <AlertCircle className="w-4 h-4 mr-1" />
+                                  )}
+                                  <span className="text-xs">Severity</span>
+                                </Button>
+                              )}
+
                             <Button
                               variant="outline"
                               size="sm"
@@ -929,13 +928,12 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
               {selectedReclamation.penaltyPoints !== undefined && selectedReclamation.penaltyPoints !== null && (
                 <div>
                   <label className="text-sm font-medium text-gray-700">Penalty Points</label>
-                  <p className={`text-sm font-semibold ${
-                    selectedReclamation.penaltyPoints >= 15 
-                      ? "text-red-600" 
-                      : selectedReclamation.penaltyPoints >= 10
+                  <p className={`text-sm font-semibold ${selectedReclamation.penaltyPoints >= 15
+                    ? "text-red-600"
+                    : selectedReclamation.penaltyPoints >= 10
                       ? "text-orange-600"
                       : "text-red-600"
-                  }`}>
+                    }`}>
                     {selectedReclamation.penaltyPoints} points
                   </p>
                   {selectedReclamation.penaltyPoints >= 15 && (
@@ -953,27 +951,27 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                   </p>
                 </div>
               )}
-              
+
               {/* Action Buttons for OPEN and IN_REVIEW status */}
               {(selectedReclamation.status === "OPEN" || selectedReclamation.status === "IN_REVIEW") && (
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
                   {/* Severity Button - Only for types that need severity */}
-                  {selectedReclamation.type !== "ACCESS_ISSUE" && 
-                   selectedReclamation.type !== "NOT_AS_DESCRIBED" && (
-                    <Button
-                      onClick={() => {
-                        setViewDialogOpen(false)
-                        setSeverityDialogOpen(true)
-                        setSelectedSeverity(selectedReclamation.severity)
-                      }}
-                      variant="outline"
-                      className="border-orange-300 text-orange-600 hover:bg-orange-50"
-                    >
-                      <AlertCircle className="w-4 h-4 mr-2" />
-                      Update Severity
-                    </Button>
-                  )}
-                  
+                  {selectedReclamation.type !== "ACCESS_ISSUE" &&
+                    selectedReclamation.type !== "NOT_AS_DESCRIBED" && (
+                      <Button
+                        onClick={() => {
+                          setViewDialogOpen(false)
+                          setSeverityDialogOpen(true)
+                          setSelectedSeverity(selectedReclamation.severity)
+                        }}
+                        variant="outline"
+                        className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                      >
+                        <AlertCircle className="w-4 h-4 mr-2" />
+                        Update Severity
+                      </Button>
+                    )}
+
                   {/* Review Button - Only for OPEN status */}
                   {selectedReclamation.status === "OPEN" && (
                     <Button
@@ -993,7 +991,7 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                       Move to Review
                     </Button>
                   )}
-                  
+
                   {/* Approve/Reject Buttons - Only for IN_REVIEW status */}
                   {selectedReclamation.status === "IN_REVIEW" && (
                     <>
@@ -1045,13 +1043,13 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                       }
                       // Remove any backslashes (Windows paths)
                       filename = filename.replace(/\\/g, '/').split('/').pop() || filename
-                      
+
                       const imageUrl = `${RECLAMATION_API_BASE_URL}/api/admin/reclamations/files/${selectedReclamation.id}/${encodeURIComponent(filename)}`
                       console.log("🖼️ Image URL:", imageUrl, "from filePath:", attachment.filePath)
                       return (
                         <div key={attachment.id || index} className="relative group">
                           <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50 hover:shadow-md transition-shadow">
-                            <div 
+                            <div
                               className="relative cursor-pointer"
                               onClick={() => window.open(imageUrl, '_blank')}
                               title="Click to view full size"
@@ -1106,8 +1104,8 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
           <DialogHeader>
             <DialogTitle>Update Severity</DialogTitle>
             <DialogDescription>
-              {selectedReclamation && 
-               (selectedReclamation.type === "ACCESS_ISSUE" || selectedReclamation.type === "NOT_AS_DESCRIBED") ? (
+              {selectedReclamation &&
+                (selectedReclamation.type === "ACCESS_ISSUE" || selectedReclamation.type === "NOT_AS_DESCRIBED") ? (
                 <span className="text-red-600 font-semibold">
                   ⚠️ Severity cannot be changed for {getTypeLabel(selectedReclamation.type)} - these types have fixed penalties
                 </span>
@@ -1116,8 +1114,8 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
               )}
             </DialogDescription>
           </DialogHeader>
-          {selectedReclamation && 
-           (selectedReclamation.type === "ACCESS_ISSUE" || selectedReclamation.type === "NOT_AS_DESCRIBED") ? (
+          {selectedReclamation &&
+            (selectedReclamation.type === "ACCESS_ISSUE" || selectedReclamation.type === "NOT_AS_DESCRIBED") ? (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
                 This reclamation type ({getTypeLabel(selectedReclamation.type)}) has a fixed penalty:
@@ -1130,45 +1128,45 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
               </p>
             </div>
           ) : (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700">Severity</label>
-              <Select
-                value={selectedSeverity}
-                onValueChange={(value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL") =>
-                  setSelectedSeverity(value)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="LOW">LOW</SelectItem>
-                  <SelectItem value="MEDIUM">MEDIUM</SelectItem>
-                  <SelectItem value="HIGH">HIGH</SelectItem>
-                  <SelectItem value="CRITICAL">CRITICAL</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Severity</label>
+                <Select
+                  value={selectedSeverity}
+                  onValueChange={(value: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL") =>
+                    setSelectedSeverity(value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LOW">LOW</SelectItem>
+                    <SelectItem value="MEDIUM">MEDIUM</SelectItem>
+                    <SelectItem value="HIGH">HIGH</SelectItem>
+                    <SelectItem value="CRITICAL">CRITICAL</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setSeverityDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleUpdateSeverity}
+                  disabled={actionLoading[`severity-${selectedReclamation?.id}`]}
+                >
+                  {actionLoading[`severity-${selectedReclamation?.id}`] ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    "Update"
+                  )}
+                </Button>
+              </div>
             </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setSeverityDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleUpdateSeverity}
-                disabled={actionLoading[`severity-${selectedReclamation?.id}`]}
-              >
-                {actionLoading[`severity-${selectedReclamation?.id}`] ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Update"
-                )}
-              </Button>
-            </div>
-          </div>
           )}
         </DialogContent>
       </Dialog>
@@ -1189,8 +1187,8 @@ export function ReclamationsManagement({ filter }: ReclamationsManagementProps) 
                 <div>
                   <p className="text-sm font-semibold text-yellow-900">Penalty Preview</p>
                   <p className="text-xs text-yellow-700 mt-1">
-                    Type: <strong>{getTypeLabel(selectedReclamation.type)}</strong> | 
-                    Severity: <strong>{selectedReclamation.severity}</strong> | 
+                    Type: <strong>{getTypeLabel(selectedReclamation.type)}</strong> |
+                    Severity: <strong>{selectedReclamation.severity}</strong> |
                     Role: <strong>{selectedReclamation.complainantRole}</strong>
                   </p>
                   {(() => {

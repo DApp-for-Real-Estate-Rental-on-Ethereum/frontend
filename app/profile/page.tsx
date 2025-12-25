@@ -26,7 +26,7 @@ export default function ProfilePage() {
     walletAddress: "",
     profilePicture: "",
   })
-  
+
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
@@ -53,7 +53,7 @@ export default function ProfilePage() {
       try {
         setIsLoading(true)
         const userData = await apiClient.users.getMe()
-        
+
         // Check if walletAddress is null, undefined, or empty string
         let walletAddress: string | null = userData.walletAddress || null
         if (walletAddress !== null && walletAddress !== undefined) {
@@ -70,7 +70,7 @@ export default function ProfilePage() {
           birthday: userData.birthday || "",
           walletAddress: walletAddress || "",
           profilePicture: userData.profilePicture || "",
-  })
+        })
       } catch (err) {
         // Use data from auth context as fallback
         setProfile({
@@ -134,9 +134,9 @@ export default function ProfilePage() {
       }
 
       await apiClient.users.updateMe(updateData)
-      
+
       setSuccessMessage("Profile updated successfully!")
-      
+
       // Reload user data
       const userData = await apiClient.users.getMe()
       setProfile((prev) => ({
@@ -165,10 +165,10 @@ export default function ProfilePage() {
     try {
       const result = await apiClient.users.updateProfilePicture(file)
       const newProfilePictureUrl = result.url
-      
+
       // Update local profile state
       setProfile((prev) => ({ ...prev, profilePicture: newProfilePictureUrl }))
-      
+
       // Fetch updated user data to ensure consistency
       try {
         const userData = await apiClient.users.getMe()
@@ -189,7 +189,7 @@ export default function ProfilePage() {
         localStorage.setItem("derent5_user_data", JSON.stringify(updatedUser))
         window.dispatchEvent(new Event("auth-state-changed"))
       }
-      
+
       setSuccessMessage("Profile picture updated successfully!")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update profile picture. Please try again.")
@@ -212,7 +212,7 @@ export default function ProfilePage() {
     try {
       await apiClient.users.deleteProfilePicture()
       setProfile((prev) => ({ ...prev, profilePicture: "" }))
-      
+
       // Update user object in localStorage and auth context
       const updatedUser = {
         ...user,
@@ -221,7 +221,7 @@ export default function ProfilePage() {
       localStorage.setItem("user", JSON.stringify(updatedUser))
       localStorage.setItem("derent5_user_data", JSON.stringify(updatedUser))
       window.dispatchEvent(new Event("auth-state-changed"))
-      
+
       setSuccessMessage("Profile picture deleted successfully!")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete profile picture. Please try again.")
@@ -362,11 +362,11 @@ export default function ProfilePage() {
                         }
                         // Profile pictures are stored in user-service (port 8082)
                         if (url.startsWith("/profile-pictures") || url.startsWith("/user-images")) {
-                          return `http://localhost:8082${url}`
+                          return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
                         }
                         // If it's a relative path starting with /, assume it's from user-service
                         if (url.startsWith("/")) {
-                          return `http://localhost:8082${url}`
+                          return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
                         }
                         return url
                       })()}
@@ -480,8 +480,8 @@ export default function ProfilePage() {
                 />
               </div>
             </div>
-            <Button 
-              onClick={handleSaveChanges} 
+            <Button
+              onClick={handleSaveChanges}
               className="mt-6 bg-teal-600 hover:bg-teal-700"
               disabled={isSaving}
             >
@@ -531,8 +531,8 @@ export default function ProfilePage() {
                 <p className="text-sm text-gray-600 mb-4">
                   Connect your MetaMask wallet to enable cryptocurrency payments
                 </p>
-                <Button 
-                  onClick={handleConnectWallet} 
+                <Button
+                  onClick={handleConnectWallet}
                   className="bg-teal-600 hover:bg-teal-700"
                   disabled={isSaving}
                 >
@@ -540,17 +540,17 @@ export default function ProfilePage() {
                 </Button>
               </div>
             ) : (
-            <div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Wallet Address</label>
                 <div className="flex items-center gap-3 mb-4">
-              <input
-                type="text"
+                  <input
+                    type="text"
                     value={profile.walletAddress}
                     readOnly
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
                   />
-                  <Button 
-                    onClick={handleDisconnectWallet} 
+                  <Button
+                    onClick={handleDisconnectWallet}
                     variant="outline"
                     className="border-red-600 text-red-600 hover:bg-red-50"
                     disabled={isSaving}
@@ -561,7 +561,7 @@ export default function ProfilePage() {
                 <p className="text-sm text-gray-500">
                   Your wallet is connected. You can use it for cryptocurrency payments.
                 </p>
-            </div>
+              </div>
             )}
           </Card>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, JSX } from "react"
 import { apiClient } from "@/lib/services/api"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -81,12 +81,12 @@ export function UsersManagement({ filter }: UsersManagementProps) {
     if (filter === "admins") {
       filtered = filtered.filter((u) => u.roles?.includes("ADMIN"))
     } else if (filter === "hosts") {
-      filtered = filtered.filter((u) => 
+      filtered = filtered.filter((u) =>
         u.roles?.includes("HOST") || u.roles?.includes("POSTER")
       )
     } else if (filter === "tenants") {
-      filtered = filtered.filter((u) => 
-        u.roles?.includes("TENANT") || u.roles?.includes("USER") || 
+      filtered = filtered.filter((u) =>
+        u.roles?.includes("TENANT") || u.roles?.includes("USER") ||
         (!u.roles?.includes("ADMIN") && !u.roles?.includes("HOST") && !u.roles?.includes("POSTER"))
       )
     } else if (filter === "disabled") {
@@ -170,7 +170,7 @@ export function UsersManagement({ filter }: UsersManagementProps) {
     try {
       setActionLoading({ ...actionLoading, [userId]: true })
       setError("")
-      
+
       switch (action) {
         case "enable":
           await apiClient.users.enableUser(userId)
@@ -191,7 +191,7 @@ export function UsersManagement({ filter }: UsersManagementProps) {
           await apiClient.users.removeHostRole(userId)
           break
       }
-      
+
       // Refresh users list
       await fetchUsers()
       setConfirmDialog({ open: false, userId: null, action: null, message: "" })
@@ -379,77 +379,77 @@ export function UsersManagement({ filter }: UsersManagementProps) {
                 filteredUsers
                   .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                   .map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {user.profilePicture ? (
-                          <Image
-                            src={(() => {
-                              const url = user.profilePicture
-                              if (!url) return "/placeholder.jpg"
-                              if (url.startsWith("http://") || url.startsWith("https://")) {
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {user.profilePicture ? (
+                            <Image
+                              src={(() => {
+                                const url = user.profilePicture
+                                if (!url) return "/placeholder.jpg"
+                                if (url.startsWith("http://") || url.startsWith("https://")) {
+                                  return url
+                                }
+                                // Profile pictures are stored in user-service (port 8082)
+                                if (url.startsWith("/profile-pictures") || url.startsWith("/user-images")) {
+                                  return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
+                                }
+                                // If it's a relative path starting with /, assume it's from user-service
+                                if (url.startsWith("/")) {
+                                  return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
+                                }
                                 return url
-                              }
-                              // Profile pictures are stored in user-service (port 8082)
-                              if (url.startsWith("/profile-pictures") || url.startsWith("/user-images")) {
-                                return `http://localhost:8082${url}`
-                              }
-                              // If it's a relative path starting with /, assume it's from user-service
-                              if (url.startsWith("/")) {
-                                return `http://localhost:8082${url}`
-                              }
-                              return url
-                            })()}
-                            alt={`${user.firstName} ${user.lastName}`}
-                            width={40}
-                            height={40}
-                            className="rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <User className="w-5 h-5 text-gray-400" />
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-medium">
-                            {user.firstName} {user.lastName}
-                          </p>
-                          {user.birthday && (
-                            <p className="text-sm text-gray-500">
-                              {new Date(user.birthday).toLocaleDateString()}
-                            </p>
+                              })()}
+                              alt={`${user.firstName} ${user.lastName}`}
+                              width={40}
+                              height={40}
+                              className="rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                              <User className="w-5 h-5 text-gray-400" />
+                            </div>
                           )}
+                          <div>
+                            <p className="font-medium">
+                              {user.firstName} {user.lastName}
+                            </p>
+                            {user.birthday && (
+                              <p className="text-sm text-gray-500">
+                                {new Date(user.birthday).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <p className="text-sm">{user.email}</p>
-                    </TableCell>
-                    <TableCell>
-                      {user.phoneNumber ? (
-                        <p className="text-sm">{user.phoneNumber}</p>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>{getRoleBadge(user.roles)}</TableCell>
-                    <TableCell>{getStatusBadge(user.enabled)}</TableCell>
-                    <TableCell>
-                      {user.walletAddress ? (
-                        <p className="text-xs font-mono text-gray-600">
-                          {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
-                        </p>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2 flex-wrap">
-                        {getActionButtons(user)}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm">{user.email}</p>
+                      </TableCell>
+                      <TableCell>
+                        {user.phoneNumber ? (
+                          <p className="text-sm">{user.phoneNumber}</p>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{getRoleBadge(user.roles)}</TableCell>
+                      <TableCell>{getStatusBadge(user.enabled)}</TableCell>
+                      <TableCell>
+                        {user.walletAddress ? (
+                          <p className="text-xs font-mono text-gray-600">
+                            {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
+                          </p>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2 flex-wrap">
+                          {getActionButtons(user)}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
               )}
             </TableBody>
           </Table>

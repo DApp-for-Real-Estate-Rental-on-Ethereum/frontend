@@ -149,11 +149,11 @@ export function Header() {
                           }
                           // Profile pictures are stored in user-service (port 8082)
                           if (url.startsWith("/profile-pictures") || url.startsWith("/user-images")) {
-                            return `http://localhost:8082${url}`
+                            return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
                           }
                           // If it's a relative path starting with /, assume it's from user-service
                           if (url.startsWith("/")) {
-                            return `http://localhost:8082${url}`
+                            return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
                           }
                           return url
                         })()}

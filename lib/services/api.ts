@@ -28,9 +28,9 @@ import type {
 } from "@/lib/types"
 
 // Configuration from environment variables
-// Use API Gateway (port 8090) as the single entry point for all services
-// If GATEWAY_URL is not set, fall back to individual service URLs for backward compatibility
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8090"
+// Use API Gateway as the single entry point for all services
+// GATEWAY_URL comes from build-time env vars (set via Docker --build-arg)
+export const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || ""
 const USE_GATEWAY = process.env.NEXT_PUBLIC_USE_GATEWAY !== "false" // Default to true
 
 // Fallback URLs for individual services (used if USE_GATEWAY is false)
@@ -42,7 +42,9 @@ const BOOKING_API_BASE_URL = USE_GATEWAY
 const PAYMENT_API_BASE_URL = USE_GATEWAY
   ? GATEWAY_URL
   : (process.env.NEXT_PUBLIC_PAYMENT_API_BASE_URL || "http://localhost:8085")
-const RECLAMATION_API_BASE_URL = process.env.NEXT_PUBLIC_RECLAMATION_API_BASE_URL || "http://localhost:8091"
+const RECLAMATION_API_BASE_URL = USE_GATEWAY
+  ? GATEWAY_URL
+  : (process.env.NEXT_PUBLIC_RECLAMATION_API_BASE_URL || "http://localhost:8091")
 const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || "v1"
 const AUTH_TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_STORAGE_KEY || "derent5_auth_token"
 const USER_DATA_KEY = process.env.NEXT_PUBLIC_USER_STORAGE_KEY || "derent5_user_data"
@@ -344,7 +346,7 @@ export const apiClient = {
         return mock.properties.getAll()
       }
       // Use property-service URL for property endpoints
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties`
+      const url = buildUrl('/properties', 'properties')
 
       try {
         const response = await fetch(url, {
@@ -428,7 +430,7 @@ export const apiClient = {
         return mock.properties.getById(id)
       }
       // Use property-service URL for property endpoints
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}`
+      const url = buildUrl(`/properties/${id}`, 'properties')
 
       try {
         const response = await fetch(url, {
@@ -462,7 +464,7 @@ export const apiClient = {
         return mock.properties.getAll()
       }
 
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/my-properties`
+      const url = buildUrl('/properties/my-properties', 'properties')
       try {
         const response = await fetch(url, {
           method: "GET",
@@ -520,7 +522,7 @@ export const apiClient = {
       })
 
       // Use property-service URL for property endpoints
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties`
+      const url = buildUrl('/properties', 'properties')
       const headers: HeadersInit = {
         ...getAuthHeaders(),
       }
@@ -551,7 +553,7 @@ export const apiClient = {
         return mock.properties.update(id, data)
       }
       // Use property-service URL for property endpoints
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}`
+      const url = buildUrl(`/properties/${id}`, 'properties')
 
       try {
         const response = await fetch(url, {
@@ -595,7 +597,7 @@ export const apiClient = {
         return mock.properties.delete(id)
       }
       // Use property-service URL for property endpoints
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}`
+      const url = buildUrl(`/properties/${id}`, 'properties')
 
       try {
         const response = await fetch(url, {
@@ -630,7 +632,7 @@ export const apiClient = {
         return mock.properties.approve(id, isApproved)
       }
       // Use property-service URL for property endpoints
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}/approve`
+      const url = buildUrl(`/properties/${id}/approve`, 'properties')
       try {
         const response = await fetch(url, {
           method: "PATCH",
@@ -661,7 +663,7 @@ export const apiClient = {
         return { success: true }
       }
       // Use property-service URL for property endpoints
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}/hide`
+      const url = buildUrl(`/properties/${id}/hide`, 'properties')
       try {
         const response = await fetch(url, {
           method: "PATCH",
@@ -689,7 +691,7 @@ export const apiClient = {
         return mock.properties.suspend(id, reason)
       }
       // Use property-service URL for property endpoints
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}/suspend`
+      const url = buildUrl(`/properties/${id}/suspend`, 'properties')
       try {
         const response = await fetch(url, {
           method: "PATCH",
@@ -717,7 +719,7 @@ export const apiClient = {
         return mock.properties.suspend(id, "") // Mock
       }
       // Use property-service URL for property endpoints
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}/revoke-suspension`
+      const url = buildUrl(`/properties/${id}/revoke-suspension`, 'properties')
       try {
         const response = await fetch(url, {
           method: "PATCH",
@@ -743,7 +745,7 @@ export const apiClient = {
         const mock = await getMockApi()
         return mock.properties.approve(id, true)
       }
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}/submit-for-approval`
+      const url = buildUrl(`/properties/${id}/submit-for-approval`, 'properties')
       try {
         const response = await fetch(url, {
           method: "PATCH",
@@ -769,7 +771,7 @@ export const apiClient = {
         const mock = await getMockApi()
         return { success: true }
       }
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${id}/cancel-approval-request`
+      const url = buildUrl(`/properties/${id}/cancel-approval-request`, 'properties')
       try {
         const response = await fetch(url, {
           method: "PATCH",
@@ -828,7 +830,7 @@ export const apiClient = {
         }
       }
 
-      const url = `${PROPERTY_API_BASE_URL}/api/${API_VERSION}/properties/${propertyId}/predict-price`
+      const url = buildUrl(`/properties/${propertyId}/predict-price`, 'properties')
 
       const response = await fetch(url, {
         method: "POST",

@@ -6,7 +6,7 @@ export async function POST(
     { params }: { params: Promise<{ tenantId: string }> }
 ) {
     const { tenantId } = await params;
-    const ML_API_URL = "http://localhost:8002"; // Server-side localhost refers to the container/host network where ML service runs
+    const ML_API_URL = process.env.AI_API_URL || "http://localhost:8002"; // Use K8s DNS or localhost default
 
     try {
         const response = await fetch(`${ML_API_URL}/tenant-risk/${tenantId}`, {

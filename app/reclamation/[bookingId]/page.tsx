@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useSearchParams, useRouter } from "next/navigation"
 import { useAuth } from "@/lib/hooks/use-auth"
-import { apiClient } from "@/lib/services/api"
+import { apiClient, GATEWAY_URL } from "@/lib/services/api"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -51,7 +51,7 @@ export default function ReclamationPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  
+
   // View mode state
   const [viewMode, setViewMode] = useState(false)
   const [existingReclamation, setExistingReclamation] = useState<any | null>(null)
@@ -73,18 +73,18 @@ export default function ReclamationPage() {
       router.push("/login")
       return
     }
-    
+
     // Check if reclamation exists (view mode)
     fetchExistingReclamation()
   }, [user, bookingId, router, authLoading, isAuthenticated, reclamationIdParam])
 
   const fetchExistingReclamation = async () => {
     if (!user?.id || !bookingId) return
-    
+
     setLoadingDetails(true)
     try {
       let reclamation: any | null = null
-      
+
       // If reclamationId is provided in query params, use it directly
       if (reclamationIdParam) {
         try {
@@ -96,7 +96,7 @@ export default function ReclamationPage() {
           // Fall back to bookingId and complainantId method
         }
       }
-      
+
       // If not found by ID, try by bookingId and complainantId
       if (!reclamation) {
         try {
@@ -110,16 +110,16 @@ export default function ReclamationPage() {
           console.error("❌ Failed to fetch reclamation by bookingId:", err)
         }
       }
-      
+
       if (reclamation) {
         setExistingReclamation(reclamation)
         setViewMode(true)
-        
+
         // Fetch booking and property details
         try {
           const bookingData = await apiClient.bookings.getById(bookingId)
           setBooking(bookingData)
-          
+
           let propertyData: Property | null = null
           if (bookingData?.propertyId) {
             try {
@@ -129,18 +129,18 @@ export default function ReclamationPage() {
               console.error("Failed to fetch property:", err)
             }
           }
-          
+
           // Fetch other party phone number
           try {
             let targetUserId: number | null = null
-            
+
             console.log("📞 Reclamation data:", {
               complainantId: reclamation.complainantId,
               targetUserId: reclamation.targetUserId,
               complainantRole: reclamation.complainantRole,
               currentUserId: user.id
             })
-            
+
             // Determine who to show phone number for
             // If user is the complainant, show target user's phone
             // If user is the target, show complainant's phone
@@ -153,7 +153,7 @@ export default function ReclamationPage() {
               targetUserId = reclamation.complainantId
               console.log("📞 User is target, fetching complainant phone. complainantId:", targetUserId)
             }
-            
+
             // Fallback: if targetUserId is not available, try to get it from booking/property
             if ((!targetUserId || targetUserId === 0) && bookingData) {
               console.log("⚠️ targetUserId not available, trying fallback method")
@@ -173,7 +173,7 @@ export default function ReclamationPage() {
               }
               console.log("📞 Fallback targetUserId:", targetUserId)
             }
-            
+
             if (targetUserId && targetUserId > 0) {
               console.log("📞 Fetching user info for ID:", targetUserId)
               const userInfo = await apiClient.users.getById(targetUserId)
@@ -352,10 +352,10 @@ export default function ReclamationPage() {
                           existingReclamation.status === "OPEN"
                             ? "bg-blue-100 text-blue-800"
                             : existingReclamation.status === "IN_REVIEW"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : existingReclamation.status === "RESOLVED"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : existingReclamation.status === "RESOLVED"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
                         }
                       >
                         {existingReclamation.status.replace("_", " ")}
@@ -365,10 +365,10 @@ export default function ReclamationPage() {
                           existingReclamation.severity === "LOW"
                             ? "bg-green-100 text-green-800"
                             : existingReclamation.severity === "MEDIUM"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : existingReclamation.severity === "HIGH"
-                            ? "bg-orange-100 text-orange-800"
-                            : "bg-red-100 text-red-800"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : existingReclamation.severity === "HIGH"
+                                ? "bg-orange-100 text-orange-800"
+                                : "bg-red-100 text-red-800"
                         }
                       >
                         {existingReclamation.severity}
@@ -435,14 +435,14 @@ export default function ReclamationPage() {
                     <div className="flex items-center gap-2 mb-2">
                       <Phone className="w-5 h-5 text-green-600" />
                       <h3 className="text-lg font-semibold text-gray-900">
-                        {existingReclamation.complainantId === user.id 
+                        {existingReclamation.complainantId === user.id
                           ? (existingReclamation.complainantRole === "GUEST" ? "Host" : "Tenant")
                           : (existingReclamation.complainantRole === "GUEST" ? "Guest" : "Host")
                         } Phone Number
                       </h3>
                     </div>
                     <p className="text-xl font-bold text-gray-900">{otherPartyPhone}</p>
-                    <a 
+                    <a
                       href={`tel:${otherPartyPhone}`}
                       className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                     >
@@ -501,7 +501,7 @@ export default function ReclamationPage() {
                       {existingReclamation.attachments.map((attachment: any, index: number) => (
                         <div key={index} className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200">
                           <Image
-                            src={`http://localhost:8091${attachment.filePath}`}
+                            src={`${GATEWAY_URL}${attachment.filePath}`}
                             alt={`Attachment ${index + 1}`}
                             fill
                             className="object-cover"
@@ -514,26 +514,26 @@ export default function ReclamationPage() {
                 )}
 
                 {/* Action Buttons - Only show Delete if user is complainant */}
-                {existingReclamation.status === "OPEN" && 
-                 existingReclamation.complainantId === user.id && (
-                  <div className="pt-6 border-t-2 border-gray-100">
-                    <Button
-                      variant="destructive"
-                      onClick={async () => {
-                        if (window.confirm("Are you sure you want to delete this reclamation?")) {
-                          try {
-                            await apiClient.reclamations.delete(existingReclamation.id, user.id)
-                            router.back()
-                          } catch (err: any) {
-                            setError(err.message || "Failed to delete reclamation")
+                {existingReclamation.status === "OPEN" &&
+                  existingReclamation.complainantId === user.id && (
+                    <div className="pt-6 border-t-2 border-gray-100">
+                      <Button
+                        variant="destructive"
+                        onClick={async () => {
+                          if (window.confirm("Are you sure you want to delete this reclamation?")) {
+                            try {
+                              await apiClient.reclamations.delete(existingReclamation.id, user.id)
+                              router.back()
+                            } catch (err: any) {
+                              setError(err.message || "Failed to delete reclamation")
+                            }
                           }
-                        }
-                      }}
-                    >
-                      Delete Reclamation
-                    </Button>
-                  </div>
-                )}
+                        }}
+                      >
+                        Delete Reclamation
+                      </Button>
+                    </div>
+                  )}
               </div>
             )}
           </Card>
@@ -595,18 +595,16 @@ export default function ReclamationPage() {
                 {reclamationTypes.map((type) => (
                   <label
                     key={type.value}
-                    className={`block p-5 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
-                      selectedType === type.value
-                        ? "border-teal-500 bg-gradient-to-r from-teal-50 to-cyan-50 shadow-lg transform scale-[1.02]"
-                        : "border-gray-200 bg-white hover:border-teal-300 hover:shadow-md hover:bg-gray-50"
-                    }`}
+                    className={`block p-5 border-2 rounded-xl cursor-pointer transition-all duration-300 ${selectedType === type.value
+                      ? "border-teal-500 bg-gradient-to-r from-teal-50 to-cyan-50 shadow-lg transform scale-[1.02]"
+                      : "border-gray-200 bg-white hover:border-teal-300 hover:shadow-md hover:bg-gray-50"
+                      }`}
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                        selectedType === type.value
-                          ? "border-teal-500 bg-teal-500"
-                          : "border-gray-300"
-                      }`}>
+                      <div className={`mt-1 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selectedType === type.value
+                        ? "border-teal-500 bg-teal-500"
+                        : "border-gray-300"
+                        }`}>
                         {selectedType === type.value && (
                           <div className="w-2 h-2 rounded-full bg-white"></div>
                         )}
@@ -669,11 +667,10 @@ export default function ReclamationPage() {
               <div className="mt-2">
                 <label
                   htmlFor="images"
-                  className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
-                    images.length >= 3
-                      ? "border-gray-300 bg-gray-50 cursor-not-allowed opacity-50"
-                      : "border-teal-300 bg-teal-50/50 hover:bg-teal-50 hover:border-teal-400"
-                  }`}
+                  className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all ${images.length >= 3
+                    ? "border-gray-300 bg-gray-50 cursor-not-allowed opacity-50"
+                    : "border-teal-300 bg-teal-50/50 hover:bg-teal-50 hover:border-teal-400"
+                    }`}
                 >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <Upload className={`w-8 h-8 mb-2 ${images.length >= 3 ? 'text-gray-400' : 'text-teal-600'}`} />
