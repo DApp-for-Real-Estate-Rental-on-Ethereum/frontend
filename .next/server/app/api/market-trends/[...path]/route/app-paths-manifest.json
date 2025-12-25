@@ -1,3 +1,0 @@
-{
-  "/api/market-trends/[...path]/route": "app/api/market-trends/[...path]/route.js"
-}
