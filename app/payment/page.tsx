@@ -221,10 +221,13 @@ export default function PaymentPage() {
       if (typeof window === "undefined" || !window.ethereum || !address) return
       const ethereum = window.ethereum
       const chainId = await ethereum.request({ method: "eth_chainId" })
-      if (chainId === HARDHAT_CHAIN_ID) {
+      // Normalize chainId to lowercase for comparison
+      const normalizedChainId = typeof chainId === 'string' ? chainId.toLowerCase() : chainId;
+
+      if (normalizedChainId === HARDHAT_CHAIN_ID.toLowerCase()) {
         setNetworkName("Hardhat Local")
         setIsCorrectNetwork(true)
-      } else if (chainId === ARBITRUM_ONE_CHAIN_ID) {
+      } else if (normalizedChainId === ARBITRUM_ONE_CHAIN_ID.toLowerCase()) {
         setNetworkName("Arbitrum One")
         setIsCorrectNetwork(true)
       } else {
@@ -237,15 +240,19 @@ export default function PaymentPage() {
       }
       const checksumAddress = ethers.getAddress(address)
       const balance = await provider.getBalance(checksumAddress)
-      if (!balance) {
+
+      // Fix: Check for null/undefined explicitly, as 0n is falsy but valid
+      if (balance === null || balance === undefined) {
         throw new Error("Balance is null or undefined")
       }
+
       const balanceInEth = parseFloat(ethers.formatEther(balance))
       if (isNaN(balanceInEth) || !isFinite(balanceInEth)) {
         throw new Error(`Invalid balance conversion result: ${balanceInEth}`)
       }
       setWalletBalance(balanceInEth)
     } catch (e: any) {
+      console.error("Wallet Check Error:", e)
       setNetworkName("Error: " + (e.message || "Unknown error"))
       setIsCorrectNetwork(false)
       setWalletBalance(null)
@@ -592,14 +599,14 @@ export default function PaymentPage() {
                             value={currentWalletAddress}
                             readOnly
                             className={`mt-1 font-mono text-sm ${bookingDetails?.userWalletAddress &&
-                                currentWalletAddress?.toLowerCase() !==
-                                bookingDetails.userWalletAddress.toLowerCase()
-                                ? bookingDetails.ownerWalletAddress &&
-                                  currentWalletAddress?.toLowerCase() ===
-                                  bookingDetails.ownerWalletAddress.toLowerCase()
-                                  ? "border-red-500 bg-red-50"
-                                  : "border-yellow-500 bg-yellow-50"
-                                : "border-green-500 bg-green-50"
+                              currentWalletAddress?.toLowerCase() !==
+                              bookingDetails.userWalletAddress.toLowerCase()
+                              ? bookingDetails.ownerWalletAddress &&
+                                currentWalletAddress?.toLowerCase() ===
+                                bookingDetails.ownerWalletAddress.toLowerCase()
+                                ? "border-red-500 bg-red-50"
+                                : "border-yellow-500 bg-yellow-50"
+                              : "border-green-500 bg-green-50"
                               }`}
                           />
                           {bookingDetails?.userWalletAddress &&
@@ -685,10 +692,10 @@ export default function PaymentPage() {
                             }
                             readOnly
                             className={`mt-1 ${walletBalance !== null &&
-                                totalPriceEth > 0 &&
-                                walletBalance < totalPriceEth + gasEstimate
-                                ? "border-red-500"
-                                : ""
+                              totalPriceEth > 0 &&
+                              walletBalance < totalPriceEth + gasEstimate
+                              ? "border-red-500"
+                              : ""
                               }`}
                           />
                           {walletBalance === null && (
@@ -699,8 +706,8 @@ export default function PaymentPage() {
                           {walletBalance !== null && totalPriceEth > 0 && (
                             <p
                               className={`text-xs mt-1 ${walletBalance >= totalPriceEth + gasEstimate
-                                  ? "text-green-600"
-                                  : "text-red-600"
+                                ? "text-green-600"
+                                : "text-red-600"
                                 }`}
                             >
                               {walletBalance >= totalPriceEth + gasEstimate
