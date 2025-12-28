@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Explicitly expose NEXT_PUBLIC environment variables to the browser
+  env: {
+    NEXT_PUBLIC_GATEWAY_URL: process.env.NEXT_PUBLIC_GATEWAY_URL,
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
+    NEXT_PUBLIC_USE_GATEWAY: process.env.NEXT_PUBLIC_USE_GATEWAY || 'true',
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

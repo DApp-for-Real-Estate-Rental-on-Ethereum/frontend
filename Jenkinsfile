@@ -5,6 +5,12 @@ pipeline {
         nodejs 'NodeJS-22'  // Must match the name configured in Jenkins Tools (Next.js with @types/node ^22)
     }
 
+    parameters {
+        string(name: 'GATEWAY_URL', defaultValue: 'http://192.168.49.2:30090', description: 'API Gateway URL (Minikube IP or AWS LoadBalancer)')
+        string(name: 'API_BASE_URL', defaultValue: 'http://192.168.49.2:30090', description: 'Base API URL')
+        booleanParam(name: 'USE_GATEWAY', defaultValue: true, description: 'Use Gateway for all requests')
+    }
+
     environment {
         DOCKER_IMAGE_NAME = 'medgm/real-estate-frontend'
     }
@@ -76,7 +82,11 @@ pipeline {
                 script {
                     sh """
                         echo "Building Docker image for Frontend..."
-                        docker build -t ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} .
+                        docker build \\
+                            --build-arg NEXT_PUBLIC_GATEWAY_URL=${params.GATEWAY_URL} \\
+                            --build-arg NEXT_PUBLIC_API_BASE_URL=${params.API_BASE_URL} \\
+                            --build-arg NEXT_PUBLIC_USE_GATEWAY=${params.USE_GATEWAY} \\
+                            -t ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} .
                         docker tag ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_IMAGE_NAME}:latest
                         GIT_COMMIT_SHORT=\$(git rev-parse --short HEAD)
                         docker tag ${DOCKER_IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_IMAGE_NAME}:\${GIT_COMMIT_SHORT}

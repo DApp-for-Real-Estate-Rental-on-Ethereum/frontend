@@ -12,12 +12,18 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build arguments
+# Build arguments - Must be set at build time for Next.js to bake into JS bundle
 ARG NEXT_PUBLIC_API_BASE_URL
-ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
-
 ARG NEXT_PUBLIC_GATEWAY_URL
+ARG NEXT_PUBLIC_USE_GATEWAY=true
+
+# Set environment variables for build
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_GATEWAY_URL=$NEXT_PUBLIC_GATEWAY_URL
+ENV NEXT_PUBLIC_USE_GATEWAY=$NEXT_PUBLIC_USE_GATEWAY
+
+# Debug: Print env vars during build
+RUN echo "Building with NEXT_PUBLIC_GATEWAY_URL=$NEXT_PUBLIC_GATEWAY_URL"
 
 # Build the application
 RUN npm run build
