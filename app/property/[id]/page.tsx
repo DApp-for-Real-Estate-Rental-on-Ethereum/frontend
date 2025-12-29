@@ -9,7 +9,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Heart, Share2, ChevronLeft, ChevronRight, Wifi, Loader2, Bed, Bath, Users, Star, X } from "lucide-react"
+import { MapPin, Heart, Share2, ChevronLeft, ChevronRight, Wifi, Loader2, Bed, Bath, Users, Star, X, Sparkles, TrendingUp } from "lucide-react"
 import type { Property } from "@/lib/types"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -27,6 +27,7 @@ export default function PropertyDetailPage() {
     const [bookingError, setBookingError] = useState("")
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
     const [guests, setGuests] = useState(1)
+    const [prediction, setPrediction] = useState<any>(null)
 
     // Helper function to format date as YYYY-MM-DD without timezone issues
     const formatDateString = (date: Date): string => {
@@ -97,6 +98,27 @@ export default function PropertyDetailPage() {
 
         return true
     }
+
+    // Fetch AI Prediction for Host
+    useEffect(() => {
+        const fetchPrediction = async () => {
+            if (isAuthenticated && user && property && String(property.userId) === String(user.id)) {
+                try {
+                    const today = new Date();
+                    const nextMonth = new Date(today);
+                    nextMonth.setDate(today.getDate() + 30);
+                    const checkIn = formatDateString(today);
+                    const checkOut = formatDateString(nextMonth);
+
+                    const data = await apiClient.properties.predictPrice(propertyId, checkIn, checkOut);
+                    setPrediction(data);
+                } catch (e) {
+                    console.error("Failed to fetch prediction", e);
+                }
+            }
+        };
+        fetchPrediction();
+    }, [property, user, isAuthenticated, propertyId]);
 
     useEffect(() => {
         const fetchProperty = async () => {
@@ -621,6 +643,45 @@ export default function PropertyDetailPage() {
                         <div className="text-center">
                             <MapPin className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-500">No images available</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* AI Price Insight for Host */}
+                {prediction && (
+                    <div className="mb-8 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-xl shadow-sm">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-white rounded-lg shadow-sm text-indigo-600">
+                                <Sparkles className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                                    AI Price Optimization
+                                    <Badge variant="secondary" className="bg-green-100 text-green-700">beta</Badge>
+                                </h3>
+                                <p className="text-gray-600 mb-4">
+                                    Our AI detected high demand for this season. You could potentially earn more by optimizing your price.
+                                </p>
+                                <div className="flex items-center gap-8">
+                                    <div>
+                                        <div className="text-sm text-gray-500 mb-1">Current Price</div>
+                                        <div className="text-xl font-bold text-gray-400 line-through">
+                                            {property?.dailyPrice || property?.price} MAD
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-green-100 rounded-full text-green-600">
+                                            <TrendingUp className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <div className="text-sm text-green-700 font-medium">AI Suggested Price</div>
+                                            <div className="text-2xl font-bold text-green-700">
+                                                {prediction.predictedPriceMad?.toFixed(0)} MAD
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
