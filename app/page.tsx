@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { RecommendedProperties } from "@/components/recommendations/RecommendedProperties"
-import { Heart, MapPin, Star, DollarSign, Users, Layers, Leaf, Shield, Target } from "lucide-react"
+import { Heart, MapPin, Star, DollarSign, Users, Layers, Leaf, Shield, Target, ArrowRight, Home } from "lucide-react"
 
 export default function HomePage() {
   const { user, isLoading } = useAuth()
@@ -85,49 +85,106 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-hidden">
 
-      <section className="bg-background py-20 lg:py-32">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-6">
-              Redefining Modern Living
-            </h1>
-            <div className="h-1 w-20 bg-primary mx-auto rounded-full" />
-          </div>
+      {/* HERO SECTION */}
+      <section className="relative min-h-[90vh] flex items-center py-20 overflow-hidden">
+        {/* Abstract Background Blobs */}
+        <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] opacity-50 animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-20%] w-[600px] h-[600px] bg-cyan-500/20 rounded-full blur-[100px] opacity-50" />
 
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="relative group">
-              <div className="relative h-[500px] w-full rounded-3xl overflow-hidden shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
+
+            <div className="space-y-8 animate-fade-in-up">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm">
+                <Star className="w-4 h-4 fill-primary" />
+                <span>#1 Decentralized Rental Platform</span>
+              </div>
+
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight">
+                Living <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-cyan-600">
+                  Reimagined.
+                </span>
+              </h1>
+
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                Experience seamless, transparent, and secure rentals powered by blockchain technology. Find your dream home without the middleman.
+              </p>
+
+              <div className="flex gap-4">
+                <Button
+                  size="lg"
+                  className="rounded-full px-8 h-12 text-base font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:scale-105 transition-all duration-300"
+                  onClick={() => {
+                    const element = document.getElementById('properties-section')
+                    element?.scrollIntoView({ behavior: 'smooth' })
+                  }}
+                >
+                  Explore Properties
+                </Button>
+                <Link href="/post-property">
+                  <Button variant="outline" size="lg" className="rounded-full px-8 h-12 text-base font-semibold hover:bg-secondary/50">
+                    List Your Space
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="flex items-center gap-8 pt-8 border-t border-border/50">
+                <div>
+                  <div className="text-3xl font-bold text-foreground">2k+</div>
+                  <div className="text-sm text-muted-foreground">Properties</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-foreground">5k+</div>
+                  <div className="text-sm text-muted-foreground">Happy Tenants</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-foreground">100%</div>
+                  <div className="text-sm text-muted-foreground">Secure</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative group perspective-1000">
+              <div className="relative h-[600px] w-full rounded-[2.5rem] overflow-hidden shadow-2xl transition-transform duration-700 hover:rotate-y-2 transform-style-3d border-8 border-white dark:border-white/5">
                 <Image
                   src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600"
                   alt="Modern Living Space"
                   fill
-                  className="object-cover"
+                  className="object-cover scale-105 group-hover:scale-110 transition-transform duration-700"
                   priority
                 />
-                <div className="absolute inset-0 bg-black/10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+
+                <div className="absolute bottom-8 left-8 right-8">
+                  <Card className="bg-white/10 backdrop-blur-xl border-white/20 text-white p-6 shadow-2xl">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-xl font-bold mb-1">Villa Azure</h3>
+                        <p className="text-white/80 text-sm flex items-center gap-1">
+                          <MapPin className="w-4 h-4" /> Marrakech, Morocco
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold">2,400 <span className="text-sm font-normal">MAD</span></div>
+                        <div className="text-xs text-white/70">per night</div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Floating Elements */}
+              <div className="absolute -top-10 -right-10 p-4 bg-background rounded-2xl shadow-xl animate-bounce-slow">
+                <Shield className="w-8 h-8 text-primary" />
+              </div>
+              <div className="absolute top-1/2 -left-12 p-4 bg-background rounded-2xl shadow-xl animate-bounce-slow delay-700">
+                <Target className="w-8 h-8 text-cyan-500" />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              {[
-                { icon: DollarSign, title: "Optimized Pricing", desc: "Experience luxury living without the premium markup." },
-                { icon: Users, title: "Vibrant Community", desc: "Connect with like-minded individuals in curated spaces." },
-                { icon: Leaf, title: "Sustainable Living", desc: "Eco-friendly homes designed for a greener future." },
-                { icon: Shield, title: "Secure & Private", desc: "Your safety and privacy are our top priorities." },
-                { icon: Layers, title: "Hassle-Free Management", desc: "We handle maintenance so you can focus on living." },
-                { icon: Target, title: "Flexible Terms", desc: "Lease structures enabling true freedom." }
-              ].map((feature, idx) => (
-                <div key={idx} className="flex flex-col items-center text-center p-6 rounded-2xl bg-card border hover:shadow-lg transition-all duration-300">
-                  <div className="p-4 bg-primary/10 rounded-full mb-4">
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.desc}</p>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
@@ -135,122 +192,101 @@ export default function HomePage() {
       {/* Recommended Properties Section - Only visible to logged-in users */}
       <RecommendedProperties />
 
-      <section id="properties-section" className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 bg-secondary/30">
-        {isFetching ? (
-          <div className="flex justify-center py-20">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      {/* CURATED LISTINGS */}
+      <section id="properties-section" className="py-32 bg-secondary/30 relative">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <Badge variant="outline" className="mb-4 text-primary border-primary/20 bg-primary/5">
+              Exclusive Listings
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Curated Residences</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Explore our hand-picked selection of premium properties waiting to become your new home.
+            </p>
           </div>
-        ) : filteredProperties.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg">No properties currently available.</p>
-          </div>
-        ) : (
-          <div>
-            <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-              <div>
-                <h2 className="text-3xl font-bold tracking-tight mb-4">Curated Residences</h2>
-                <p className="text-muted-foreground max-w-2xl">
-                  Explore our hand-picked selection of premium properties waiting to become your new home.
-                </p>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {isFetching ? (
+            <div className="flex justify-center py-20">
+              <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            </div>
+          ) : filteredProperties.length === 0 ? (
+            <div className="text-center py-20 bg-card rounded-3xl border border-dashed">
+              <p className="text-muted-foreground text-lg">No properties currently available.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
               {filteredProperties.map((property) => (
                 <Link href={`/property/${property.id}`} key={property.id} className="block group h-full">
-                  <Card className="h-full overflow-hidden hover:shadow-xl transition-all duration-300 border bg-card">
-                    <div className="relative h-72 overflow-hidden">
+                  <Card className="h-full overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-border/50 bg-card/50 backdrop-blur-sm rounded-3xl">
+                    <div className="relative h-80 overflow-hidden">
                       <Image
                         src={getImageUrl(getPropertyImage(property))}
                         alt={property.title}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        className="object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.srcset = ""
                           target.src = "/houses_placeholder.png"
                         }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 transition-opacity duration-300" />
 
                       {user && property.status && (
-                        <div className="absolute top-4 right-4">
-                          <Badge variant="secondary" className="backdrop-blur-md bg-white/90 text-primary font-medium px-3 py-1">
+                        <div className="absolute top-4 right-4 z-10">
+                          <Badge className="backdrop-blur-md bg-white/20 hover:bg-white/30 text-white border-white/20 font-medium px-3 py-1">
                             {property.status}
                           </Badge>
                         </div>
                       )}
-                      <button
-                        className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-full p-2.5 hover:bg-white hover:text-red-500 transition-colors shadow-sm"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          // Favorite logic here
-                        }}
-                      >
-                        <Heart className="w-5 h-5 transition-colors" />
-                      </button>
+
+                      <div className="absolute bottom-4 left-4 right-4 z-10">
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <h3 className="font-bold text-white text-xl mb-1 line-clamp-1 group-hover:text-primary-foreground transition-colors">
+                              {property.title}
+                            </h3>
+                            <div className="flex items-center text-white/80 text-sm">
+                              <MapPin className="w-3.5 h-3.5 mr-1" />
+                              <span className="line-clamp-1">
+                                {property.address ? `${property.address.city}, ${property.address.country}` : "Location info"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="bg-white/20 backdrop-blur-md p-2 rounded-lg text-white font-bold">
+                            {property.dailyPrice?.toFixed(0) || property.price?.toFixed(0) || "N/A"} MAD
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="p-6">
-                      <div className="mb-4">
-                        <h3 className="font-bold text-xl mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-                          {property.title}
-                        </h3>
-                        <div className="flex items-center text-muted-foreground text-sm">
-                          <MapPin className="w-4 h-4 mr-2 text-primary" />
-                          <span className="line-clamp-1">
-                            {property.address ? `${property.address.city}, ${property.address.country}` : "Location not available"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between mb-6 pb-6 border-b border-border">
-                        <div>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-bold text-primary">
-                              {property.dailyPrice?.toFixed(4) || property.price?.toFixed(4) || "N/A"}
-                            </span>
-                            <span className="text-sm text-muted-foreground font-medium">MAD / day</span>
+                      <div className="flex items-center justify-between mb-6 pb-6 border-b border-border/50">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Users className="w-4 h-4" /> {property.capacity}
                           </div>
-                          {property.depositAmount && property.depositAmount > 0 && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Deposit: {property.depositAmount.toFixed(0)} MAD
-                            </p>
-                          )}
+                          <div className="h-4 w-[1px] bg-border" />
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Home className="w-4 h-4" /> {property.numberOfBedrooms} Bd
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1.5 bg-yellow-400/10 px-3 py-1.5 rounded-full">
+                        <div className="flex items-center gap-1">
                           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-semibold">4.8</span>
+                          <span className="font-bold text-sm">4.92</span>
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          <span>{property.capacity} Guests</span>
-                        </div>
-                        {property.numberOfBedrooms && (
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{property.numberOfBedrooms}</span> Beds
-                          </div>
-                        )}
-                        {property.numberOfBathrooms && (
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{property.numberOfBathrooms}</span> Baths
-                          </div>
-                        )}
                       </div>
 
                       {property.amenities && property.amenities.length > 0 && (
-                        <div className="mt-6 flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2">
                           {property.amenities.slice(0, 3).map((a) => (
-                            <Badge key={a.id} variant="outline" className="text-xs font-normal bg-secondary/50 border-0">
+                            <Badge key={a.id} variant="secondary" className="text-xs font-normal bg-secondary/50 hover:bg-secondary">
                               {a.name}
                             </Badge>
                           ))}
                           {property.amenities.length > 3 && (
-                            <Badge variant="outline" className="text-xs font-normal">
-                              +{property.amenities.length - 3} more
+                            <Badge variant="outline" className="text-xs font-normal border-dashed">
+                              +{property.amenities.length - 3}
                             </Badge>
                           )}
                         </div>
@@ -260,116 +296,62 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
-          </div>
-        )}
-      </section>
+          )}
 
-      <section className="py-24 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-6 mt-12">
-                <div className="relative h-64 rounded-2xl overflow-hidden shadow-lg">
-                  <Image
-                    src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300"
-                    alt="Interior Design"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 flex items-end p-6">
-                    <span className="text-white font-semibold">Premium Interiors</span>
-                  </div>
-                </div>
-                <div className="relative h-48 rounded-2xl overflow-hidden shadow-lg">
-                  <Image
-                    src="https://images.unsplash.com/photo-1556912173-3bb406ef7e77?w=400&h=300"
-                    alt="Clean Spaces"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-              <div className="space-y-6">
-                <div className="relative h-48 rounded-2xl overflow-hidden shadow-lg">
-                  <Image
-                    src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=300"
-                    alt="Guaranteed Quality"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="relative h-64 rounded-2xl overflow-hidden shadow-lg">
-                  <Image
-                    src="https://images.unsplash.com/photo-1512918760383-eda2723ad6e1?w=400&h=300"
-                    alt="Lifestyle"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-primary/20 hover:bg-primary/10 transition-colors" />
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:pl-8">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">
-                Flexible Living, <br />
-                <span className="text-primary">Uncompromised Quality.</span>
-              </h2>
-              <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-                Whether you need a short-term sanctuary or a long-term residence, we adapt to your timeline.
-                Our platform eliminates the complexities of traditional renting, offering streamlined verification,
-                secure crypto payments, and a curated network of premium properties.
-              </p>
-              <Button
-                size="lg"
-                onClick={() => {
-                  const element = document.getElementById('properties-section')
-                  element?.scrollIntoView({ behavior: 'smooth' })
-                }}
-                className="rounded-full px-8 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
-              >
-                Find Your Home
+          <div className="mt-16 text-center">
+            <Link href="/properties">
+              <Button variant="outline" size="lg" className="rounded-full px-8 border-primary text-primary hover:bg-primary hover:text-white">
+                View All Properties <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
 
-      <section className="py-24 bg-secondary/20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="relative bg-card p-10 rounded-3xl shadow-sm border">
-              <div className="absolute top-8 left-8 text-8xl text-primary/10 font-serif leading-none">"</div>
-              <blockquote className="relative z-10">
-                <p className="text-xl text-foreground/80 leading-relaxed mb-8 italic">
-                  I was skeptical about using a crypto-based rental platform, but DeRent5 made it effortless.
-                  The transparency in pricing and the quality of the verified listings exceeded my expectations.
-                  It's not just renting; it's a new standard of living.
-                </p>
-                <footer className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-lg">
-                    SE
+      {/* FEATURES OFFSET */}
+      <section className="py-32 bg-foreground text-background overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2" />
+
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight">
+                Why <span className="text-primary">DeRent5</span> is <br /> the future of renting.
+              </h2>
+              <div className="space-y-8">
+                {[
+                  { title: "Smart Contracts", desc: "Automated lease agreements that function without manual oversight.", icon: Layers },
+                  { title: "Zero Hidden Fees", desc: "Transparent pricing powered by blockchain immutability.", icon: DollarSign },
+                  { title: "Instant Verification", desc: "Decentralized identity verification for immediate trust.", icon: Shield },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex gap-6 group">
+                    <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-300 shrink-0">
+                      <item.icon className="w-6 h-6 text-white group-hover:text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                      <p className="text-white/60 leading-relaxed">{item.desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <cite className="not-italic font-bold text-foreground block">Salma Essalhi</cite>
-                    <span className="text-sm text-primary font-medium">Verified Tenant</span>
-                  </div>
-                </footer>
-              </blockquote>
+                ))}
+              </div>
             </div>
 
-            <div className="relative h-[500px] rounded-3xl overflow-hidden shadow-2xl">
-              <Image
-                src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&h=600"
-                alt="Luxury Exterior"
-                fill
-                className="object-cover"
-              />
-              <div className="absolute bottom-8 left-8 right-8">
-                <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-lg">
-                  <h3 className="text-2xl font-cursive text-primary text-center">
-                    Welcome Home
-                  </h3>
+            <div className="relative">
+              <div className="relative h-[600px] w-full rounded-[3rem] overflow-hidden border border-white/10">
+                <Image
+                  src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&h=1000"
+                  alt="Future Living"
+                  fill
+                  className="object-cover opacity-80"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+
+                <div className="absolute bottom-12 left-12 right-12">
+                  <div className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-white opacity-80">
+                    2025
+                  </div>
+                  <p className="text-white/80 mt-4 text-lg">Awarded Best Decentralized App Interface</p>
                 </div>
               </div>
             </div>
@@ -377,40 +359,60 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="bg-foreground text-background py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            <div className="col-span-1 md:col-span-1">
-              <Image src="/logo1.svg" alt="DeRent5" width={120} height={40} className="mb-6 invert opacity-90" />
-              <p className="text-muted-foreground text-sm">
-                Next-generation rental management powered by blockchain transparency and modern design.
-              </p>
-            </div>
 
-            {[
-              { title: "Platform", links: ["Browse Homes", "List Property", "How it Works"] },
-              { title: "Community", links: ["Host Stories", "Tenant Guidelines", "Events"] },
-              { title: "Legal", links: ["Privacy Policy", "Terms of Service", "Smart Contracts"] }
-            ].map((col, idx) => (
-              <div key={idx}>
-                <h4 className="font-bold mb-6 text-lg">{col.title}</h4>
-                <ul className="space-y-4 text-sm text-muted-foreground">
-                  {col.links.map((link) => (
-                    <li key={link}>
-                      <a href="#" className="hover:text-primary transition-colors hover:underline">
-                        {link}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+      {/* TESTIMONIALS */}
+      <section className="py-32 bg-background relative overflow-hidden">
+        <div className="absolute left-[-10%] top-[-10%] w-[500px] h-[500px] bg-secondary rounded-full blur-[80px] opacity-60" />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Trusted by Thousands</h2>
+            <p className="text-muted-foreground">Don't just take our word for it.</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {[1, 2].map((i) => (
+              <Card key={i} className="p-10 rounded-[2rem] border-0 shadow-lg bg-card/50 hover:bg-card transition-colors">
+                <div className="flex gap-1 text-yellow-400 mb-6">
+                  {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-5 h-5 fill-current" />)}
+                </div>
+                <p className="text-xl leading-relaxed mb-8 font-medium">
+                  "We found our dream apartment in Casablanca within hours. The crypto payment was instant, and the smart contract gave us peace of mind that no other platform could offer."
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-teal-600 to-cyan-600" />
+                  <div>
+                    <div className="font-bold text-lg">Amine & Sarah</div>
+                    <div className="text-primary text-sm font-medium">Verified Tenants</div>
+                  </div>
+                </div>
+              </Card>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div className="border-t border-border/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-muted-foreground">© 2025 DeRent5. All rights reserved.</p>
-            <div className="flex gap-6">
-              {/* Social icons would go here */}
+      {/* CTA FOOTER */}
+      <footer className="bg-foreground text-background py-24 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-5xl md:text-7xl font-bold mb-8 tracking-tighter">Ready to move in?</h2>
+          <p className="text-white/60 text-xl max-w-2xl mx-auto mb-12">
+            Join the fastest growing decentralized real estate network today.
+          </p>
+          <div className="flex justify-center gap-6">
+            <Link href="/signup">
+              <Button size="lg" className="h-16 px-10 rounded-full text-lg bg-white text-black hover:bg-white/90">
+                Get Started Now
+              </Button>
+            </Link>
+          </div>
+
+          <div className="mt-24 pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-white/40 text-sm">
+            <p>© 2025 DeRent5 Inc. Built on Ethereum.</p>
+            <div className="flex gap-8 mt-4 md:mt-0">
+              <a href="#" className="hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="hover:text-white transition-colors">Terms</a>
+              <a href="#" className="hover:text-white transition-colors">Sitemap</a>
             </div>
           </div>
         </div>

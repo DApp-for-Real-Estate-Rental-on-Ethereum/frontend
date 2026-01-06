@@ -22,7 +22,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
   const { user, isLoading: authLoading, token } = useAuth()
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [isCheckingWallet, setIsCheckingWallet] = useState(true)
-  
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -51,7 +51,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
     fifteenDays: false,
     oneMonth: false,
   })
-  
+
   // Refs to prevent formData from being reset unnecessarily
   const formDataInitializedRef = useRef(false)
   const propertyDataIdRef = useRef<string | null>(null)
@@ -74,7 +74,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
         const userData = await apiClient.users.getMe()
         const walletAddr = userData.walletAddress && userData.walletAddress.trim() !== "" ? userData.walletAddress : null
         setWalletAddress(walletAddr)
-        
+
         if (walletAddr) {
           const updatedUser = { ...user, walletAddress: walletAddr }
           localStorage.setItem("user", JSON.stringify(updatedUser))
@@ -96,7 +96,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
     if (isEditMode && propertyData && propertyId) {
       // Only initialize formData if this is a new property (different ID) or first time
       const isNewProperty = propertyDataIdRef.current !== propertyId
-      
+
       if (isNewProperty || !formDataInitializedRef.current) {
         const initialFormData = {
           title: propertyData.title || "",
@@ -145,7 +145,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
       }
     }
   }, [isEditMode, propertyData, propertyId])
-  
+
   // Reset initialization flag when propertyId changes
   useEffect(() => {
     if (propertyId && propertyDataIdRef.current !== propertyId) {
@@ -193,17 +193,17 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    
+
     // Combine with existing images (if any)
     const totalFiles = [...images, ...files]
-    
+
     // Validate total image count: must be between 5 and 10 (only for new properties)
     if (!isEditMode && totalFiles.length > 10) {
       setError(`You can upload at most 10 images total. Currently have ${images.length}, trying to add ${files.length}`)
       e.target.value = "" // Reset input
       return
     }
-    
+
     setImages(totalFiles)
     setError("") // Clear any previous errors
 
@@ -212,7 +212,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
       return URL.createObjectURL(file)
     })
     setImagePreview([...imagePreview, ...newPreviews])
-    
+
     // Reset input to allow selecting more files
     e.target.value = ""
   }
@@ -220,10 +220,10 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
   const removeImage = (index: number) => {
     // Revoke object URL to prevent memory leak
     URL.revokeObjectURL(imagePreview[index])
-    
+
     const newImages = images.filter((_, i) => i !== index)
     const newPreviews = imagePreview.filter((_, i) => i !== index)
-    
+
     setImages(newImages)
     setImagePreview(newPreviews)
     setError("") // Clear any errors when removing images
@@ -239,22 +239,22 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
     setError("")
 
     // Try with high accuracy first, then fallback to lower accuracy
-    const options = retryCount === 0 
+    const options = retryCount === 0
       ? {
-          enableHighAccuracy: true,
-          timeout: 15000, // Increased timeout
-          maximumAge: 60000 // Accept cached position up to 1 minute old
-        }
+        enableHighAccuracy: true,
+        timeout: 15000, // Increased timeout
+        maximumAge: 60000 // Accept cached position up to 1 minute old
+      }
       : {
-          enableHighAccuracy: false, // Fallback: use less accurate but faster method
-          timeout: 10000,
-          maximumAge: 300000 // Accept cached position up to 5 minutes old
-        }
+        enableHighAccuracy: false, // Fallback: use less accurate but faster method
+        timeout: 10000,
+        maximumAge: 300000 // Accept cached position up to 5 minutes old
+      }
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude, accuracy } = position.coords
-        
+
         try {
           // Use OpenStreetMap Nominatim API for reverse geocoding (free, no API key needed)
           const response = await fetch(
@@ -265,7 +265,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
               }
             }
           )
-          
+
           if (!response.ok) {
             throw new Error("Failed to get address from coordinates")
           }
@@ -278,7 +278,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
             ...prev,
             latitude: latitude.toString(),
             longitude: longitude.toString(),
-            address: addressData.road || addressData.house_number 
+            address: addressData.road || addressData.house_number
               ? `${addressData.house_number || ""} ${addressData.road || ""}`.trim()
               : prev.address,
             city: addressData.city || addressData.town || addressData.village || addressData.municipality || addressData.county || prev.city,
@@ -301,22 +301,22 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
       },
       (error) => {
         setIsGettingLocation(false)
-        
+
         if (retryCount === 0 && (error.code === error.POSITION_UNAVAILABLE || error.code === 2)) {
           setTimeout(() => getCurrentLocation(1), 500)
           return
         }
-        
+
         // Handle error codes (using constants or numeric values)
         const errorCode = error.code
         const errorMessage = error.message || ""
-        
+
         if (errorCode === error.PERMISSION_DENIED || errorCode === 1) {
           setError("Location access denied. Please enable location permissions in your browser settings and try again.")
         } else if (errorCode === error.POSITION_UNAVAILABLE || errorCode === 2) {
           // Check if it's a desktop/laptop without GPS
           const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-          const errorMsg = isMobile 
+          const errorMsg = isMobile
             ? "Location unavailable. Please check if GPS is enabled on your device and try again, or enter address manually."
             : "Location unavailable. Desktop computers usually don't have GPS. Please enter address manually or use a mobile device."
           setError(errorMsg)
@@ -334,7 +334,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
     e.preventDefault()
     setError("")
     setIsLoading(true)
-    
+
     // Use formData state directly - it's always up-to-date via handleInputChange
     // This ensures all fields are captured correctly
     const formDataToUse = { ...formData }
@@ -421,7 +421,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
         // Note: Backend UpdatePropertyRequest currently only supports: description, dailyPrice, capacity, amenities
         // Backend requires amenities to be @NotNull, so we must send existing amenities
         const existingAmenities = propertyData?.amenities || []
-        
+
         // Ensure amenities have the correct structure (with id)
         // Backend expects Set<Amenity> where each amenity has an id that exists in the database
         const amenitiesToSend = existingAmenities
@@ -433,7 +433,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
             id: amenity.id,
             name: amenity.name || amenity.amenityName || "",
           }))
-        
+
         // Ensure capacity is always provided (required by @NotNull)
         if (!capacity || capacity < 1) {
           setError("Capacity must be at least 1.")
@@ -465,7 +465,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
 
         // Ensure amenities is never null - backend requires @NotNull
         const finalAmenities = amenitiesToSend.length > 0 ? amenitiesToSend : (existingAmenities.length > 0 ? existingAmenities.map((a: any) => ({ id: a.id, name: a.name || a.amenityName || "" })) : [])
-        
+
         const updateRequest: any = {
           title: formDataToUse.title.trim(),
           description: formDataToUse.description.trim(),
@@ -482,20 +482,20 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
           // Backend @NotNull validation requires amenities to be present (not null)
           amenities: finalAmenities,
         }
-        
+
         try {
           await apiClient.properties.update(propertyId, updateRequest)
         } catch (err: any) {
           throw err
         }
-        
+
         // Note: Other fields (title, address, bedrooms, etc.) are not supported by current backend API
         // They would need to be added to UpdatePropertyRequest in the backend
-        
+
         if (onSuccess) {
           onSuccess()
         }
-        
+
         alert("Property updated successfully!")
         setIsLoading(false)
         return
@@ -534,35 +534,35 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
       }
 
       const result = await apiClient.properties.create(createRequest, images)
-      
+
       try {
         const userData = await apiClient.users.getMe()
-        
+
         const frontendRoles = (userData.roles || []).map((r: string) => {
           if (r === "HOST") return "POSTER"
           if (r === "TENANT") return "USER"
           if (r === "ADMIN") return "ADMIN"
           return r
         })
-        
+
         const updatedUser = {
           ...user,
           roles: frontendRoles.length > 0 ? frontendRoles : user?.roles || ["USER"],
           walletAddress: userData.walletAddress || user?.walletAddress,
         }
-        
+
         localStorage.setItem("user", JSON.stringify(updatedUser))
         localStorage.setItem(process.env.NEXT_PUBLIC_USER_STORAGE_KEY || "derent5_user_data", JSON.stringify(updatedUser))
         window.dispatchEvent(new Event("auth-state-changed"))
       } catch (error) {
         console.error("Failed to refresh user data:", error)
       }
-      
+
       // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess()
       }
-      
+
       // Reset form
       setFormData({
         title: "",
@@ -589,7 +589,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
         fifteenDays: false,
         oneMonth: false,
       })
-      
+
       // Show success message
       setError("")
       alert("Property created successfully!")
@@ -601,14 +601,14 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
   }
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
       <h2 className="text-2xl font-bold text-gray-900 mb-4">
         {isEditMode ? "Edit Property" : "Add New Property"}
       </h2>
       <p className="text-gray-600 mb-6">
         {isEditMode ? "Update the details of your property" : "Fill in the details to post your property"}
       </p>
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && <div className="p-4 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>}
 
@@ -616,7 +616,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
         <div>
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Upload Images</h3>
           <div className="space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-600 transition-colors">
+            <div className="border-2 border-dashed border-teal-200 bg-teal-50/30 rounded-xl p-8 text-center hover:bg-teal-50/50 hover:border-teal-500 transition-all group cursor-pointer">
               <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
               <label className="cursor-pointer">
                 <span className="text-teal-600 hover:text-teal-700 font-medium">Click to upload</span> or drag and drop
@@ -685,7 +685,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 placeholder="e.g. Modern Downtown Apartment"
                 required
               />
@@ -697,7 +697,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 h-24"
+                className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all h-24"
                 placeholder="Describe your property in detail..."
                 required
               />
@@ -710,7 +710,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                   name="typeId"
                   value={formData.typeId}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 >
                   <option value="1">Apartment</option>
                   <option value="2">House</option>
@@ -721,7 +721,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
               </div>
 
               <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Daily Price (MAD) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Daily Price (MAD) *</label>
                 <input
                   type="number"
                   name="dailyPrice"
@@ -729,17 +729,17 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                   onChange={handleInputChange}
                   step="0.001"
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                   placeholder="0.05"
                   required
                 />
-                    <p className="text-xs text-gray-500 mt-1">Price per day in Moroccan Dirham (MAD)</p>
+                <p className="text-xs text-gray-500 mt-1">Price per day in Moroccan Dirham (MAD)</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Deposit Amount (MAD) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Deposit Amount (MAD) *</label>
                 <input
                   type="number"
                   name="depositAmount"
@@ -747,11 +747,11 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                   onChange={handleInputChange}
                   step="0.001"
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                   placeholder="0.1"
                   required
                 />
-                    <p className="text-xs text-gray-500 mt-1">Security deposit amount in Moroccan Dirham (MAD)</p>
+                <p className="text-xs text-gray-500 mt-1">Security deposit amount in Moroccan Dirham (MAD)</p>
               </div>
             </div>
 
@@ -768,7 +768,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                 step="0.1"
                 min="0"
                 max="100"
-                className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600"
+                className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 placeholder="0.0"
                 required
               />
@@ -788,7 +788,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                 name="capacity"
                 value={formData.capacity}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 placeholder="4"
                 required
               />
@@ -800,7 +800,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                 name="numberOfBedrooms"
                 value={formData.numberOfBedrooms}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 placeholder="2"
                 required
               />
@@ -812,7 +812,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                 name="numberOfBeds"
                 value={formData.numberOfBeds}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 placeholder="3"
                 required
               />
@@ -824,7 +824,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                 name="numberOfBathrooms"
                 value={formData.numberOfBathrooms}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 placeholder="1"
                 min="1"
                 required
@@ -930,7 +930,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
               <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 text-sm text-teal-700">
                 <p className="font-medium">📍 Location detected:</p>
                 <p className="text-xs mt-1">
-                  {formData.latitude && formData.longitude 
+                  {formData.latitude && formData.longitude
                     ? `Lat: ${parseFloat(formData.latitude).toFixed(6)}, Lng: ${parseFloat(formData.longitude).toFixed(6)}`
                     : ""}
                 </p>
@@ -943,7 +943,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                 name="address"
                 value={formData.address}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 placeholder="123 Main Street"
                 required
               />
@@ -957,7 +957,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                   name="city"
                   value={formData.city}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                   placeholder="Casablanca"
                   required
                 />
@@ -970,7 +970,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                   name="country"
                   value={formData.country}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                   required
                 />
               </div>
@@ -982,7 +982,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
                   name="zipCode"
                   value={formData.zipCode}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                   placeholder="20000"
                 />
               </div>
@@ -992,9 +992,9 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
 
         {/* Submit */}
         <div className="flex gap-4 pt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             className="flex-1"
             onClick={() => {
               setFormData({
@@ -1027,7 +1027,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
           >
             Clear
           </Button>
-          <Button type="submit" className="flex-1 bg-teal-600 hover:bg-teal-700" disabled={isLoading}>
+          <Button type="submit" className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 h-10 shadow-lg hover:shadow-xl transition-all" disabled={isLoading}>
             {isLoading ? (isEditMode ? "Updating..." : "Publishing...") : (isEditMode ? "Update Property" : "Publish Property")}
           </Button>
         </div>

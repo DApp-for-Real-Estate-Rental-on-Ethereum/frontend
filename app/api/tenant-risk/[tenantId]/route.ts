@@ -6,10 +6,16 @@ export async function POST(
     { params }: { params: Promise<{ tenantId: string }> }
 ) {
     const { tenantId } = await params;
-    const ML_API_URL = process.env.AI_API_URL || "http://localhost:8002"; // Use K8s DNS or localhost default
+
+    // Use Gateway URL in production (K8s), fallback to direct AI service for local dev
+    // AI_API_URL in K8s points to Gateway, Gateway routes /api/tenant-risk/** to pricing-api
+    const GATEWAY_URL = process.env.AI_API_URL || process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8002";
 
     try {
-        const response = await fetch(`${ML_API_URL}/tenant-risk/${tenantId}`, {
+        // AI Service (pricing-api) expects /api prefix
+        const fullUrl = `${GATEWAY_URL}/api/tenant-risk/${tenantId}`;
+
+        const response = await fetch(fullUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -21,8 +27,9 @@ export async function POST(
         });
 
         if (!response.ok) {
+            const errorText = await response.text().catch(() => response.statusText);
             return NextResponse.json(
-                { error: `ML Service Error: ${response.statusText}` },
+                { error: `ML Service Error: ${errorText}` },
                 { status: response.status }
             );
         }
@@ -32,7 +39,7 @@ export async function POST(
     } catch (error: any) {
         console.error("Proxy error:", error);
         return NextResponse.json(
-            { error: "Failed to connect to ML service" },
+            { error: `Failed to connect to ML service: ${error.message}` },
             { status: 500 }
         );
     }

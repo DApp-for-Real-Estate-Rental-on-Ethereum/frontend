@@ -7,6 +7,7 @@ export interface User {
   phoneNumber?: string
   birthday?: string
   profileImage?: string
+  profilePicture?: string // backend may return this field; keep for compatibility
   walletAddress?: string
   roles: UserRole[]
   verified?: boolean
@@ -208,3 +209,45 @@ export interface MarketTrendsResponse {
   insights: MarketInsight[];
   generated_at: string;
 }
+
+// Booking Types
+export type BookingStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "REJECTED"
+  | "CANCELLED"
+  | "COMPLETED"
+  | "TENANT_CHECKED_OUT"
+  | "WAITING_FOR_PAYMENT"
+  | "PAYMENT_FAILED"
+  | "REFUNDED"
+  | "DISPUTED"
+
+export interface Booking {
+  id: number
+  userId: number
+  propertyId: string
+  checkInDate: string
+  checkOutDate: string
+  totalPrice: number
+  status: BookingStatus
+  longStayDiscountPercent?: number
+  requestedNegotiationPercent?: number
+  negotiationExpiresAt?: string
+  onChainTxHash?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface BookingRequest {
+  userId: number | string
+  propertyId: string
+  checkInDate: string
+  checkOutDate: string
+  numberOfGuests: number
+  requestedPrice?: number
+}
+
+export type NegotiationStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "EXPIRED"
+
+export type PropertyRequest = CreatePropertyRequest;

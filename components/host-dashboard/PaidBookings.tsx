@@ -92,8 +92,8 @@ export function PaidBookings({ ownerId }: PaidBookingsProps) {
         try {
           setLoadingRiskScores(prev => ({ ...prev, [tenantId]: true }));
 
-          if (apiClient.risk && apiClient.risk.getTenantRiskScore) {
-            const score = await apiClient.risk.getTenantRiskScore(Number(tenantId));
+          if (apiClient.tenantRisk && apiClient.tenantRisk.assess) {
+            const score = await apiClient.tenantRisk.assess(Number(tenantId));
             setTenantRiskScores(prev => ({ ...prev, [tenantId]: score }));
           }
         } catch (err) {

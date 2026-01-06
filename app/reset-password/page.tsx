@@ -82,8 +82,8 @@ export default function ResetPasswordPage() {
 
   if (isValidatingToken) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Validating reset token...</p>
@@ -94,8 +94,8 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
         <div className="p-8">
           <div className="flex justify-center mb-8">
             <Image src="/logo.svg" alt="DeRent5" width={120} height={40} className="h-12 w-auto" />
@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 pr-10"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all pr-10"
                   placeholder="••••••••"
                   required
                 />
@@ -136,7 +136,7 @@ export default function ResetPasswordPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 pr-10"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all pr-10"
                   placeholder="••••••••"
                   required
                 />
@@ -155,7 +155,7 @@ export default function ResetPasswordPage() {
             )}
             {error && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>}
 
-            <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all h-10 rounded-xl" disabled={isLoading}>
               {isLoading ? "Resetting..." : "Reset Password"}
             </Button>
           </form>

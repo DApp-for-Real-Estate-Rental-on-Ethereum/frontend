@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Configuration for the ML Service
-const ML_SERVICE_URL = process.env.AI_API_URL || "http://localhost:8002";
-
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ path: string[] }> }
 ) {
     try {
+        // Use Gateway URL in production (K8s), fallback to direct AI service for local dev
+        const GATEWAY_URL = process.env.AI_API_URL || process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8002";
+
         const { path } = await params;
         const pathString = path.join("/");
         const searchParams = request.nextUrl.searchParams.toString();
-        const targetUrl = `${ML_SERVICE_URL}/market-trends/${pathString}${searchParams ? `?${searchParams}` : ""}`;
+        const targetUrl = `${GATEWAY_URL}/api/market-trends/${pathString}${searchParams ? `?${searchParams}` : ""}`;
 
         const response = await fetch(targetUrl, {
             method: "GET",

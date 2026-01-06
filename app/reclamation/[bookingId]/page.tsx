@@ -40,7 +40,8 @@ export default function ReclamationPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, isLoading: authLoading, isAuthenticated } = useAuth()
-  const bookingId = params?.bookingId as string
+  const bookingIdParam = params?.bookingId as string
+  const bookingId = bookingIdParam ? parseInt(bookingIdParam, 10) : NaN
   const isHost = searchParams?.get("isHost") === "true"
   const reclamationIdParam = searchParams?.get("reclamationId")
 
@@ -103,7 +104,7 @@ export default function ReclamationPage() {
           console.log("🔍 Fetching reclamation by bookingId and complainantId:", bookingId, user.id)
           reclamation = await apiClient.reclamations.getByBookingIdAndComplainant(
             bookingId,
-            user.id
+            Number(user.id)
           )
           console.log("✅ Found reclamation by bookingId:", reclamation)
         } catch (err) {
@@ -161,10 +162,10 @@ export default function ReclamationPage() {
                 // User is guest complainant, get host from property
                 if (propertyData?.userId) {
                   targetUserId = parseInt(String(propertyData.userId))
-                } else {
-                  const propertyInfo = await apiClient.bookings.getPropertyInfo(String(bookingData.propertyId))
-                  if (propertyInfo.ownerId) {
-                    targetUserId = propertyInfo.ownerId
+                } else if (bookingData.propertyId) {
+                  const fallbackProperty = await apiClient.properties.getById(String(bookingData.propertyId))
+                  if (fallbackProperty?.userId) {
+                    targetUserId = parseInt(String(fallbackProperty.userId))
                   }
                 }
               } else {
@@ -176,7 +177,7 @@ export default function ReclamationPage() {
 
             if (targetUserId && targetUserId > 0) {
               console.log("📞 Fetching user info for ID:", targetUserId)
-              const userInfo = await apiClient.users.getById(targetUserId)
+              const userInfo = await apiClient.users.getById(Number(targetUserId))
               console.log("📞 User info received:", userInfo)
               if (userInfo && userInfo.phoneNumber) {
                 console.log("✅ Setting phone number:", userInfo.phoneNumber)
@@ -310,7 +311,7 @@ export default function ReclamationPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="p-8 shadow-2xl border-2 border-teal-100 bg-white/95 backdrop-blur-sm">
+          <Card className="p-8 shadow-2xl border border-white/20 bg-white/80 backdrop-blur-md">
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -522,7 +523,7 @@ export default function ReclamationPage() {
                         onClick={async () => {
                           if (window.confirm("Are you sure you want to delete this reclamation?")) {
                             try {
-                              await apiClient.reclamations.delete(existingReclamation.id, user.id)
+                              await apiClient.reclamations.delete(existingReclamation.id, Number(user.id))
                               router.back()
                             } catch (err: any) {
                               setError(err.message || "Failed to delete reclamation")
@@ -546,7 +547,7 @@ export default function ReclamationPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 py-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Card className="p-8 shadow-2xl border-2 border-teal-100 bg-white/95 backdrop-blur-sm">
+        <Card className="p-8 shadow-2xl border border-white/20 bg-white/80 backdrop-blur-md">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className={`p-3 rounded-xl ${isHost ? 'bg-orange-100' : 'bg-teal-100'}`}>
@@ -639,7 +640,7 @@ export default function ReclamationPage() {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Short title for the reclamation..."
                 required
-                className="mt-2 border-2 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 rounded-lg transition-all"
+                className="mt-2 w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -655,7 +656,7 @@ export default function ReclamationPage() {
                 rows={5}
                 placeholder="Add additional details about the reclamation..."
                 required
-                className="mt-2 border-2 border-gray-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 rounded-lg transition-all resize-none"
+                className="mt-2 w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all resize-none"
               />
             </div>
 

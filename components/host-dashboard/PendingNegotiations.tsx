@@ -148,6 +148,38 @@ export function PendingNegotiations({ ownerId, onUpdate }: PendingNegotiationsPr
     return url
   }
 
+  const getRiskLevel = (score: number) => {
+    if (score >= 80) return { label: "Low Risk", color: "bg-green-100 text-green-800 border-green-200", icon: CheckCircle }
+    if (score >= 50) return { label: "Medium Risk", color: "bg-yellow-100 text-yellow-800 border-yellow-200", icon: Eye }
+    return { label: "High Risk", color: "bg-red-100 text-red-800 border-red-200", icon: XCircle }
+  }
+
+  const [riskScores, setRiskScores] = useState<{ [key: number]: number }>({})
+
+  useEffect(() => {
+    // Fetch risk scores for all bookings
+    const fetchRiskScores = async () => {
+      const scores: { [key: number]: number } = {}
+      await Promise.all(
+        bookings.map(async (booking) => {
+          try {
+            const response = await apiClient.risk.getTenantRiskScore(booking.userId)
+            if (response && typeof response.trust_score === 'number') {
+              scores[booking.id] = response.trust_score
+            }
+          } catch (e) {
+            console.error(`Failed to fetch risk score for user ${booking.userId}`, e)
+          }
+        })
+      )
+      setRiskScores(scores)
+    }
+
+    if (bookings.length > 0) {
+      fetchRiskScores()
+    }
+  }, [bookings])
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -184,6 +216,7 @@ export function PendingNegotiations({ ownerId, onUpdate }: PendingNegotiationsPr
         {bookings.map((booking) => {
           const imageUrl = getPropertyImage(booking.property)
           const nights = calculateNights(booking.checkInDate, booking.checkOutDate)
+          const risk = riskScores[booking.id] ? getRiskLevel(riskScores[booking.id]) : null
 
           return (
             <Card key={booking.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300">
@@ -202,8 +235,14 @@ export function PendingNegotiations({ ownerId, onUpdate }: PendingNegotiationsPr
                     <MapPin className="w-16 h-16 text-yellow-300" />
                   </div>
                 )}
-                <div className="absolute top-4 right-4">
+                <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
                   <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Negotiation</Badge>
+                  {risk && (
+                    <Badge className={`${risk.color} border shadow-sm`}>
+                      <risk.icon className="w-3 h-3 mr-1" />
+                      {risk.label} ({riskScores[booking.id]})
+                    </Badge>
+                  )}
                 </div>
                 <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg">
                   <div className="flex items-baseline gap-1">

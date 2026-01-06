@@ -1528,7 +1528,7 @@ export const apiClient = {
     async getById(id: string | number): Promise<any> {
       if (USE_MOCK_API) {
         const mock = await getMockApi()
-        return mock.bookings?.getById?.(id) || null
+        return mock.?.getById?.(id) || null
       }
 
       const url = `${BOOKING_API_BASE_URL}/api/bookings/${id}`

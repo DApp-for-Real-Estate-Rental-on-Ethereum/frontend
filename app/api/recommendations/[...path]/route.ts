@@ -7,13 +7,16 @@ export async function GET(
 ) {
     const { path } = await params;
     const pathString = path.join("/");
-    const ML_API_URL = process.env.AI_API_URL || "http://localhost:8002";
+
+    // Use Gateway URL in production (K8s), fallback to direct AI service for local dev
+    const GATEWAY_URL = process.env.AI_API_URL || process.env.NEXT_PUBLIC_GATEWAY_URL || "http://localhost:8002";
 
     // Capture query parameters from the original request
     const searchParams = request.nextUrl.searchParams.toString();
     const queryString = searchParams ? `?${searchParams}` : "";
 
-    const targetUrl = `${ML_API_URL}/recommendations/${pathString}${queryString}`;
+    // AI Service (pricing-api)
+    const targetUrl = `${GATEWAY_URL}/api/recommendations/${pathString}${queryString}`;
 
     try {
         const response = await fetch(targetUrl, {

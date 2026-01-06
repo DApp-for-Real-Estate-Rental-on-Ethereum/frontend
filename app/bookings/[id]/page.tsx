@@ -7,14 +7,14 @@ import { useAuth } from "@/lib/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Loader2, 
-  Calendar, 
-  MapPin, 
-  Clock, 
-  DollarSign, 
-  Edit, 
-  Trash2, 
+import {
+  Loader2,
+  Calendar,
+  MapPin,
+  Clock,
+  DollarSign,
+  Edit,
+  Trash2,
   ArrowLeft,
   CheckCircle,
   XCircle,
@@ -120,7 +120,12 @@ export default function BookingDetailPage() {
     if (!booking?.propertyId) return
     try {
       const info = await apiClient.bookings.getPropertyInfo(String(booking.propertyId))
-      setPropertyInfo(info)
+      setPropertyInfo({
+        pricePerNight: Number(info.pricePerNight),
+        isNegotiable: info.isNegotiable,
+        discountEnabled: info.discountEnabled,
+        negotiationPercentage: info.maxNegotiationPercent
+      })
     } catch (err) {
       console.error("Failed to fetch property info:", err)
     }
@@ -223,7 +228,7 @@ export default function BookingDetailPage() {
     setError("")
 
     try {
-      await apiClient.bookings.delete(booking.id)
+      await apiClient.bookings.delete(booking.id, parseInt(user!.id))
       router.push("/my-bookings")
     } catch (err: any) {
       setError(err.message || "Failed to cancel booking")
@@ -235,10 +240,10 @@ export default function BookingDetailPage() {
     if (!dateString) return "N/A"
     try {
       const date = new Date(dateString)
-      return date.toLocaleDateString("en-US", { 
-        year: "numeric", 
-        month: "long", 
-        day: "numeric" 
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
       })
     } catch {
       return dateString
@@ -340,7 +345,7 @@ export default function BookingDetailPage() {
   }
 
   const nights = calculateNights(booking.checkInDate, booking.checkOutDate)
-  const imageUrl = getPropertyImage(property)
+  const imageUrl = getPropertyImage(property || undefined)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -569,8 +574,8 @@ export default function BookingDetailPage() {
                           {parseFloat(editForm.requestedPrice) >= basePrice
                             ? "✅ Full price - negotiation will be cancelled"
                             : parseFloat(editForm.requestedPrice) >= basePrice * (1 - propertyInfo.negotiationPercentage / 100)
-                            ? "✅ Valid negotiation price"
-                            : "⚠️ Price below minimum allowed"}
+                              ? "✅ Valid negotiation price"
+                              : "⚠️ Price below minimum allowed"}
                         </p>
                       )}
                     </div>
@@ -614,31 +619,31 @@ export default function BookingDetailPage() {
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions</h2>
                 <div className="space-y-3">
                   {/* Edit Button */}
-                  {(booking.status === "PENDING" || 
-                    booking.status === "PENDING_PAYMENT" || 
+                  {(booking.status === "PENDING" ||
+                    booking.status === "PENDING_PAYMENT" ||
                     booking.status === "PENDING_NEGOTIATION") && (
-                    <Button
-                      onClick={handleEdit}
-                      disabled={actionLoading}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Booking
-                    </Button>
-                  )}
+                      <Button
+                        onClick={handleEdit}
+                        disabled={actionLoading}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit Booking
+                      </Button>
+                    )}
 
                   {/* Pay Button */}
-                  {(booking.status === "PENDING_PAYMENT" || 
+                  {(booking.status === "PENDING_PAYMENT" ||
                     (booking.status === "PENDING" && !booking.requestedNegotiationPercent)) && (
-                    <Button
-                      onClick={() => router.push(`/payment?bookingId=${booking.id}`)}
-                      className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                    >
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      Pay Now
-                    </Button>
-                  )}
+                      <Button
+                        onClick={() => router.push(`/payment?bookingId=${booking.id}`)}
+                        className="w-full bg-teal-600 hover:bg-teal-700 text-white"
+                      >
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        Pay Now
+                      </Button>
+                    )}
 
                   {/* Checkout Button */}
                   {booking.status === "CONFIRMED" && (
@@ -673,28 +678,28 @@ export default function BookingDetailPage() {
                   )}
 
                   {/* Delete Button */}
-                  {(booking.status === "PENDING" || 
-                    booking.status === "PENDING_PAYMENT" || 
+                  {(booking.status === "PENDING" ||
+                    booking.status === "PENDING_PAYMENT" ||
                     booking.status === "PENDING_NEGOTIATION") && (
-                    <Button
-                      onClick={handleDelete}
-                      disabled={actionLoading}
-                      variant="destructive"
-                      className="w-full"
-                    >
-                      {actionLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Deleting...
-                        </>
-                      ) : (
-                        <>
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Cancel Booking
-                        </>
-                      )}
-                    </Button>
-                  )}
+                      <Button
+                        onClick={handleDelete}
+                        disabled={actionLoading}
+                        variant="destructive"
+                        className="w-full"
+                      >
+                        {actionLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Cancel Booking
+                          </>
+                        )}
+                      </Button>
+                    )}
                 </div>
               </Card>
             )}

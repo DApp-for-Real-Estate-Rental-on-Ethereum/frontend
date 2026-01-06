@@ -35,13 +35,13 @@ export default function EditPropertyPage() {
       setIsLoading(true)
       setError("")
       const data = await apiClient.properties.getById(propertyId)
-      
+
       // Check if user owns this property
       if (data.userId !== user?.id) {
         setError("You don't have permission to edit this property.")
         return
       }
-      
+
       setProperty(data)
     } catch (err: any) {
       console.error("Failed to fetch property:", err)
@@ -71,7 +71,7 @@ export default function EditPropertyPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="p-8 text-center max-w-md">
+        <Card className="p-8 text-center max-w-md bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
           <p className="text-red-600 mb-4">{error}</p>
           <button
             onClick={() => router.push("/host-dashboard")}
@@ -87,7 +87,7 @@ export default function EditPropertyPage() {
   if (!property) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="p-8 text-center max-w-md">
+        <Card className="p-8 text-center max-w-md bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
           <p className="text-gray-600 mb-4">Property not found</p>
           <button
             onClick={() => router.push("/host-dashboard")}
@@ -101,7 +101,7 @@ export default function EditPropertyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <AddPropertyForm
           propertyId={propertyId}

@@ -12,11 +12,17 @@ import { ArrowLeft, Wallet, Loader2, Calendar, User, AlertCircle } from "lucide-
 import { useAuth } from "@/lib/hooks/use-auth"
 import { toast } from "sonner"
 
-const HARDHAT_CHAIN_ID = "0x7a69"
-const ARBITRUM_ONE_CHAIN_ID = "0xa4b1"
+import { WEB3_CONFIG, getNetworkConfig, isSupportedNetwork } from "@/lib/config/web3-config"
 
-// MAD to ETH conversion rate (1 ETH ≈ 35,000 MAD)
-const MAD_TO_ETH_RATE = 35000
+// Blockchain RPC URL - use HTTPS URL for MetaMask compatibility
+// For production: Set NEXT_PUBLIC_BLOCKCHAIN_RPC_URL to your HTTPS endpoint
+const BLOCKCHAIN_RPC_URL = WEB3_CONFIG.networks.hardhat.rpcUrl
+
+// Check if RPC URL is HTTPS (required for MetaMask wallet_addEthereumChain)
+const isHttpsRpcUrl = BLOCKCHAIN_RPC_URL.startsWith("https://")
+
+// MAD to ETH conversion rate
+const MAD_TO_ETH_RATE = WEB3_CONFIG.constants.MAD_TO_ETH_RATE
 
 // Helper function to convert MAD to ETH
 function madToEth(madAmount: number): number {
@@ -109,9 +115,10 @@ export default function PaymentPage() {
     const ethereum = window.ethereum
     if (ethereum && typeof ethereum.on === "function") {
       const handleChainChanged = async (chainId: string) => {
-        if (chainId === HARDHAT_CHAIN_ID || chainId === ARBITRUM_ONE_CHAIN_ID) {
+        const config = getNetworkConfig(chainId)
+        if (config) {
           setIsCorrectNetwork(true)
-          setNetworkName(chainId === HARDHAT_CHAIN_ID ? "Hardhat Local" : "Arbitrum One")
+          setNetworkName(config.chainName)
         } else {
           setIsCorrectNetwork(false)
           setNetworkName("Wrong Network")
@@ -129,6 +136,7 @@ export default function PaymentPage() {
       }
     }
   }, [walletAddress, bookingDetails])
+
 
   async function fetchBookingDetails(id: number) {
     try {
@@ -161,6 +169,19 @@ export default function PaymentPage() {
       })
     } catch (switchError: any) {
       if (switchError.code === 4902) {
+        // MetaMask requires HTTPS for rpcUrls when adding custom chains
+        // If the URL is HTTP, show manual setup instructions instead
+        if (!rpcUrl.startsWith("https://")) {
+          toast.error(
+            `Please add the network manually in MetaMask:\n` +
+            `Network: ${chainName}\n` +
+            `RPC URL: ${rpcUrl}\n` +
+            `Chain ID: ${parseInt(chainId, 16)}\n` +
+            `Symbol: ETH`,
+            { duration: 15000 }
+          )
+          throw new Error(`MetaMask requires HTTPS for automatic network setup. Please add ${chainName} manually.`)
+        }
         await ethereum.request({
           method: "wallet_addEthereumChain",
           params: [
@@ -169,7 +190,7 @@ export default function PaymentPage() {
               chainName,
               nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
               rpcUrls: [rpcUrl],
-              blockExplorerUrls: chainId === ARBITRUM_ONE_CHAIN_ID ? ["https://arbiscan.io"] : [],
+              blockExplorerUrls: getNetworkConfig(chainId)?.blockExplorerUrls || [],
             },
           ],
         })
@@ -187,11 +208,21 @@ export default function PaymentPage() {
       }
       const ethereum = window.ethereum
       const currentChainId = await ethereum.request({ method: "eth_chainId" })
-      if (currentChainId !== HARDHAT_CHAIN_ID && currentChainId !== ARBITRUM_ONE_CHAIN_ID) {
+
+      if (!isSupportedNetwork(currentChainId)) {
         try {
-          await switchToNetwork(HARDHAT_CHAIN_ID, "Hardhat Local", "http://127.0.0.1:8545")
+          await switchToNetwork(
+            WEB3_CONFIG.networks.hardhat.chainId,
+            WEB3_CONFIG.networks.hardhat.chainName,
+            WEB3_CONFIG.networks.hardhat.rpcUrl
+          )
         } catch {
-          await switchToNetwork(ARBITRUM_ONE_CHAIN_ID, "Arbitrum One", "https://arb1.arbitrum.io/rpc")
+          // Try fallback to Arbitrum
+          await switchToNetwork(
+            WEB3_CONFIG.networks.arbitrumOne.chainId,
+            WEB3_CONFIG.networks.arbitrumOne.chainName,
+            WEB3_CONFIG.networks.arbitrumOne.rpcUrl
+          )
         }
       }
       const accounts = (await ethereum.request({ method: "eth_requestAccounts" })) as string[]
@@ -223,12 +254,10 @@ export default function PaymentPage() {
       const chainId = await ethereum.request({ method: "eth_chainId" })
       // Normalize chainId to lowercase for comparison
       const normalizedChainId = typeof chainId === 'string' ? chainId.toLowerCase() : chainId;
+      const config = getNetworkConfig(normalizedChainId);
 
-      if (normalizedChainId === HARDHAT_CHAIN_ID.toLowerCase()) {
-        setNetworkName("Hardhat Local")
-        setIsCorrectNetwork(true)
-      } else if (normalizedChainId === ARBITRUM_ONE_CHAIN_ID.toLowerCase()) {
-        setNetworkName("Arbitrum One")
+      if (config) {
+        setNetworkName(config.chainName)
         setIsCorrectNetwork(true)
       } else {
         setNetworkName("Wrong Network")
@@ -735,9 +764,9 @@ export default function PaymentPage() {
                                   onClick={async () => {
                                     try {
                                       await switchToNetwork(
-                                        HARDHAT_CHAIN_ID,
-                                        "Hardhat Local",
-                                        "http://127.0.0.1:8545"
+                                        WEB3_CONFIG.networks.hardhat.chainId,
+                                        WEB3_CONFIG.networks.hardhat.chainName,
+                                        WEB3_CONFIG.networks.hardhat.rpcUrl
                                       )
                                       await checkWalletInfo(
                                         walletAddress || bookingDetails?.userWalletAddress || ""
@@ -757,9 +786,9 @@ export default function PaymentPage() {
                                   onClick={async () => {
                                     try {
                                       await switchToNetwork(
-                                        ARBITRUM_ONE_CHAIN_ID,
-                                        "Arbitrum One",
-                                        "https://arb1.arbitrum.io/rpc"
+                                        WEB3_CONFIG.networks.arbitrumOne.chainId,
+                                        WEB3_CONFIG.networks.arbitrumOne.chainName,
+                                        WEB3_CONFIG.networks.arbitrumOne.rpcUrl
                                       )
                                       await checkWalletInfo(
                                         walletAddress || bookingDetails?.userWalletAddress || ""

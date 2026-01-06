@@ -110,6 +110,15 @@ export function useAuth(): UseAuthReturn {
       try {
         const userData = await apiClient.users.getMe()
 
+        const resolveMediaUrl = (url?: string | null) => {
+          if (!url) return undefined
+          if (url.startsWith("http://") || url.startsWith("https://")) return url
+          const base = process.env.NEXT_PUBLIC_GATEWAY_URL || process.env.NEXT_PUBLIC_API_BASE_URL || ""
+          if (!base) return url
+          const normalized = url.startsWith("/") ? url : `/${url}`
+          return `${base}${normalized}`
+        }
+
         // Use roles from API if available, otherwise use roles from JWT
         let finalRoles = roles
         if (userData.roles && userData.roles.length > 0) {
@@ -128,7 +137,7 @@ export function useAuth(): UseAuthReturn {
           lastName: userData.lastName,
           phoneNumber: userData.phoneNumber?.toString(),
           birthday: userData.birthday,
-          profileImage: userData.profilePicture,
+          profileImage: resolveMediaUrl(userData.profilePicture),
           roles: finalRoles,
           verified: true, // If user can login, they are verified
           walletAddress: userData.walletAddress || undefined, // Add walletAddress from API

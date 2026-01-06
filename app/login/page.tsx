@@ -9,6 +9,9 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Loader2, AlertCircle, CheckCircle } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -43,79 +46,104 @@ export default function LoginPage() {
     }
   }
 
-
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-indigo-100 dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-white/20 shadow-2xl overflow-hidden">
         <div className="p-8">
-          <div className="flex justify-center mb-8">
-            <Image src="/logo.svg" alt="DeRent5" width={120} height={40} className="h-12 w-auto" />
+          <div className="flex flex-col items-center mb-8 space-y-2">
+            <Link href="/" className="mb-4 transition-transform hover:scale-105">
+              <Image src="/logo.svg" alt="DeRent5" width={140} height={48} className="h-14 w-auto drop-shadow-sm" priority />
+            </Link>
+            <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white tracking-tight">Welcome Back</h1>
+            <p className="text-center text-gray-500 dark:text-gray-400 text-sm">Sign in to manage your bookings and properties</p>
           </div>
 
-          <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">Welcome to DeRent5</h1>
-          <p className="text-center text-gray-600 mb-8">Sign in to your account or become a host</p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-              <input
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
-                placeholder="your@email.com"
+                className="bg-white/50 dark:bg-slate-950/50 border-gray-200 dark:border-slate-800 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                placeholder="name@example.com"
+
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
-                placeholder="••••••••"
-                required
-              />
-              <div className="mt-2 text-right">
-                <Link href="/forgot-password" className="text-sm text-teal-600 hover:underline">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs font-medium text-teal-600 hover:text-teal-700 hover:underline dark:text-teal-400"
+                >
                   Forgot password?
                 </Link>
               </div>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-white/50 dark:bg-slate-950/50 border-gray-200 dark:border-slate-800 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                placeholder="••••••••"
+                required
+              />
             </div>
 
             {successMessage && (
-              <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm">
-                {successMessage}
-                <div className="mt-2">
-                  <Link href="/verify" className="text-teal-600 hover:underline font-medium">
-                    Click here to verify your account
+              <div className="flex items-start gap-3 p-3 bg-green-50/80 border border-green-100 text-green-700 rounded-lg text-sm dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
+                <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">{successMessage}</p>
+                  <Link href="/verify" className="text-teal-700 dark:text-teal-400 hover:underline font-semibold mt-1 inline-block">
+                    Verify account now &rarr;
                   </Link>
                 </div>
               </div>
             )}
+
             {searchParams.get("verified") === "true" && (
-              <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm">
-                Account verified successfully! You can now sign in.
+              <div className="flex items-center gap-3 p-3 bg-green-50/80 border border-green-100 text-green-700 rounded-lg text-sm dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
+                <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                <span>Account verified! You may now sign in.</span>
               </div>
             )}
-            {error && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>}
 
-            <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In"}
+            {error && (
+              <div className="flex items-center gap-3 p-3 bg-red-50/80 border border-red-100 text-red-700 rounded-lg text-sm dark:bg-red-900/20 dark:border-red-800 dark:text-red-300">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium shadow-lg shadow-teal-500/20 transition-all duration-200"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </form>
 
-
-
-          <p className="text-center text-sm text-gray-600 mt-6">
-            Don't have an account?{" "}
-            <Link href="/signup" className="text-teal-600 hover:underline">
-              Sign up
-            </Link>
-          </p>
+          <div className="mt-8 text-center pt-6 border-t border-gray-100 dark:border-white/10">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Don't have an account?{" "}
+              <Link href="/signup" className="text-teal-600 hover:text-teal-700 font-semibold hover:underline dark:text-teal-400 transition-colors">
+                Create Account
+              </Link>
+            </p>
+          </div>
         </div>
       </Card>
     </div>

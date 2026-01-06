@@ -96,25 +96,25 @@ export function MarketTrends() {
                 </div>
                 <div className="flex gap-4">
                     <Select value={selectedCity} onValueChange={setSelectedCity}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[180px] bg-white/50 border-gray-200 rounded-xl focus:ring-teal-500 transition-all">
                             <SelectValue placeholder="Select City" />
                         </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Cities</SelectItem>
+                        <SelectContent className="bg-white/95 backdrop-blur-md border-gray-100 rounded-xl shadow-xl">
+                            <SelectItem value="all" className="focus:bg-teal-50 focus:text-teal-700 cursor-pointer">All Cities</SelectItem>
                             {data.trends.map(t => (
-                                <SelectItem key={t.city} value={t.city}>{t.city}</SelectItem>
+                                <SelectItem key={t.city} value={t.city} className="focus:bg-teal-50 focus:text-teal-700 cursor-pointer">{t.city}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
 
                     <Select value={periodMonths.toString()} onValueChange={(v) => setPeriodMonths(parseInt(v))}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[180px] bg-white/50 border-gray-200 rounded-xl focus:ring-teal-500 transition-all">
                             <SelectValue placeholder="Period" />
                         </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="6">Last 6 Months</SelectItem>
-                            <SelectItem value="12">Last 12 Months</SelectItem>
-                            <SelectItem value="24">Last 24 Months</SelectItem>
+                        <SelectContent className="bg-white/95 backdrop-blur-md border-gray-100 rounded-xl shadow-xl">
+                            <SelectItem value="6" className="focus:bg-teal-50 focus:text-teal-700 cursor-pointer">Last 6 Months</SelectItem>
+                            <SelectItem value="12" className="focus:bg-teal-50 focus:text-teal-700 cursor-pointer">Last 12 Months</SelectItem>
+                            <SelectItem value="24" className="focus:bg-teal-50 focus:text-teal-700 cursor-pointer">Last 24 Months</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -122,27 +122,32 @@ export function MarketTrends() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredTrends.map(trend => (
-                    <Card key={trend.city}>
+                    <Card key={trend.city} className="bg-white/80 backdrop-blur-md border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 group">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                <MapPin className="w-4 h-4 text-muted-foreground" />
+                            <CardTitle className="text-sm font-medium flex items-center gap-2 text-gray-700 group-hover:text-teal-700 transition-colors">
+                                <div className="p-2 bg-teal-50 rounded-lg group-hover:bg-teal-100 transition-colors">
+                                    <MapPin className="w-4 h-4 text-teal-600" />
+                                </div>
                                 {trend.city}
                             </CardTitle>
                             {getTrendIcon(trend.trend_direction)}
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{trend.data_points[trend.data_points.length - 1]?.avg_price_mad.toFixed(0)} MAD</div>
-                            <p className="text-xs text-muted-foreground">
-                                {trend.price_change_percent > 0 ? "+" : ""}{trend.price_change_percent}% change ({trend.trend_direction.toLowerCase()})
+                            <div className="text-2xl font-bold text-gray-900 mt-2">{trend.data_points[trend.data_points.length - 1]?.avg_price_mad.toFixed(0)} MAD</div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                <span className={trend.price_change_percent > 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                                    {trend.price_change_percent > 0 ? "+" : ""}{trend.price_change_percent}%
+                                </span>
+                                <span className="text-gray-400 ml-1">last {periodMonths} months</span>
                             </p>
-                            <div className="mt-4 pt-4 border-t flex justify-between text-sm">
+                            <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm">
                                 <div className="flex flex-col">
-                                    <span className="text-muted-foreground">Avg Occupancy</span>
-                                    <span className="font-semibold">{(trend.avg_occupancy * 100).toFixed(1)}%</span>
+                                    <span className="text-xs text-gray-500 uppercase font-semibold">Occupancy</span>
+                                    <span className="font-semibold text-gray-700">{(trend.avg_occupancy * 100).toFixed(1)}%</span>
                                 </div>
                                 <div className="flex flex-col text-right">
-                                    <span className="text-muted-foreground">Properties</span>
-                                    <span className="font-semibold">~</span>
+                                    <span className="text-xs text-gray-500 uppercase font-semibold">Trend</span>
+                                    <span className="font-semibold text-gray-700">{trend.trend_direction.toLowerCase().replace('_', ' ')}</span>
                                 </div>
                             </div>
                         </CardContent>
@@ -151,10 +156,10 @@ export function MarketTrends() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <Card className="lg:col-span-2">
+                <Card className="lg:col-span-2 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
                     <CardHeader>
-                        <CardTitle>Price Evolution (MAD)</CardTitle>
-                        <CardDescription>Average daily rental rates over time</CardDescription>
+                        <CardTitle className="text-xl font-bold text-gray-900">Price Evolution (MAD)</CardTitle>
+                        <CardDescription className="text-gray-500">Average daily rental rates over the selected period</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="h-[350px] w-full">
@@ -184,13 +189,15 @@ export function MarketTrends() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-white/80 backdrop-blur-md border border-white/20 shadow-xl h-fit">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Sparkles className="w-5 h-5 text-indigo-500" />
+                        <CardTitle className="flex items-center gap-2 text-xl font-bold text-gray-900">
+                            <div className="p-2 bg-indigo-50 rounded-lg">
+                                <Sparkles className="w-5 h-5 text-indigo-600" />
+                            </div>
                             AI Insights
                         </CardTitle>
-                        <CardDescription>Smart forecasts & patterns</CardDescription>
+                        <CardDescription className="text-gray-500">Smart forecasts & market patterns</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {data.insights.filter(i => selectedCity === 'all' || i.city === selectedCity).length === 0 ? (

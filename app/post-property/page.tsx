@@ -17,13 +17,13 @@ export default function PostPropertyPage() {
   const { user, isLoading: authLoading, token } = useAuth()
   const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [isCheckingWallet, setIsCheckingWallet] = useState(true)
-  
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     typeId: "1",
-    dailyPrice: "", // Daily price in ETH
-    depositAmount: "", // Deposit amount in ETH
+    dailyPrice: "", // Daily price in MAD
+    depositAmount: "", // Deposit amount in MAD
     negotiationPercentage: "", // negotiation percentage
     capacity: "",
     numberOfBedrooms: "",
@@ -67,7 +67,7 @@ export default function PostPropertyPage() {
         const userData = await apiClient.users.getMe()
         const walletAddr = userData.walletAddress && userData.walletAddress.trim() !== "" ? userData.walletAddress : null
         setWalletAddress(walletAddr)
-        
+
         // Update user in localStorage if walletAddress was found
         if (walletAddr) {
           const updatedUser = { ...user, walletAddress: walletAddr }
@@ -132,17 +132,17 @@ export default function PostPropertyPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
-    
+
     // Combine with existing images (if any)
     const totalFiles = [...images, ...files]
-    
+
     // Validate total image count: must be between 5 and 10
     if (totalFiles.length > 10) {
       setError(`You can upload at most 10 images total. Currently have ${images.length}, trying to add ${files.length}`)
       e.target.value = "" // Reset input
       return
     }
-    
+
     setImages(totalFiles)
     setError("") // Clear any previous errors
 
@@ -151,7 +151,7 @@ export default function PostPropertyPage() {
       return URL.createObjectURL(file)
     })
     setImagePreview([...imagePreview, ...newPreviews])
-    
+
     // Reset input to allow selecting more files
     e.target.value = ""
   }
@@ -159,16 +159,22 @@ export default function PostPropertyPage() {
   const removeImage = (index: number) => {
     // Revoke object URL to prevent memory leak
     URL.revokeObjectURL(imagePreview[index])
-    
+
     const newImages = images.filter((_, i) => i !== index)
     const newPreviews = imagePreview.filter((_, i) => i !== index)
-    
+
     setImages(newImages)
     setImagePreview(newPreviews)
     setError("") // Clear any errors when removing images
   }
 
   const getCurrentLocation = (retryCount = 0) => {
+    // Geolocation requires HTTPS or localhost; warn early on insecure origins like 192.168.*
+    if (typeof window !== "undefined" && !window.isSecureContext && window.location.hostname !== "localhost") {
+      setError("Location access needs HTTPS (or localhost). Please enable location on a secure connection or enter your address manually.")
+      return
+    }
+
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by your browser. Please enter address manually.")
       return
@@ -178,24 +184,24 @@ export default function PostPropertyPage() {
     setError("")
 
     // Try with high accuracy first, then fallback to lower accuracy
-    const options = retryCount === 0 
+    const options = retryCount === 0
       ? {
-          enableHighAccuracy: true,
-          timeout: 15000, // Increased timeout
-          maximumAge: 60000 // Accept cached position up to 1 minute old
-        }
+        enableHighAccuracy: true,
+        timeout: 15000, // Increased timeout
+        maximumAge: 60000 // Accept cached position up to 1 minute old
+      }
       : {
-          enableHighAccuracy: false, // Fallback: use less accurate but faster method
-          timeout: 10000,
-          maximumAge: 300000 // Accept cached position up to 5 minutes old
-        }
+        enableHighAccuracy: false, // Fallback: use less accurate but faster method
+        timeout: 10000,
+        maximumAge: 300000 // Accept cached position up to 5 minutes old
+      }
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude, accuracy } = position.coords
-        
+
         console.log(`📍 Location obtained: ${latitude}, ${longitude} (accuracy: ${accuracy}m)`)
-        
+
         try {
           // Use OpenStreetMap Nominatim API for reverse geocoding (free, no API key needed)
           const response = await fetch(
@@ -206,7 +212,7 @@ export default function PostPropertyPage() {
               }
             }
           )
-          
+
           if (!response.ok) {
             throw new Error("Failed to get address from coordinates")
           }
@@ -221,7 +227,7 @@ export default function PostPropertyPage() {
             ...prev,
             latitude: latitude.toString(),
             longitude: longitude.toString(),
-            address: addressData.road || addressData.house_number 
+            address: addressData.road || addressData.house_number
               ? `${addressData.house_number || ""} ${addressData.road || ""}`.trim()
               : prev.address,
             city: addressData.city || addressData.town || addressData.village || addressData.municipality || addressData.county || prev.city,
@@ -252,24 +258,24 @@ export default function PostPropertyPage() {
           TIMEOUT: error.TIMEOUT
         })
         setIsGettingLocation(false)
-        
+
         // Retry with lower accuracy if first attempt failed
         if (retryCount === 0 && (error.code === error.POSITION_UNAVAILABLE || error.code === 2)) {
           console.log("Retrying with lower accuracy...")
           setTimeout(() => getCurrentLocation(1), 500)
           return
         }
-        
+
         // Handle error codes (using constants or numeric values)
         const errorCode = error.code
         const errorMessage = error.message || ""
-        
+
         if (errorCode === error.PERMISSION_DENIED || errorCode === 1) {
           setError("Location access denied. Please enable location permissions in your browser settings and try again.")
         } else if (errorCode === error.POSITION_UNAVAILABLE || errorCode === 2) {
           // Check if it's a desktop/laptop without GPS
           const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-          const errorMsg = isMobile 
+          const errorMsg = isMobile
             ? "Location unavailable. Please check if GPS is enabled on your device and try again, or enter address manually."
             : "Location unavailable. Desktop computers usually don't have GPS. Please enter address manually or use a mobile device."
           setError(errorMsg)
@@ -366,7 +372,7 @@ export default function PostPropertyPage() {
       }
 
       // Use first image as cover image (optional - if null, first image will be cover)
-      const coverImageName = images[0]?.name || null
+      const coverImageName = images[0]?.name || undefined
 
       const createRequest = {
         title: formData.title.trim(),
@@ -398,36 +404,30 @@ export default function PostPropertyPage() {
       }
 
       const result = await apiClient.properties.create(createRequest, images)
-      
+
       // Refresh user data to get updated roles (HOST role was added)
       try {
         const userData = await apiClient.users.getMe()
-        
-        // Map backend roles to frontend roles
-        const frontendRoles = (userData.roles || []).map((r: string) => {
-          if (r === "HOST") return "POSTER"
-          if (r === "TENANT") return "USER"
-          if (r === "ADMIN") return "ADMIN"
-          return r
-        })
-        
-        // Update user in localStorage with new roles
+
+        // Persist backend roles as-is so HOST remains available in headers
+        const backendRoles = userData.roles && userData.roles.length > 0 ? userData.roles : user?.roles || ["USER"]
+
         const updatedUser = {
           ...user,
-          roles: frontendRoles.length > 0 ? frontendRoles : user?.roles || ["USER"],
+          roles: backendRoles,
           walletAddress: userData.walletAddress || user?.walletAddress,
         }
-        
+
         localStorage.setItem("user", JSON.stringify(updatedUser))
         localStorage.setItem(process.env.NEXT_PUBLIC_USER_STORAGE_KEY || "derent5_user_data", JSON.stringify(updatedUser))
-        
+
         // Dispatch event to update all components (including header)
         window.dispatchEvent(new Event("auth-state-changed"))
       } catch (error) {
         console.error("Failed to refresh user data:", error)
         // Continue anyway - user can refresh manually
       }
-      
+
       router.refresh() // Refresh to update header
       router.push(`/property/${result.propertyId || result.id}`)
     } catch (err) {
@@ -438,11 +438,11 @@ export default function PostPropertyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">List Your Property</h1>
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-2">List Your Property</h1>
         <p className="text-gray-600 mb-8">Fill in the details to post your property</p>
-        <Card className="p-8">
+        <Card className="p-8 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-8">
             {error && <div className="p-4 bg-red-50 text-red-700 rounded-lg">{error}</div>}
 
@@ -518,7 +518,7 @@ export default function PostPropertyPage() {
                     name="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                    className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     placeholder="e.g. Modern Downtown Apartment"
                     required
                   />
@@ -530,7 +530,7 @@ export default function PostPropertyPage() {
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 h-32"
+                    className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent h-32 transition-all resize-none"
                     placeholder="Describe your property in detail..."
                     required
                   />
@@ -543,7 +543,7 @@ export default function PostPropertyPage() {
                       name="typeId"
                       value={formData.typeId}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                      className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     >
                       <option value="1">Apartment</option>
                       <option value="2">House</option>
@@ -554,37 +554,37 @@ export default function PostPropertyPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Daily Price (ETH) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Daily Price (MAD) *</label>
                     <input
                       type="number"
                       name="dailyPrice"
                       value={formData.dailyPrice}
                       onChange={handleInputChange}
-                      step="0.001"
+                      step="1"
                       min="0"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
-                      placeholder="0.05"
+                      className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                      placeholder="600"
                       required
                     />
-                    <p className="text-xs text-gray-500 mt-1">Price per day in Ethereum (ETH)</p>
+                    <p className="text-xs text-gray-500 mt-1">Price per day in Moroccan Dirham (MAD)</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Deposit Amount (ETH) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Deposit Amount (MAD) *</label>
                     <input
                       type="number"
                       name="depositAmount"
                       value={formData.depositAmount}
                       onChange={handleInputChange}
-                      step="0.001"
+                      step="1"
                       min="0"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
-                      placeholder="0.1"
+                      className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                      placeholder="1000"
                       required
                     />
-                    <p className="text-xs text-gray-500 mt-1">Security deposit amount in Ethereum (ETH)</p>
+                    <p className="text-xs text-gray-500 mt-1">Security deposit amount in Moroccan Dirham (MAD)</p>
                   </div>
                 </div>
 
@@ -602,7 +602,7 @@ export default function PostPropertyPage() {
                     step="0.1"
                     min="0"
                     max="100"
-                    className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600"
+                    className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     placeholder="0.0"
                     required
                     style={{ display: 'block', visibility: 'visible' }}
@@ -623,7 +623,7 @@ export default function PostPropertyPage() {
                     name="capacity"
                     value={formData.capacity}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                    className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     placeholder="4"
                     required
                   />
@@ -635,7 +635,7 @@ export default function PostPropertyPage() {
                     name="numberOfBedrooms"
                     value={formData.numberOfBedrooms}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                    className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     placeholder="2"
                     required
                   />
@@ -647,7 +647,7 @@ export default function PostPropertyPage() {
                     name="numberOfBeds"
                     value={formData.numberOfBeds}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                    className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     placeholder="3"
                     required
                   />
@@ -659,7 +659,7 @@ export default function PostPropertyPage() {
                     name="numberOfBathrooms"
                     value={formData.numberOfBathrooms}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                    className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     placeholder="1"
                     min="1"
                     required
@@ -744,7 +744,7 @@ export default function PostPropertyPage() {
                 <h2 className="text-xl font-semibold text-gray-900">Location</h2>
                 <Button
                   type="button"
-                  onClick={getCurrentLocation}
+                  onClick={() => getCurrentLocation()}
                   disabled={isGettingLocation}
                   variant="outline"
                   className="flex items-center gap-2"
@@ -767,7 +767,7 @@ export default function PostPropertyPage() {
                   <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 text-sm text-teal-700">
                     <p className="font-medium">📍 Location detected:</p>
                     <p className="text-xs mt-1">
-                      {formData.latitude && formData.longitude 
+                      {formData.latitude && formData.longitude
                         ? `Lat: ${parseFloat(formData.latitude).toFixed(6)}, Lng: ${parseFloat(formData.longitude).toFixed(6)}`
                         : ""}
                     </p>
@@ -780,7 +780,7 @@ export default function PostPropertyPage() {
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                    className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     placeholder="123 Main Street"
                     required
                   />
@@ -794,7 +794,7 @@ export default function PostPropertyPage() {
                       name="city"
                       value={formData.city}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                      className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                       placeholder="Casablanca"
                       required
                     />
@@ -807,7 +807,7 @@ export default function PostPropertyPage() {
                       name="country"
                       value={formData.country}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                      className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                       required
                     />
                   </div>
@@ -819,7 +819,7 @@ export default function PostPropertyPage() {
                       name="zipCode"
                       value={formData.zipCode}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                      className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                       placeholder="20000"
                     />
                   </div>
@@ -834,7 +834,7 @@ export default function PostPropertyPage() {
                   Cancel
                 </Button>
               </Link>
-              <Button type="submit" className="flex-1 bg-teal-600 hover:bg-teal-700 h-12 text-lg" disabled={isLoading}>
+              <Button type="submit" className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 h-12 text-lg shadow-lg hover:shadow-xl transition-all" disabled={isLoading}>
                 {isLoading ? "Publishing..." : "Publish Property"}
               </Button>
             </div>

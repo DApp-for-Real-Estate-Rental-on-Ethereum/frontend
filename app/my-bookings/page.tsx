@@ -44,7 +44,7 @@ export default function MyBookingsPage() {
   const [error, setError] = useState("")
   const [actionLoading, setActionLoading] = useState<{ [key: number]: boolean }>({})
   const [loadingProperties, setLoadingProperties] = useState<{ [key: string]: boolean }>({})
-  
+
   // Edit modal state
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editingBooking, setEditingBooking] = useState<BookingWithProperty | null>(null)
@@ -54,7 +54,7 @@ export default function MyBookingsPage() {
     numberOfGuests: 1,
     requestedPrice: undefined as string | undefined,
   })
-  
+
   // View modal state
   const [viewModalOpen, setViewModalOpen] = useState(false)
   const [viewingBooking, setViewingBooking] = useState<BookingWithProperty | null>(null)
@@ -66,7 +66,7 @@ export default function MyBookingsPage() {
   const [complaintProperties, setComplaintProperties] = useState<{ [key: number]: any }>({})
   const [complaintPhoneNumbers, setComplaintPhoneNumbers] = useState<{ [key: number]: string | null }>({})
   const [loadingComplaintData, setLoadingComplaintData] = useState<{ [key: number]: boolean }>({})
-  
+
   // Get active tab from URL query parameter, default to "current"
   const activeTab = searchParams.get("tab") || "current"
 
@@ -84,7 +84,7 @@ export default function MyBookingsPage() {
 
     // User is authenticated, fetch bookings based on active tab
     fetchBookings()
-    
+
     // Fetch complaints if on complaints tab
     if (activeTab === "complaints") {
       fetchMyComplaints()
@@ -132,8 +132,8 @@ export default function MyBookingsPage() {
           const pending = await apiClient.bookings.getPendingBookings(parseInt(user.id))
           if (!pending || pending.length === 0) {
             const all = await apiClient.bookings.getByTenantId(parseInt(user.id))
-            const filtered = (all || []).filter((b: any) => 
-              b.status === "PENDING_NEGOTIATION" || 
+            const filtered = (all || []).filter((b: any) =>
+              b.status === "PENDING_NEGOTIATION" ||
               (b.status === "PENDING" && b.requestedNegotiationPercent != null && b.requestedNegotiationPercent > 0)
             )
             bookingsData = filtered
@@ -145,8 +145,8 @@ export default function MyBookingsPage() {
           const payment = await apiClient.bookings.getAwaitingPaymentBookings(parseInt(user.id))
           if (!payment || payment.length === 0) {
             const all = await apiClient.bookings.getByTenantId(parseInt(user.id))
-            const filtered = (all || []).filter((b: any) => 
-              b.status === "PENDING_PAYMENT" || 
+            const filtered = (all || []).filter((b: any) =>
+              b.status === "PENDING_PAYMENT" ||
               (b.status === "PENDING" && (b.requestedNegotiationPercent == null || b.requestedNegotiationPercent === 0))
             )
             bookingsData = filtered
@@ -156,7 +156,7 @@ export default function MyBookingsPage() {
           break
         case "rejected":
           const allForRejected = await apiClient.bookings.getByTenantId(parseInt(user.id))
-          const rejectedFiltered = (allForRejected || []).filter((b: any) => 
+          const rejectedFiltered = (allForRejected || []).filter((b: any) =>
             b.status === "NEGOTIATION_REJECTED"
           )
           bookingsData = rejectedFiltered
@@ -192,7 +192,7 @@ export default function MyBookingsPage() {
       const confirmedBookings = [...(currentBookingLocal ? [currentBookingLocal] : []), ...bookingsData].filter(
         (b) => b.status === "CONFIRMED"
       )
-      
+
       if (confirmedBookings.length > 0) {
         await fetchHostPhoneNumbers(confirmedBookings)
       }
@@ -205,12 +205,12 @@ export default function MyBookingsPage() {
 
   const fetchMyComplaints = async () => {
     if (!user?.id) return
-    
+
     setComplaintsLoading(true)
     try {
-      const complaints = await apiClient.reclamations.getMyComplaints(user.id)
+      const complaints = await apiClient.reclamations.getMyComplaints(parseInt(user.id))
       setMyComplaints(complaints || [])
-      
+
       // Fetch property and phone number data for each complaint
       if (complaints && complaints.length > 0) {
         await fetchComplaintDetails(complaints)
@@ -226,12 +226,12 @@ export default function MyBookingsPage() {
     try {
       const propertiesMap: { [key: number]: any } = {}
       const phoneNumbersMap: { [key: number]: string | null } = {}
-      
+
       await Promise.all(
         complaints.map(async (complaint) => {
           try {
             setLoadingComplaintData((prev) => ({ ...prev, [complaint.id]: true }))
-            
+
             // Fetch booking to get propertyId
             try {
               const booking = await apiClient.bookings.getById(complaint.bookingId)
@@ -244,17 +244,17 @@ export default function MyBookingsPage() {
                 } catch (err) {
                   // Ignore property fetch errors
                 }
-                
+
                 try {
                   if (property?.userId) {
-                    const hostInfo = await apiClient.users.getById(property.userId)
+                    const hostInfo = await apiClient.users.getById(parseInt(String(property.userId)))
                     if (hostInfo.phoneNumber) {
                       phoneNumbersMap[complaint.id] = String(hostInfo.phoneNumber)
                     }
                   } else {
                     const propertyInfo = await apiClient.bookings.getPropertyInfo(String(booking.propertyId))
                     if (propertyInfo.ownerId) {
-                      const hostInfo = await apiClient.users.getById(propertyInfo.ownerId)
+                      const hostInfo = await apiClient.users.getById(parseInt(String(propertyInfo.ownerId)))
                       if (hostInfo.phoneNumber) {
                         phoneNumbersMap[complaint.id] = String(hostInfo.phoneNumber)
                       }
@@ -274,7 +274,7 @@ export default function MyBookingsPage() {
           }
         })
       )
-      
+
       setComplaintProperties((prev) => ({ ...prev, ...propertiesMap }))
       setComplaintPhoneNumbers((prev) => ({ ...prev, ...phoneNumbersMap }))
     } catch (err) {
@@ -288,7 +288,7 @@ export default function MyBookingsPage() {
     try {
       const reclamationsMap: { [key: number]: any } = {}
       const bookingsToCheck = current ? [current, ...bookingsList] : bookingsList
-      
+
       await Promise.all(
         bookingsToCheck.map(async (booking) => {
           try {
@@ -296,7 +296,8 @@ export default function MyBookingsPage() {
               booking.id,
               parseInt(user.id)
             )
-            if (reclamation) {
+            // Only track reclamations opened by the current user; ignore host-side complaints
+            if (reclamation && String(reclamation.complainantId) === String(user.id)) {
               reclamationsMap[booking.id] = reclamation
             }
           } catch (err) {
@@ -313,14 +314,14 @@ export default function MyBookingsPage() {
   const fetchHostPhoneNumbers = async (bookings: BookingWithProperty[]) => {
     try {
       const phoneNumbersMap: { [key: number]: string | null } = {}
-      
+
       await Promise.all(
         bookings.map(async (booking) => {
           try {
             setLoadingHostPhones((prev) => ({ ...prev, [booking.id]: true }))
-            
+
             if (booking.property?.userId) {
-              const ownerId = booking.property.userId
+              const ownerId = parseInt(String(booking.property.userId))
               try {
                 const ownerInfo = await apiClient.users.getById(ownerId)
                 if (ownerInfo && ownerInfo.phoneNumber !== null && ownerInfo.phoneNumber !== undefined) {
@@ -336,7 +337,7 @@ export default function MyBookingsPage() {
               try {
                 const propertyInfo = await apiClient.bookings.getPropertyInfo(String(booking.propertyId))
                 if (propertyInfo.ownerId) {
-                  const ownerInfo = await apiClient.users.getById(propertyInfo.ownerId)
+                  const ownerInfo = await apiClient.users.getById(parseInt(String(propertyInfo.ownerId)))
                   if (ownerInfo && ownerInfo.phoneNumber !== null && ownerInfo.phoneNumber !== undefined) {
                     const phoneStr = String(ownerInfo.phoneNumber)
                     phoneNumbersMap[booking.id] = phoneStr
@@ -357,7 +358,7 @@ export default function MyBookingsPage() {
           }
         })
       )
-      
+
       setHostPhoneNumbers((prev) => ({ ...prev, ...phoneNumbersMap }))
     } catch (err) {
       // Ignore errors
@@ -472,8 +473,8 @@ export default function MyBookingsPage() {
       checkInDate: formatDateForInput(booking.checkInDate),
       checkOutDate: formatDateForInput(booking.checkOutDate),
       numberOfGuests: 1, // Default, can be updated if API provides it
-      requestedPrice: (booking.requestedNegotiationPercent || booking.status === "NEGOTIATION_REJECTED") 
-        ? booking.totalPrice?.toString() 
+      requestedPrice: (booking.requestedNegotiationPercent || booking.status === "NEGOTIATION_REJECTED")
+        ? booking.totalPrice?.toString()
         : undefined,
     })
     setIsEditModalOpen(true)
@@ -522,19 +523,19 @@ export default function MyBookingsPage() {
         return
       }
 
-      const result = await apiClient.bookings.update(editingBooking.id, {
+      const result: any = await apiClient.bookings.update(editingBooking.id, {
         checkInDate: editFormData.checkInDate,
         checkOutDate: editFormData.checkOutDate,
         numberOfGuests: editFormData.numberOfGuests,
         requestedPrice: editFormData.requestedPrice ? parseFloat(editFormData.requestedPrice) : undefined,
       })
-      
+
       // Check if update was rejected
-      if (result.status === "rejected" || result.error === "PRICE_TOO_LOW") {
-        setError(result.message || "Price is not acceptable. Please increase it.")
+      if (result?.status === "rejected" || result?.error === "PRICE_TOO_LOW") {
+        setError(result?.message || "Price is not acceptable. Please increase it.")
         return
       }
-      
+
       setIsEditModalOpen(false)
       setEditingBooking(null)
       setError("")
@@ -543,7 +544,7 @@ export default function MyBookingsPage() {
     } catch (err: any) {
       // Parse error message from response
       let errorMessage = "Failed to update booking"
-      
+
       if (err.message) {
         if (err.message.includes("Price is not acceptable")) {
           errorMessage = err.message
@@ -553,7 +554,7 @@ export default function MyBookingsPage() {
           errorMessage = err.message
         }
       }
-      
+
       setError(errorMessage)
     } finally {
       setActionLoading((prev) => ({ ...prev, [editingBooking.id]: false }))
@@ -563,28 +564,28 @@ export default function MyBookingsPage() {
   const getStatusBadge = (status: string) => {
     switch (status.toUpperCase()) {
       case "PENDING_PAYMENT":
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">Awaiting Payment</Badge>
+        return <Badge className="bg-blue-100/80 text-blue-800 border-blue-200 backdrop-blur-sm">Awaiting Payment</Badge>
       case "PENDING_NEGOTIATION":
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending Negotiation</Badge>
+        return <Badge className="bg-yellow-100/80 text-yellow-800 border-yellow-200 backdrop-blur-sm">Pending Negotiation</Badge>
       case "NEGOTIATION_REJECTED":
-        return <Badge className="bg-orange-100 text-orange-800 border-orange-200">Negotiation Rejected</Badge>
+        return <Badge className="bg-orange-100/80 text-orange-800 border-orange-200 backdrop-blur-sm">Negotiation Rejected</Badge>
       case "CONFIRMED":
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Confirmed</Badge>
+        return <Badge className="bg-green-100/80 text-green-800 border-green-200 backdrop-blur-sm">Confirmed</Badge>
       case "COMPLETED":
-        return <Badge className="bg-gray-100 text-gray-800 border-gray-200">Completed</Badge>
+        return <Badge className="bg-gray-100/80 text-gray-800 border-gray-200 backdrop-blur-sm">Completed</Badge>
       case "TENANT_CHECKED_OUT":
-        return <Badge className="bg-purple-100 text-purple-800 border-purple-200">Checked Out</Badge>
+        return <Badge className="bg-purple-100/80 text-purple-800 border-purple-200 backdrop-blur-sm">Checked Out</Badge>
       case "IN_DISPUTE":
-        return <Badge className="bg-red-100 text-red-800 border-red-200">In Dispute</Badge>
+        return <Badge className="bg-red-100/80 text-red-800 border-red-200 backdrop-blur-sm">In Dispute</Badge>
       case "CANCELLED_BY_HOST":
-        return <Badge className="bg-red-100 text-red-800 border-red-200">Cancelled by Host</Badge>
+        return <Badge className="bg-red-100/80 text-red-800 border-red-200 backdrop-blur-sm">Cancelled by Host</Badge>
       case "CANCELLED_BY_TENANT":
-        return <Badge className="bg-red-100 text-red-800 border-red-200">Cancelled</Badge>
+        return <Badge className="bg-red-100/80 text-red-800 border-red-200 backdrop-blur-sm">Cancelled</Badge>
       case "PENDING":
         // Legacy status - show as pending
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>
+        return <Badge className="bg-yellow-100/80 text-yellow-800 border-yellow-200 backdrop-blur-sm">Pending</Badge>
       default:
-        return <Badge className="bg-gray-100 text-gray-800 border-gray-200">{status}</Badge>
+        return <Badge className="bg-gray-100/80 text-gray-800 border-gray-200 backdrop-blur-sm">{status}</Badge>
     }
   }
 
@@ -642,12 +643,11 @@ export default function MyBookingsPage() {
     return (
       <Card
         key={booking.id}
-        className={`overflow-hidden hover:shadow-2xl transition-all duration-300 ${
-          isCurrent ? "max-w-2xl mx-auto" : ""
-        }`}
+        className={`overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl ${isCurrent ? "max-w-2xl mx-auto" : ""
+          }`}
       >
         {/* Image Section */}
-        <div className="relative h-64 bg-gradient-to-br from-teal-100 to-teal-200 overflow-hidden">
+        <div className="relative h-64 bg-gradient-to-br from-teal-100 to-cyan-200 overflow-hidden">
           {isLoadingProperty ? (
             <div className="w-full h-full flex items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
@@ -665,7 +665,7 @@ export default function MyBookingsPage() {
               <MapPin className="w-16 h-16 text-teal-300" />
             </div>
           )}
-          
+
           {/* Status Badge Overlay */}
           <div className="absolute top-4 right-4">
             {getStatusBadge(booking.status)}
@@ -764,7 +764,7 @@ export default function MyBookingsPage() {
             {booking.status === "PENDING_PAYMENT" && (
               <Button
                 onClick={() => handlePay(booking.id)}
-                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white"
+                className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md hover:shadow-lg transition-all"
               >
                 <CreditCard className="w-4 h-4 mr-2" />
                 Pay Now
@@ -797,7 +797,7 @@ export default function MyBookingsPage() {
               <Button
                 onClick={() => handleCheckout(booking.id)}
                 disabled={actionLoading[booking.id]}
-                className="w-full bg-green-600 hover:bg-green-700 text-white mb-2"
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white mb-2 shadow-md hover:shadow-lg transition-all"
               >
                 {actionLoading[booking.id] ? (
                   <>
@@ -871,41 +871,41 @@ export default function MyBookingsPage() {
             </Button>
 
             {/* Edit Button - Show for PENDING_NEGOTIATION and PENDING_PAYMENT (not for rejected in this section) */}
-            {(booking.status === "PENDING_PAYMENT" || 
+            {(booking.status === "PENDING_PAYMENT" ||
               booking.status === "PENDING_NEGOTIATION") && (
-              <Button
-                onClick={() => handleEdit(booking)}
-                variant="outline"
-                className="flex-1"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
-            )}
+                <Button
+                  onClick={() => handleEdit(booking)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              )}
 
             {/* Delete Button - Show for cancellable statuses */}
-            {(booking.status === "PENDING_PAYMENT" || 
+            {(booking.status === "PENDING_PAYMENT" ||
               booking.status === "PENDING_NEGOTIATION" ||
               booking.status === "NEGOTIATION_REJECTED") && (
-              <Button
-                onClick={() => handleDelete(booking.id)}
-                disabled={actionLoading[booking.id]}
-                variant="destructive"
-                className={booking.status === "NEGOTIATION_REJECTED" ? "w-full" : "flex-1"}
-              >
-                {actionLoading[booking.id] ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Cancel
-                  </>
-                )}
-              </Button>
-            )}
+                <Button
+                  onClick={() => handleDelete(booking.id)}
+                  disabled={actionLoading[booking.id]}
+                  variant="destructive"
+                  className={booking.status === "NEGOTIATION_REJECTED" ? "w-full" : "flex-1"}
+                >
+                  {actionLoading[booking.id] ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Cancel
+                    </>
+                  )}
+                </Button>
+              )}
           </div>
         </div>
       </Card>
@@ -954,25 +954,22 @@ export default function MyBookingsPage() {
               {/* Current Booking */}
               <button
                 onClick={() => handleTabChange("current")}
-                className={`flex-1 px-6 py-4 text-center transition-colors ${
-                  activeTab === "current"
-                    ? "bg-teal-600 text-white"
-                    : "hover:bg-gray-50"
-                }`}
+                className={`flex-1 px-6 py-4 text-center transition-colors ${activeTab === "current"
+                  ? "bg-teal-600 text-white"
+                  : "hover:bg-gray-50"
+                  }`}
               >
                 <div className="flex flex-col">
-                  <label className={`text-xs font-semibold mb-1 ${
-                    activeTab === "current"
-                      ? "text-white"
-                      : "text-gray-900"
-                  }`}>
+                  <label className={`text-xs font-semibold mb-1 ${activeTab === "current"
+                    ? "text-white"
+                    : "text-gray-900"
+                    }`}>
                     Current
                   </label>
-                  <span className={`text-sm ${
-                    activeTab === "current"
-                      ? "text-white"
-                      : "text-gray-600"
-                  }`}>
+                  <span className={`text-sm ${activeTab === "current"
+                    ? "text-white"
+                    : "text-gray-600"
+                    }`}>
                     Booking
                   </span>
                 </div>
@@ -981,25 +978,22 @@ export default function MyBookingsPage() {
               {/* Pending Negotiations */}
               <button
                 onClick={() => handleTabChange("pending")}
-                className={`flex-1 px-6 py-4 text-center transition-colors ${
-                  activeTab === "pending"
-                    ? "bg-teal-600 text-white"
-                    : "hover:bg-gray-50"
-                }`}
+                className={`flex-1 px-6 py-4 text-center transition-colors ${activeTab === "pending"
+                  ? "bg-teal-600 text-white"
+                  : "hover:bg-gray-50"
+                  }`}
               >
                 <div className="flex flex-col">
-                  <label className={`text-xs font-semibold mb-1 ${
-                    activeTab === "pending"
-                      ? "text-white"
-                      : "text-gray-900"
-                  }`}>
+                  <label className={`text-xs font-semibold mb-1 ${activeTab === "pending"
+                    ? "text-white"
+                    : "text-gray-900"
+                    }`}>
                     Pending
                   </label>
-                  <span className={`text-sm ${
-                    activeTab === "pending"
-                      ? "text-white"
-                      : "text-gray-600"
-                  }`}>
+                  <span className={`text-sm ${activeTab === "pending"
+                    ? "text-white"
+                    : "text-gray-600"
+                    }`}>
                     Negotiations
                   </span>
                 </div>
@@ -1008,25 +1002,22 @@ export default function MyBookingsPage() {
               {/* Awaiting Payment */}
               <button
                 onClick={() => handleTabChange("payment")}
-                className={`flex-1 px-6 py-4 text-center transition-colors ${
-                  activeTab === "payment"
-                    ? "bg-teal-600 text-white"
-                    : "hover:bg-gray-50"
-                }`}
+                className={`flex-1 px-6 py-4 text-center transition-colors ${activeTab === "payment"
+                  ? "bg-teal-600 text-white"
+                  : "hover:bg-gray-50"
+                  }`}
               >
                 <div className="flex flex-col">
-                  <label className={`text-xs font-semibold mb-1 ${
-                    activeTab === "payment"
-                      ? "text-white"
-                      : "text-gray-900"
-                  }`}>
+                  <label className={`text-xs font-semibold mb-1 ${activeTab === "payment"
+                    ? "text-white"
+                    : "text-gray-900"
+                    }`}>
                     Awaiting
                   </label>
-                  <span className={`text-sm ${
-                    activeTab === "payment"
-                      ? "text-white"
-                      : "text-gray-600"
-                  }`}>
+                  <span className={`text-sm ${activeTab === "payment"
+                    ? "text-white"
+                    : "text-gray-600"
+                    }`}>
                     Payment
                   </span>
                 </div>
@@ -1035,25 +1026,22 @@ export default function MyBookingsPage() {
               {/* Rejected Negotiations */}
               <button
                 onClick={() => handleTabChange("rejected")}
-                className={`flex-1 px-6 py-4 text-center transition-colors ${
-                  activeTab === "rejected"
-                    ? "bg-teal-600 text-white"
-                    : "hover:bg-gray-50"
-                }`}
+                className={`flex-1 px-6 py-4 text-center transition-colors ${activeTab === "rejected"
+                  ? "bg-teal-600 text-white"
+                  : "hover:bg-gray-50"
+                  }`}
               >
                 <div className="flex flex-col">
-                  <label className={`text-xs font-semibold mb-1 ${
-                    activeTab === "rejected"
-                      ? "text-white"
-                      : "text-gray-900"
-                  }`}>
+                  <label className={`text-xs font-semibold mb-1 ${activeTab === "rejected"
+                    ? "text-white"
+                    : "text-gray-900"
+                    }`}>
                     Rejected
                   </label>
-                  <span className={`text-sm ${
-                    activeTab === "rejected"
-                      ? "text-white"
-                      : "text-gray-600"
-                  }`}>
+                  <span className={`text-sm ${activeTab === "rejected"
+                    ? "text-white"
+                    : "text-gray-600"
+                    }`}>
                     Negotiations
                   </span>
                 </div>
@@ -1062,25 +1050,22 @@ export default function MyBookingsPage() {
               {/* My Complaints */}
               <button
                 onClick={() => handleTabChange("complaints")}
-                className={`flex-1 px-6 py-4 text-center transition-colors rounded-r-2xl ${
-                  activeTab === "complaints"
-                    ? "bg-teal-600 text-white"
-                    : "hover:bg-gray-50"
-                }`}
+                className={`flex-1 px-6 py-4 text-center transition-colors rounded-r-2xl ${activeTab === "complaints"
+                  ? "bg-teal-600 text-white"
+                  : "hover:bg-gray-50"
+                  }`}
               >
                 <div className="flex flex-col">
-                  <label className={`text-xs font-semibold mb-1 ${
-                    activeTab === "complaints"
-                      ? "text-white"
-                      : "text-gray-900"
-                  }`}>
+                  <label className={`text-xs font-semibold mb-1 ${activeTab === "complaints"
+                    ? "text-white"
+                    : "text-gray-900"
+                    }`}>
                     My
                   </label>
-                  <span className={`text-sm ${
-                    activeTab === "complaints"
-                      ? "text-white"
-                      : "text-gray-600"
-                  }`}>
+                  <span className={`text-sm ${activeTab === "complaints"
+                    ? "text-white"
+                    : "text-gray-600"
+                    }`}>
                     Complaints
                   </span>
                 </div>
@@ -1221,7 +1206,7 @@ export default function MyBookingsPage() {
                       const property = complaintProperties[complaint.id]
                       const phoneNumber = complaintPhoneNumbers[complaint.id]
                       const isLoadingDetails = loadingComplaintData[complaint.id]
-                      
+
                       return (
                         <Card key={complaint.id} className="p-6 hover:shadow-lg transition-shadow">
                           <div className="flex flex-col h-full">
@@ -1234,12 +1219,12 @@ export default function MyBookingsPage() {
                                 <Badge
                                   className={
                                     complaint.status === "OPEN"
-                                      ? "bg-blue-100 text-blue-800"
+                                      ? "bg-blue-100/80 text-blue-800 backdrop-blur-sm"
                                       : complaint.status === "IN_REVIEW"
-                                      ? "bg-yellow-100 text-yellow-800"
-                                      : complaint.status === "RESOLVED"
-                                      ? "bg-green-100 text-green-800"
-                                      : "bg-red-100 text-red-800"
+                                        ? "bg-yellow-100/80 text-yellow-800 backdrop-blur-sm"
+                                        : complaint.status === "RESOLVED"
+                                          ? "bg-green-100 text-green-800"
+                                          : "bg-red-100 text-red-800"
                                   }
                                 >
                                   {complaint.status.replace("_", " ")}
@@ -1247,22 +1232,22 @@ export default function MyBookingsPage() {
                                 <Badge
                                   className={
                                     complaint.severity === "LOW"
-                                      ? "bg-green-100 text-green-800"
+                                      ? "bg-green-100/80 text-green-800 backdrop-blur-sm"
                                       : complaint.severity === "MEDIUM"
-                                      ? "bg-yellow-100 text-yellow-800"
-                                      : complaint.severity === "HIGH"
-                                      ? "bg-orange-100 text-orange-800"
-                                      : "bg-red-100 text-red-800"
+                                        ? "bg-yellow-100/80 text-yellow-800 backdrop-blur-sm"
+                                        : complaint.severity === "HIGH"
+                                          ? "bg-orange-100/80 text-orange-800 backdrop-blur-sm"
+                                          : "bg-red-100/80 text-red-800 backdrop-blur-sm"
                                   }
                                 >
                                   {complaint.severity}
                                 </Badge>
                               </div>
                             </div>
-                            
+
                             {/* Description */}
                             <p className="text-gray-600 mb-4 text-sm line-clamp-3 flex-1">{complaint.description}</p>
-                            
+
                             {/* Property Info */}
                             {property && (
                               <div className="mb-4 p-3 bg-gray-50 rounded-lg">
@@ -1278,7 +1263,7 @@ export default function MyBookingsPage() {
                                 )}
                               </div>
                             )}
-                            
+
                             {/* Host Phone Number */}
                             {phoneNumber && (
                               <div className="mb-4 flex items-center gap-2 text-sm">
@@ -1287,13 +1272,13 @@ export default function MyBookingsPage() {
                                 <span className="font-semibold text-gray-900">{phoneNumber}</span>
                               </div>
                             )}
-                            
+
                             {/* Type */}
                             <div className="mb-4">
                               <span className="text-xs text-gray-500">Type: </span>
                               <span className="text-xs font-medium text-gray-700">{complaint.type.replace("_", " ")}</span>
                             </div>
-                            
+
                             {/* Refund and Penalty */}
                             <div className="mb-4 space-y-1">
                               {complaint.refundAmount && (
@@ -1307,7 +1292,7 @@ export default function MyBookingsPage() {
                                 </div>
                               )}
                             </div>
-                            
+
                             {/* Resolution Notes */}
                             {complaint.resolutionNotes && (
                               <div className="mb-4 p-3 bg-blue-50 rounded-lg">
@@ -1315,7 +1300,7 @@ export default function MyBookingsPage() {
                                 <p className="text-xs text-blue-700">{complaint.resolutionNotes}</p>
                               </div>
                             )}
-                            
+
                             {/* Actions */}
                             <div className="flex gap-2 mt-auto pt-4 border-t border-gray-200">
                               <Button
@@ -1357,11 +1342,11 @@ export default function MyBookingsPage() {
         <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-gray-900">
+              <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                 Edit Booking #{editingBooking?.id}
               </DialogTitle>
             </DialogHeader>
-            
+
             {editingBooking && (
               <div className="space-y-6 mt-4">
                 {/* Property Info */}
@@ -1437,33 +1422,33 @@ export default function MyBookingsPage() {
                 {((editingBooking.property?.negotiationPercentage && editingBooking.property.negotiationPercentage > 0) ||
                   editingBooking.status === "NEGOTIATION_REJECTED" ||
                   editingBooking.status === "PENDING_NEGOTIATION") && (
-                  <div>
-                    <Label htmlFor="requestedPrice" className="text-sm font-semibold text-gray-700">
-                      Requested Price (MAD) *
-                    </Label>
-                    <Input
-                      id="requestedPrice"
-                      type="number"
-                      step="0.001"
-                      min="0"
-                      value={editFormData.requestedPrice || ""}
-                      onChange={(e) => setEditFormData({ ...editFormData, requestedPrice: e.target.value || undefined })}
-                      placeholder="Enter your requested price"
-                      className="mt-2"
-                      required
-                    />
-                    {editingBooking.property?.negotiationPercentage && editingBooking.property.negotiationPercentage > 0 && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Maximum negotiation: {editingBooking.property.negotiationPercentage}%
-                      </p>
-                    )}
-                    {editingBooking.status === "NEGOTIATION_REJECTED" && (
-                      <p className="text-xs text-orange-600 mt-1 font-medium">
-                        ⚠️ Your previous negotiation was rejected. Please enter a new price.
-                      </p>
-                    )}
-                  </div>
-                )}
+                    <div>
+                      <Label htmlFor="requestedPrice" className="text-sm font-semibold text-gray-700">
+                        Requested Price (MAD) *
+                      </Label>
+                      <Input
+                        id="requestedPrice"
+                        type="number"
+                        step="0.001"
+                        min="0"
+                        value={editFormData.requestedPrice || ""}
+                        onChange={(e) => setEditFormData({ ...editFormData, requestedPrice: e.target.value || undefined })}
+                        placeholder="Enter your requested price"
+                        className="mt-2"
+                        required
+                      />
+                      {editingBooking.property?.negotiationPercentage && editingBooking.property.negotiationPercentage > 0 && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Maximum negotiation: {editingBooking.property.negotiationPercentage}%
+                        </p>
+                      )}
+                      {editingBooking.status === "NEGOTIATION_REJECTED" && (
+                        <p className="text-xs text-orange-600 mt-1 font-medium">
+                          ⚠️ Your previous negotiation was rejected. Please enter a new price.
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                 {/* Error Message */}
                 {error && (
@@ -1481,14 +1466,14 @@ export default function MyBookingsPage() {
                       setEditingBooking(null)
                       setError("")
                     }}
-                    className="flex-1"
+                    className="flex-1 hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleSaveEdit}
                     disabled={actionLoading[editingBooking.id]}
-                    className="flex-1 bg-teal-600 hover:bg-teal-700 text-white"
+                    className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md hover:shadow-lg transition-all"
                   >
                     {actionLoading[editingBooking.id] ? (
                       <>
@@ -1509,16 +1494,16 @@ export default function MyBookingsPage() {
         <Dialog open={viewModalOpen} onOpenChange={setViewModalOpen}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-gray-900">
+              <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                 Booking Details
               </DialogTitle>
             </DialogHeader>
-            
+
             {viewingBooking && (
               <div className="space-y-6 mt-4">
                 {/* Property Image and Title */}
                 {viewingBooking.property && (
-                  <div className="relative h-48 bg-gradient-to-br from-teal-100 to-teal-200 rounded-lg overflow-hidden mb-4">
+                  <div className="relative h-48 bg-gradient-to-br from-teal-100 to-cyan-200 rounded-lg overflow-hidden mb-4">
                     {getPropertyImage(viewingBooking.property) ? (
                       <Image
                         src={getImageUrl(getPropertyImage(viewingBooking.property))}
@@ -1750,48 +1735,48 @@ export default function MyBookingsPage() {
                   )}
 
                   {/* Edit Button */}
-                  {(viewingBooking.status === "PENDING_PAYMENT" || 
+                  {(viewingBooking.status === "PENDING_PAYMENT" ||
                     viewingBooking.status === "PENDING_NEGOTIATION" ||
                     viewingBooking.status === "NEGOTIATION_REJECTED") && (
-                    <Button
-                      onClick={() => {
-                        setViewModalOpen(false)
-                        handleEdit(viewingBooking)
-                      }}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
-                    </Button>
-                  )}
+                      <Button
+                        onClick={() => {
+                          setViewModalOpen(false)
+                          handleEdit(viewingBooking)
+                        }}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                    )}
 
                   {/* Delete Button */}
-                  {(viewingBooking.status === "PENDING_PAYMENT" || 
+                  {(viewingBooking.status === "PENDING_PAYMENT" ||
                     viewingBooking.status === "PENDING_NEGOTIATION" ||
                     viewingBooking.status === "NEGOTIATION_REJECTED") && (
-                    <Button
-                      onClick={async () => {
-                        setViewModalOpen(false)
-                        await handleDelete(viewingBooking.id)
-                      }}
-                      disabled={actionLoading[viewingBooking.id]}
-                      variant="destructive"
-                      className="flex-1"
-                    >
-                      {actionLoading[viewingBooking.id] ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Deleting...
-                        </>
-                      ) : (
-                        <>
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Cancel
-                        </>
-                      )}
-                    </Button>
-                  )}
+                      <Button
+                        onClick={async () => {
+                          setViewModalOpen(false)
+                          await handleDelete(viewingBooking.id)
+                        }}
+                        disabled={actionLoading[viewingBooking.id]}
+                        variant="destructive"
+                        className="flex-1"
+                      >
+                        {actionLoading[viewingBooking.id] ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Cancel
+                          </>
+                        )}
+                      </Button>
+                    )}
 
                   {/* Close Button */}
                   <Button

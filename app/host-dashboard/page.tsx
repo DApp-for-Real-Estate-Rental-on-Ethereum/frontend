@@ -21,7 +21,7 @@ export default function HostDashboardPage() {
   const { user, isLoading: authLoading, token } = useAuth()
   const router = useRouter()
   const [activeSection, setActiveSection] = useState("paid")
-  
+
   // Stats data
   const [propertiesCount, setPropertiesCount] = useState(0)
   const [currentBookingsCount, setCurrentBookingsCount] = useState(0)
@@ -39,8 +39,8 @@ export default function HostDashboardPage() {
     if (!authLoading && user) {
       const isAdmin = user.roles?.includes("ADMIN")
       const isPoster = user.roles?.includes("POSTER")
-      const isHost = user.roles?.includes("HOST")
-      
+      const isHost = (user.roles as string[])?.includes("HOST")
+
       // Allow admin, poster, or host access
       if (!isAdmin && !isPoster && !isHost) {
         router.push("/")
@@ -96,10 +96,15 @@ export default function HostDashboardPage() {
 
   if (authLoading || isLoadingStats) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 via-white to-cyan-50">
         <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-teal-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading dashboard...</p>
+          <div className="relative">
+            <Loader2 className="h-16 w-16 animate-spin text-teal-600 mx-auto mb-4" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 bg-teal-100 rounded-full"></div>
+            </div>
+          </div>
+          <p className="text-gray-600 font-medium text-lg">Loading dashboard...</p>
         </div>
       </div>
     )
@@ -112,8 +117,8 @@ export default function HostDashboardPage() {
   const userId = user.id
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
         <div className="mb-6">
         </div>
@@ -127,75 +132,75 @@ export default function HostDashboardPage() {
         <div className="mt-8">
           {activeSection === "paid" && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Paid Bookings</h2>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-6">Paid Bookings</h2>
               <PaidBookings ownerId={userId} />
             </div>
           )}
 
           {activeSection === "negotiations" && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Pending Approvals</h2>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-6">Pending Approvals</h2>
               <PendingNegotiations ownerId={userId} onUpdate={handleUpdate} />
             </div>
           )}
 
           {activeSection === "current" && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Current Bookings</h2>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-6">Current Bookings</h2>
               <CurrentBookings ownerId={userId} onUpdate={handleUpdate} />
             </div>
           )}
 
           {activeSection === "checkout-requests" && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Checkout Requests</h2>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-6">Checkout Requests</h2>
               <CheckoutRequests ownerId={userId} onUpdate={handleUpdate} />
             </div>
           )}
 
           {activeSection === "calendar" && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Calendar</h2>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-6">Calendar</h2>
               <Calendar ownerId={userId} />
             </div>
           )}
 
-          {(activeSection === "my-properties" || 
+          {(activeSection === "my-properties" ||
             activeSection === "draft" ||
             activeSection === "pending-approval" ||
             activeSection === "approved" ||
             activeSection === "disapproved" ||
             activeSection === "suspended" ||
             activeSection === "hidden") && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                {activeSection === "my-properties" && "All Properties"}
-                {activeSection === "draft" && "Draft Properties"}
-                {activeSection === "pending-approval" && "Pending Approval"}
-                {activeSection === "approved" && "Approved Properties"}
-                {activeSection === "disapproved" && "Disapproved Properties"}
-                {activeSection === "suspended" && "Suspended Properties"}
-                {activeSection === "hidden" && "Hidden Properties"}
-              </h2>
-              <PropertiesList 
-                userId={userId} 
-                onUpdate={handleUpdate}
-                filter={
-                  activeSection === "draft" ? "draft" :
-                  activeSection === "pending-approval" ? "pending-approval" :
-                  activeSection === "approved" ? "approved" :
-                  activeSection === "disapproved" ? "disapproved" :
-                  activeSection === "suspended" ? "suspended" :
-                  activeSection === "hidden" ? "hidden" :
-                  "all"
-                }
-              />
-            </div>
-          )}
+              <div>
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-6">
+                  {activeSection === "my-properties" && "All Properties"}
+                  {activeSection === "draft" && "Draft Properties"}
+                  {activeSection === "pending-approval" && "Pending Approval"}
+                  {activeSection === "approved" && "Approved Properties"}
+                  {activeSection === "disapproved" && "Disapproved Properties"}
+                  {activeSection === "suspended" && "Suspended Properties"}
+                  {activeSection === "hidden" && "Hidden Properties"}
+                </h2>
+                <PropertiesList
+                  userId={userId}
+                  onUpdate={handleUpdate}
+                  filter={
+                    activeSection === "draft" ? "draft" :
+                      activeSection === "pending-approval" ? "pending-approval" :
+                        activeSection === "approved" ? "approved" :
+                          activeSection === "disapproved" ? "disapproved" :
+                            activeSection === "suspended" ? "suspended" :
+                              activeSection === "hidden" ? "hidden" :
+                                "all"
+                  }
+                />
+              </div>
+            )}
 
           {(activeSection === "my-complaints" || activeSection === "complaints-against-me") && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-6">
                 {activeSection === "my-complaints" && "My Complaints"}
                 {activeSection === "complaints-against-me" && "Complaints Against Me"}
               </h2>

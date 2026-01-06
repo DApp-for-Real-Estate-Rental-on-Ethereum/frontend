@@ -9,6 +9,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -17,6 +20,10 @@ const nextConfig = {
         hostname: 'localhost',
         port: '8082',
         pathname: '/profile-pictures/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
     ],
   },

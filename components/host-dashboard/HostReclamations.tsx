@@ -270,7 +270,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
     }
 
     return (
-      <Badge className={colors[status] || "bg-gray-100 text-gray-800"}>
+      <Badge className={`${colors[status] || "bg-gray-100 text-gray-800"} backdrop-blur-sm border border-current/20`}>
         {status.replace("_", " ")}
       </Badge>
     )
@@ -285,7 +285,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
     }
 
     return (
-      <Badge className={colors[severity] || "bg-gray-100 text-gray-800"}>
+      <Badge className={`${colors[severity] || "bg-gray-100 text-gray-800"} backdrop-blur-sm border border-current/20`}>
         {severity}
       </Badge>
     )
@@ -360,7 +360,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
           }
 
           return (
-            <Card key={complaint.id} className="p-6 hover:shadow-lg transition-shadow">
+            <Card key={complaint.id} className="p-6 hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl group">
               <div className="flex flex-col h-full">
                 {/* Header */}
                 <div className="mb-4">
@@ -443,8 +443,9 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
+
                     onClick={() => handleView(complaint)}
+                    className="flex-1 hover:bg-gray-50 transition-colors"
                   >
                     <Eye className="w-4 h-4 mr-1" />
                     View
@@ -522,7 +523,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Reclamation Details</DialogTitle>
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Reclamation Details</DialogTitle>
             <DialogDescription>
               {filter === "my-complaints" ? "View your reclamation" : "View reclamation against you"}
             </DialogDescription>
@@ -614,7 +615,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Reclamation</DialogTitle>
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Edit Reclamation</DialogTitle>
             <DialogDescription>
               Update title, description, and images. Only OPEN reclamations can be edited.
             </DialogDescription>
@@ -691,7 +692,7 @@ export function HostReclamations({ ownerId, filter }: HostReclamationsProps) {
                 <Button
                   onClick={handleUpdate}
                   disabled={updating || !editTitle.trim() || !editDescription.trim()}
-                  className="flex-1"
+                  className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white shadow-md hover:shadow-lg transition-all"
                 >
                   {updating ? (
                     <>

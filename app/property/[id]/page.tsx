@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { apiClient } from "@/lib/services/api"
+import { PROPERTY_API_BASE_URL } from "@/lib/services/api/core"
 import { useAuth } from "@/lib/hooks/use-auth"
 import Image from "next/image"
 import Link from "next/link"
@@ -48,6 +49,7 @@ export default function PropertyDetailPage() {
         pricePerNight?: number
         isNegotiable?: boolean
         discountEnabled?: boolean
+        discountPercent?: number
     } | null>(null)
     const [basePrice, setBasePrice] = useState<number | null>(null)
     const [finalPrice, setFinalPrice] = useState<number | null>(null)
@@ -145,6 +147,66 @@ export default function PropertyDetailPage() {
         }
     }, [propertyId, router])
 
+    // Fetch property pricing info and compute totals when dates change
+    useEffect(() => {
+        const loadPricing = async () => {
+            if (!property || !dateRange?.from || !dateRange?.to) {
+                setPropertyInfo(null)
+                setBasePrice(null)
+                setFinalPrice(null)
+                setDiscountInfo(null)
+                return
+            }
+
+            try {
+                setLoadingPropertyInfo(true)
+
+                // Pull pricing/negotiation info (fallback to property fields)
+                let pricePerNight = Number(property.dailyPrice ?? property.price ?? 0)
+                let isNegotiable = Boolean(property.negotiationPercentage && property.negotiationPercentage > 0)
+                let discountPercent = Number((property as any)?.longStayDiscountPercent ?? 0)
+                let discountEnabled = discountPercent > 0
+
+                try {
+                    const info = await apiClient.bookings.getPropertyInfo(propertyId)
+                    if (info) {
+                        if ((info as any).pricePerNight !== undefined) pricePerNight = Number((info as any).pricePerNight)
+                        if ((info as any).isNegotiable !== undefined) isNegotiable = Boolean((info as any).isNegotiable)
+                        if ((info as any).discountEnabled !== undefined) discountEnabled = Boolean((info as any).discountEnabled)
+                        if ((info as any).discountPercent !== undefined) discountPercent = Number((info as any).discountPercent)
+
+                        const propObj = (info as any).property || (info as any)
+                        if (propObj) {
+                            if (propObj.pricePerNight !== undefined) pricePerNight = Number(propObj.pricePerNight)
+                            if (propObj.negotiationPercentage !== undefined) isNegotiable = Boolean(propObj.negotiationPercentage > 0)
+                            if (propObj.longStayDiscountPercent !== undefined) {
+                                discountPercent = Number(propObj.longStayDiscountPercent)
+                                discountEnabled = discountPercent > 0
+                            }
+                        }
+                    }
+                } catch {
+                    // best-effort; fall back to property fields
+                }
+
+                const nights = Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24))
+                const base = pricePerNight * nights
+
+                discountPercent = discountEnabled ? discountPercent : 0
+                const discountAmount = discountPercent > 0 && nights >= 7 ? (base * discountPercent) / 100 : 0
+
+                setPropertyInfo({ pricePerNight, isNegotiable, discountEnabled: discountPercent > 0, discountPercent })
+                setBasePrice(base)
+                setDiscountInfo(discountAmount > 0 ? { percent: discountPercent, amount: discountAmount } : null)
+                setFinalPrice(base - discountAmount)
+            } finally {
+                setLoadingPropertyInfo(false)
+            }
+        }
+
+        loadPricing()
+    }, [property, propertyId, dateRange])
+
     // Fetch confirmed bookings for this property to block dates
     useEffect(() => {
         const fetchConfirmedBookings = async () => {
@@ -232,89 +294,6 @@ export default function PropertyDetailPage() {
         return () => window.removeEventListener('keydown', handleKeyDown)
     }, [lightboxOpen, property?.propertyImages?.length])
 
-    // Fetch property info for booking (price, discount, negotiation) when dates change
-    useEffect(() => {
-        const fetchPropertyInfo = async () => {
-            if (!propertyId || !checkInDate || !checkOutDate) {
-                setBasePrice(null)
-                setFinalPrice(null)
-                setDiscountInfo(null)
-                setPropertyInfo(null)
-                return
-            }
-
-            setLoadingPropertyInfo(true)
-            try {
-                const checkIn = new Date(checkInDate)
-                const checkOut = new Date(checkOutDate)
-                checkIn.setHours(0, 0, 0, 0)
-                checkOut.setHours(0, 0, 0, 0)
-                const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))
-
-                if (nights <= 0) {
-                    setBasePrice(null)
-                    setFinalPrice(null)
-                    setDiscountInfo(null)
-                    setPropertyInfo(null)
-                    return
-                }
-
-                // Fetch property info from booking-service
-                const info = await apiClient.bookings.getPropertyInfo(propertyId)
-
-                // Convert pricePerNight to number if it's a string
-                const pricePerNightNum = typeof info.pricePerNight === 'string'
-                    ? parseFloat(info.pricePerNight)
-                    : info.pricePerNight
-
-                setPropertyInfo({
-                    pricePerNight: pricePerNightNum,
-                    isNegotiable: info.isNegotiable,
-                    discountEnabled: info.discountEnabled,
-                })
-
-                if (info && pricePerNightNum) {
-                    const calculatedBasePrice = pricePerNightNum * nights
-                    setBasePrice(calculatedBasePrice)
-
-                    // Calculate discount
-                    let discountPercent = 0
-                    if (info.discountEnabled) {
-                        if (nights > 30) {
-                            discountPercent = 20
-                        } else if (nights > 15) {
-                            discountPercent = 15
-                        } else if (nights > 5) {
-                            discountPercent = 10
-                        }
-                    }
-
-                    if (discountPercent > 0) {
-                        const discountAmount = calculatedBasePrice * (discountPercent / 100)
-                        const calculatedFinalPrice = calculatedBasePrice - discountAmount
-                        setFinalPrice(calculatedFinalPrice)
-                        setDiscountInfo({
-                            percent: discountPercent,
-                            amount: discountAmount
-                        })
-                    } else {
-                        setFinalPrice(calculatedBasePrice)
-                        setDiscountInfo(null)
-                    }
-                }
-            } catch (err) {
-                setBasePrice(null)
-                setFinalPrice(null)
-                setDiscountInfo(null)
-                setPropertyInfo(null)
-            } finally {
-                setLoadingPropertyInfo(false)
-            }
-        }
-
-        fetchPropertyInfo()
-    }, [propertyId, checkInDate, checkOutDate])
-
     // Helper function to get the cover image or first image
     const getPropertyImage = (property: Property, index?: number) => {
         if (!property.propertyImages || property.propertyImages.length === 0) {
@@ -336,15 +315,16 @@ export default function PropertyDetailPage() {
     // Helper function to build full image URL
     const getImageUrl = (url: string | null | undefined) => {
         if (!url) return "/houses_placeholder.png"
-        // If URL starts with http, return as is
         if (url.startsWith("http://") || url.startsWith("https://")) {
             return url
         }
-        // If URL starts with /uploads, prepend property-service URL
+
+        // Property images are served by property-service; honor env override instead of hardcoded localhost
+        const base = (PROPERTY_API_BASE_URL || "").replace(/\/$/, "") || "http://localhost:8081"
         if (url.startsWith("/uploads")) {
-            return `http://localhost:8081${url}`
+            return `${base}${url}`
         }
-        // Otherwise return as is
+
         return url
     }
 
@@ -470,7 +450,7 @@ export default function PropertyDetailPage() {
 
             // Check if booking was rejected due to invalid price
             if (bookingResponse.status === "rejected") {
-                setBookingError(bookingResponse.message || "السعر غير مقبول. يرجى رفع السعر.")
+                setBookingError(bookingResponse.message || "Booking request was rejected. Please adjust your requested price.")
                 setIsBooking(false)
                 return
             }
@@ -506,7 +486,7 @@ export default function PropertyDetailPage() {
                     const booking = await apiClient.bookings.getById(bookingId)
 
                     // If booking is PENDING_PAYMENT (no negotiation), redirect to payment
-                    if (booking?.status === "PENDING_PAYMENT") {
+                    if ((booking as any)?.status === "PENDING_PAYMENT" || booking?.status === "WAITING_FOR_PAYMENT") {
                         router.push(`/payment?bookingId=${bookingId}`)
                     } else {
                         // Otherwise redirect to my-bookings
@@ -527,7 +507,7 @@ export default function PropertyDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Title and Actions */}
                 <div className="flex items-center justify-between mb-6">
@@ -786,7 +766,7 @@ export default function PropertyDetailPage() {
 
                     {/* Booking Card */}
                     <div>
-                        <Card className="p-6 sticky top-24 shadow-xl border-2">
+                        <Card className="p-6 sticky top-24 shadow-xl border border-white/20 bg-white/80 backdrop-blur-md">
                             <div className="mb-6">
                                 <div className="flex items-baseline gap-2 mb-2">
                                     <span className="text-3xl font-bold text-teal-600">
@@ -819,7 +799,7 @@ export default function PropertyDetailPage() {
                                     <PopoverTrigger asChild>
                                         <button
                                             type="button"
-                                            className="w-full border-2 border-gray-300 rounded-lg p-4 hover:border-gray-400 transition-colors text-left"
+                                            className="w-full border border-gray-200 bg-white/50 rounded-xl p-4 hover:border-teal-500 transition-all text-left focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                                         >
                                             {dateRange?.from && dateRange?.to ? (
                                                 <div className="flex items-center gap-2">
@@ -891,7 +871,7 @@ export default function PropertyDetailPage() {
                             {/* Guests Selection */}
                             <div className="mb-6">
                                 <label className="block text-xs font-semibold text-gray-900 mb-2">GUESTS</label>
-                                <div className="flex items-center border border-gray-300 rounded-lg">
+                                <div className="flex items-center border border-gray-200 bg-white/50 rounded-xl overflow-hidden">
                                     <button
                                         type="button"
                                         onClick={() => setGuests(Math.max(1, guests - 1))}
@@ -973,7 +953,7 @@ export default function PropertyDetailPage() {
                             <Button
                                 onClick={handleBooking}
                                 disabled={isBooking || !dateRange?.from || !dateRange?.to}
-                                className="w-full bg-teal-600 hover:bg-teal-700 text-white h-12 text-lg font-semibold"
+                                className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white h-12 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
                             >
                                 {isBooking ? (
                                     <>

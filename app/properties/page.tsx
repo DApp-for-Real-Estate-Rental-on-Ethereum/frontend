@@ -65,7 +65,7 @@ export default function PropertiesPage() {
         const availableProperties = await Promise.all(
           filtered.map(async (property) => {
             try {
-              const bookings = await apiClient.bookings.getConfirmedBookingsByProperty(String(property.id))
+              const bookings = await apiClient.bookings.getConfirmedBookingsByProperty(property.id)
 
               const hasOverlap = bookings.some((booking: Booking) => {
                 const bookingCheckIn = new Date(booking.checkInDate)
@@ -194,10 +194,10 @@ export default function PropertiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      <section className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Card className="shadow-lg border-0">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50">
+      <section className="bg-white/50 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <Card className="shadow-lg border border-white/20 bg-white/80 backdrop-blur-md">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-0 divide-x divide-gray-200">
               <div className="p-4 hover:bg-gray-50 transition-colors">
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Where</label>
@@ -262,7 +262,7 @@ export default function PropertiesPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">Discover Properties</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent mb-3">Discover Properties</h1>
           <p className="text-lg text-gray-600">
             Explore {filteredProperties.length} {filteredProperties.length === 1 ? "beautiful property" : "beautiful properties"} available for rent
           </p>
@@ -284,7 +284,7 @@ export default function PropertiesPage() {
 
               return (
                 <Link href={`/property/${property.id}`} key={property.id}>
-                  <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer group border border-gray-200 bg-white rounded-xl">
+                  <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer group border border-white/20 bg-white/60 backdrop-blur-md rounded-xl hover:-translate-y-2">
                     <div className="relative h-64 bg-gradient-to-br from-gray-200 to-gray-300 overflow-hidden">
                       {imageUrl ? (
                         <Image

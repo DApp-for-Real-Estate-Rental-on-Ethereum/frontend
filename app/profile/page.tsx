@@ -14,7 +14,7 @@ import { Camera, X, Eye, EyeOff, Loader2 } from "lucide-react"
 import { apiClient } from "@/lib/services/api"
 
 export default function ProfilePage() {
-  const { user, login } = useAuth()
+  const { user, login, logout } = useAuth()
   const router = useRouter()
 
   const [profile, setProfile] = useState({
@@ -41,6 +41,21 @@ export default function ProfilePage() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const mediaBaseUrl =
+    process.env.NEXT_PUBLIC_MEDIA_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_GATEWAY_URL ||
+    "http://localhost:8082"
+
+  const resolveProfileImage = (url?: string | null) => {
+    if (!url) return "/placeholder.jpg"
+    if (url.startsWith("http://") || url.startsWith("https://")) return url
+    const relativePath = url.startsWith("/") ? url : `/${url}`
+
+    // Prefer direct user-service base for static media, fall back to gateway/media base
+    const apiMediaBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_MEDIA_BASE_URL || mediaBaseUrl
+    return `${apiMediaBase}${relativePath}`
+  }
 
   // Load user data from API on mount
   useEffect(() => {
@@ -154,6 +169,28 @@ export default function ProfilePage() {
     }
   }
 
+  const handleDeleteAccount = async () => {
+    if (!user) return
+    const confirmed = window.confirm("Are you sure you want to delete your account? This cannot be undone.")
+    if (!confirmed) return
+
+    setIsSaving(true)
+    setError("")
+    setSuccessMessage("")
+
+    try {
+      await apiClient.users.deleteAccount()
+      // Clear auth state and redirect to homepage
+      logout()
+      router.push("/")
+      router.refresh()
+    } catch (err: any) {
+      setError(err.message || "Failed to delete account. Please try again.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const handleProfilePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !user) return
@@ -163,8 +200,10 @@ export default function ProfilePage() {
     setSuccessMessage("")
 
     try {
-      const result = await apiClient.users.updateProfilePicture(file)
-      const newProfilePictureUrl = result.url
+      const formData = new FormData()
+      formData.append("file", file)
+      const result = await apiClient.users.updateProfilePicture(formData)
+      const newProfilePictureUrl = (result as any).profilePicture || (result as any).url || ""
 
       // Update local profile state
       setProfile((prev) => ({ ...prev, profilePicture: newProfilePictureUrl }))
@@ -340,36 +379,21 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Profile</h1>
         </div>
 
         <div className="space-y-8">
           {/* Profile Picture */}
-          <Card className="p-8">
+          <Card className="p-8 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
             <div className="flex items-center gap-6">
               <div className="relative">
                 {profile.profilePicture ? (
                   <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-teal-600">
                     <Image
-                      src={(() => {
-                        const url = profile.profilePicture
-                        if (!url) return "/placeholder.jpg"
-                        if (url.startsWith("http://") || url.startsWith("https://")) {
-                          return url
-                        }
-                        // Profile pictures are stored in user-service (port 8082)
-                        if (url.startsWith("/profile-pictures") || url.startsWith("/user-images")) {
-                          return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
-                        }
-                        // If it's a relative path starting with /, assume it's from user-service
-                        if (url.startsWith("/")) {
-                          return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
-                        }
-                        return url
-                      })()}
+                      src={resolveProfileImage(profile.profilePicture)}
                       alt={`${user.firstName} ${user.lastName}`}
                       fill
                       className="object-cover"
@@ -398,7 +422,7 @@ export default function ProfilePage() {
                 <p className="text-gray-600">{user.email}</p>
                 <div className="mt-4 flex gap-2">
                   <label className="cursor-pointer">
-                    <Button type="button" className="bg-teal-600 hover:bg-teal-700" asChild>
+                    <Button type="button" className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 shadow-md transition-all" asChild>
                       <span>Change profile picture</span>
                     </Button>
                     <input
@@ -434,7 +458,7 @@ export default function ProfilePage() {
           )}
 
           {/* Personal Information */}
-          <Card className="p-8">
+          <Card className="p-8 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Personal Information</h2>
             <div className="grid grid-cols-2 gap-6">
               <div>
@@ -444,7 +468,7 @@ export default function ProfilePage() {
                   name="firstName"
                   value={profile.firstName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 />
               </div>
               <div>
@@ -454,7 +478,7 @@ export default function ProfilePage() {
                   name="lastName"
                   value={profile.lastName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 />
               </div>
               <div className="col-span-2">
@@ -465,7 +489,7 @@ export default function ProfilePage() {
                   value={profile.phoneNumber}
                   onChange={handleInputChange}
                   placeholder="212612345678"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 />
                 <p className="text-sm text-gray-500 mt-1">10-15 digits only</p>
               </div>
@@ -476,13 +500,13 @@ export default function ProfilePage() {
                   name="birthday"
                   value={profile.birthday}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 />
               </div>
             </div>
             <Button
               onClick={handleSaveChanges}
-              className="mt-6 bg-teal-600 hover:bg-teal-700"
+              className="mt-6 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 shadow-md hover:shadow-lg transition-all"
               disabled={isSaving}
             >
               {isSaving ? "Saving..." : "Save changes"}
@@ -490,7 +514,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Security */}
-          <Card className="p-8">
+          <Card className="p-8 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Security</h2>
             <div className="space-y-6">
               <div>
@@ -500,7 +524,7 @@ export default function ProfilePage() {
                   name="email"
                   value={profile.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  className="w-full px-4 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                 />
               </div>
               <div>
@@ -508,7 +532,7 @@ export default function ProfilePage() {
                 <Button
                   type="button"
                   onClick={() => setChangePasswordModalOpen(true)}
-                  className="w-full bg-teal-600 hover:bg-teal-700"
+                  className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 shadow-md hover:shadow-lg transition-all"
                 >
                   Change password
                 </Button>
@@ -517,7 +541,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Payment */}
-          <Card className="p-8">
+          <Card className="p-8 bg-white/80 backdrop-blur-md border border-white/20 shadow-xl">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Payment</h2>
             {(() => {
               // Simple check: if walletAddress is null, undefined, or empty string, show connect button
@@ -566,7 +590,7 @@ export default function ProfilePage() {
           </Card>
 
           {/* Danger Zone */}
-          <Card className="p-8 border-red-200">
+          <Card className="p-8 bg-red-50/50 backdrop-blur-md border border-red-200 shadow-sm">
             <h2 className="text-xl font-semibold text-red-600 mb-4">Danger Zone</h2>
             <p className="text-gray-600 mb-4">
               Once you delete your account, there is no going back. Please be certain.
@@ -581,6 +605,16 @@ export default function ProfilePage() {
                 {isSaving ? "Deleting..." : "Delete profile picture"}
               </Button>
             )}
+            <div className="mt-4">
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={isSaving}
+                className="w-full"
+              >
+                {isSaving ? "Deleting account..." : "Delete account"}
+              </Button>
+            </div>
           </Card>
         </div>
       </div>

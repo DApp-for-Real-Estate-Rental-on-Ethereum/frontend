@@ -13,6 +13,14 @@ export function Header() {
   const router = useRouter()
   const pathname = usePathname()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const mediaBaseUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"
+
+  const resolveProfileImage = (url?: string | null) => {
+    if (!url) return "/placeholder.jpg"
+    if (url.startsWith("http://") || url.startsWith("https://")) return url
+    if (url.startsWith("/")) return `${mediaBaseUrl}${url}`
+    return url
+  }
 
   const handleLogout = () => {
     logout()
@@ -20,8 +28,9 @@ export function Header() {
     router.refresh()
   }
 
-  const isAdmin = user?.roles?.includes("ADMIN") ?? false
-  const isPoster = user?.roles?.includes("POSTER") ?? false
+  const normalizedRoles = (user?.roles || []).map((role) => role.replace(/^ROLE_/i, "").toUpperCase())
+  const isAdmin = normalizedRoles.includes("ADMIN")
+  const isHost = normalizedRoles.some((role) => role === "HOST" || role === "POSTER")
 
   // Check if current route is active
   const isActive = (path: string) => pathname === path
@@ -79,7 +88,7 @@ export function Header() {
                   </Button>
                 </Link>
 
-                {(isPoster || isAdmin) && (
+                {(isHost || isAdmin) && (
                   <Link href="/host-dashboard">
                     <Button
                       variant="ghost"
@@ -103,7 +112,7 @@ export function Header() {
                   </Link>
                 )}
 
-                {!isPoster && !isAdmin && (
+                {!isHost && !isAdmin && (
                   <Button
                     className="bg-teal-600 hover:bg-teal-700 text-white"
                     onClick={() => router.push("/post-property")}
@@ -141,22 +150,7 @@ export function Header() {
                   <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors">
                     {user?.profileImage ? (
                       <img
-                        src={(() => {
-                          const url = user.profileImage
-                          if (!url) return "/placeholder.jpg"
-                          if (url.startsWith("http://") || url.startsWith("https://")) {
-                            return url
-                          }
-                          // Profile pictures are stored in user-service (port 8082)
-                          if (url.startsWith("/profile-pictures") || url.startsWith("/user-images")) {
-                            return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
-                          }
-                          // If it's a relative path starting with /, assume it's from user-service
-                          if (url.startsWith("/")) {
-                            return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
-                          }
-                          return url
-                        })()}
+                        src={resolveProfileImage(user.profileImage)}
                         alt={user.firstName || "User"}
                         className="w-9 h-9 rounded-full object-cover border-2 border-gray-200"
                         onError={(e) => {
@@ -248,7 +242,7 @@ export function Header() {
                     My Bookings
                   </Link>
 
-                  {isPoster && (
+                  {isHost && (
                     <Button
                       className="w-full bg-teal-600 hover:bg-teal-700 text-white mt-2"
                       onClick={() => {
@@ -273,7 +267,7 @@ export function Header() {
                     </Button>
                   )}
 
-                  {!isPoster && (
+                  {!isHost && (
                     <Button
                       className="w-full bg-teal-600 hover:bg-teal-700 text-white mt-2"
                       onClick={() => {
@@ -294,22 +288,7 @@ export function Header() {
                   >
                     {user?.profileImage ? (
                       <img
-                        src={(() => {
-                          const url = user.profileImage
-                          if (!url) return "/placeholder.jpg"
-                          if (url.startsWith("http://") || url.startsWith("https://")) {
-                            return url
-                          }
-                          // Profile pictures are stored in user-service (port 8082)
-                          if (url.startsWith("/profile-pictures") || url.startsWith("/user-images")) {
-                            return `http://localhost:8082${url}`
-                          }
-                          // If it's a relative path starting with /, assume it's from user-service
-                          if (url.startsWith("/")) {
-                            return `http://localhost:8082${url}`
-                          }
-                          return url
-                        })()}
+                        src={resolveProfileImage(user.profileImage)}
                         alt={user.firstName || "User"}
                         className="w-8 h-8 rounded-full object-cover"
                         onError={(e) => {
