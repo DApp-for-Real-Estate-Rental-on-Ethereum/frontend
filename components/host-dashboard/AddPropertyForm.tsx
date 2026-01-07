@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/hooks/use-auth"
 import { apiClient } from "@/lib/services/api"
+import { resolveMediaUrl } from "@/lib/services/api/core"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Upload, MapPin, Loader2 } from "lucide-react"
@@ -133,13 +134,7 @@ export function AddPropertyForm({ onSuccess, propertyId, propertyData, isEditMod
       // Set image previews from existing images
       if (propertyData.propertyImages && propertyData.propertyImages.length > 0) {
         const previews = propertyData.propertyImages.map((img: any) => {
-          if (img.url.startsWith("http://") || img.url.startsWith("https://")) {
-            return img.url
-          }
-          if (img.url.startsWith("/uploads")) {
-            return `http://localhost:8081${img.url}`
-          }
-          return img.url
+          return resolveMediaUrl(img.url)
         })
         setImagePreview(previews)
       }

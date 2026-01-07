@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { apiClient } from "@/lib/services/api"
+import { resolveMediaUrl } from "@/lib/services/api/core"
 import { useAuth } from "@/lib/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -39,6 +40,7 @@ interface Booking {
   onChainTxHash?: string
   createdAt?: string
   updatedAt?: string
+  hasNegotiation?: boolean
 }
 
 export default function BookingDetailPage() {
@@ -90,7 +92,7 @@ export default function BookingDetailPage() {
     try {
       setIsLoading(true)
       setError("")
-      const data = await apiClient.bookings.getById(bookingId)
+      const data = await apiClient.bookings.getById(Number(bookingId))
       setBooking(data)
       setEditForm({
         checkInDate: data.checkInDate || "",
@@ -120,11 +122,12 @@ export default function BookingDetailPage() {
     if (!booking?.propertyId) return
     try {
       const info = await apiClient.bookings.getPropertyInfo(String(booking.propertyId))
+      const propertyData = info.property
       setPropertyInfo({
-        pricePerNight: Number(info.pricePerNight),
-        isNegotiable: info.isNegotiable,
-        discountEnabled: info.discountEnabled,
-        negotiationPercentage: info.maxNegotiationPercent
+        pricePerNight: Number(propertyData?.price || propertyData?.pricePerNight || 0),
+        isNegotiable: propertyData?.isNegotiable ?? false,
+        discountEnabled: propertyData?.discountEnabled ?? false,
+        negotiationPercentage: propertyData?.negotiationPercentage ?? propertyData?.maxNegotiationPercent ?? 0
       })
     } catch (err) {
       console.error("Failed to fetch property info:", err)
@@ -293,14 +296,7 @@ export default function BookingDetailPage() {
 
   // Helper function to build full image URL
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url
-    }
-    if (url.startsWith("/uploads")) {
-      return `http://localhost:8081${url}`
-    }
-    return url
+    return resolveMediaUrl(url, "/placeholder.jpg")
   }
 
   if (isLoading) {

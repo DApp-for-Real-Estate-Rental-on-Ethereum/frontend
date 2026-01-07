@@ -3,9 +3,75 @@
  * Handles configuration, authentication headers, and base request logic.
  */
 
-// Configuration from environment variables
-export const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || ""
+// Configuration: compute gateway URL lazily at actual runtime (not build time)
 const USE_GATEWAY = process.env.NEXT_PUBLIC_USE_GATEWAY !== "false" // Default to true
+
+/**
+ * Get the gateway URL - computed at runtime in browser, falls back for SSR
+ */
+function getGatewayUrl(): string {
+    // If env explicitly set, use it
+    if (process.env.NEXT_PUBLIC_GATEWAY_URL) {
+        return process.env.NEXT_PUBLIC_GATEWAY_URL
+    }
+
+    // In browser: derive from current host
+    if (typeof window !== "undefined") {
+        const hostname = window.location.hostname
+        const currentPort = window.location.port
+        const protocol = window.location.protocol
+
+        // CloudFront: use the API Gateway CloudFront distribution
+        if (hostname.includes("cloudfront.net")) {
+            // Frontend is on d1xxz231cvorys.cloudfront.net
+            // API Gateway is on d2ukdap3e0lir5.cloudfront.net
+            return "https://d2ukdap3e0lir5.cloudfront.net"
+        }
+
+        // AWS ELB: hostname contains "elb.amazonaws.com" - gateway is on port 8090
+        if (hostname.includes("elb.amazonaws.com")) {
+            // Extract base ELB hostname and use gateway port 8090
+            // The frontend ELB is different from gateway ELB
+            // We need to use the gateway ELB URL which should be in env
+            // But if not set, assume same host with port 8090
+            return `${protocol}//${hostname}:8090`
+        }
+
+        // Minikube: if on frontend NodePort 32079, redirect to gateway NodePort 30090
+        if (currentPort === "32079") {
+            return `${protocol}//${hostname}:30090`
+        }
+
+        // Default: use same host with current port or configured gateway port
+        const port = process.env.NEXT_PUBLIC_GATEWAY_PORT || currentPort || "8090"
+        const portPart = port ? `:${port}` : ""
+        return `${protocol}//${hostname}${portPart}`
+    }
+
+    // SSR/build time: use cluster-internal address
+    return "http://api-gateway:8090"
+}
+
+// For backward compatibility, export as constant (but use getGatewayUrl() in functions)
+export const GATEWAY_URL = "http://api-gateway:8090" // Placeholder for SSR; actual calls use getGatewayUrl()
+
+/**
+ * Get media base URL for profile pictures, property images, etc.
+ * Uses gateway URL so images are served through the API gateway
+ */
+export function getMediaBaseUrl(): string {
+    return getGatewayUrl()
+}
+
+/**
+ * Resolve a media URL (profile picture, property image, etc.) to a full URL
+ */
+export function resolveMediaUrl(url?: string | null, fallback = "/placeholder.jpg"): string {
+    if (!url) return fallback
+    if (url.startsWith("http://") || url.startsWith("https://")) return url
+    const relativePath = url.startsWith("/") ? url : `/${url}`
+    return `${getMediaBaseUrl()}${relativePath}`
+}
 
 // Fallback URLs for individual services
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"
@@ -83,7 +149,7 @@ export type ServiceType = 'auth' | 'users' | 'properties' | 'bookings' | 'paymen
  * Helper function to get the correct base URL for a service
  */
 export function getServiceUrl(service: ServiceType): string {
-    if (USE_GATEWAY) return GATEWAY_URL
+    if (USE_GATEWAY) return getGatewayUrl()
 
     switch (service) {
         case 'auth':

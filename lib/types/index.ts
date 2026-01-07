@@ -11,6 +11,9 @@ export interface User {
   walletAddress?: string
   roles: UserRole[]
   verified?: boolean
+  score?: number
+  rating?: number
+  enabled?: boolean
 }
 
 export type UserRole = "ADMIN" | "POSTER" | "USER"
@@ -237,6 +240,7 @@ export interface Booking {
   onChainTxHash?: string
   createdAt?: string
   updatedAt?: string
+  hasNegotiation?: boolean
 }
 
 export interface BookingRequest {

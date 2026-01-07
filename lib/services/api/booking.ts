@@ -137,6 +137,12 @@ export const bookings = {
         service: "bookings" as const
     }),
 
+    // Owner confirms tenant checkout
+    ownerConfirmCheckout: (id: number, ownerId: number) => request(`/bookings/${id}/checkout/owner?userId=${ownerId}`, {
+        method: "POST",
+        service: "bookings" as const
+    }),
+
     // Admin
     getAllForAdmin: () => request<Booking[]>("/bookings/admin/all", {
         service: "bookings" as const

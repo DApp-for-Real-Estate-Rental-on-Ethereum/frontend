@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { apiClient } from "@/lib/services/api"
-import { PROPERTY_API_BASE_URL } from "@/lib/services/api/core"
+import { PROPERTY_API_BASE_URL, resolveMediaUrl } from "@/lib/services/api/core"
 import { useAuth } from "@/lib/hooks/use-auth"
 import Image from "next/image"
 import Link from "next/link"
@@ -314,18 +314,7 @@ export default function PropertyDetailPage() {
 
     // Helper function to build full image URL
     const getImageUrl = (url: string | null | undefined) => {
-        if (!url) return "/houses_placeholder.png"
-        if (url.startsWith("http://") || url.startsWith("https://")) {
-            return url
-        }
-
-        // Property images are served by property-service; honor env override instead of hardcoded localhost
-        const base = (PROPERTY_API_BASE_URL || "").replace(/\/$/, "") || "http://localhost:8081"
-        if (url.startsWith("/uploads")) {
-            return `${base}${url}`
-        }
-
-        return url
+        return resolveMediaUrl(url, "/houses_placeholder.png")
     }
 
     // Get all images sorted (cover first, then others)

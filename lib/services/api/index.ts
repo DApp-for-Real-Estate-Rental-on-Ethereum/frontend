@@ -29,6 +29,10 @@ export const apiClient = {
     marketTrends,
     recommendations,
     tenantRisk,
+    // Alias for risk-related functionality
+    risk: {
+        getTenantRiskScore: tenantRisk.assess
+    },
 
     // Auth namespace
     auth: {

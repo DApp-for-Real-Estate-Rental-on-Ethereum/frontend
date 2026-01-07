@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { apiClient } from "@/lib/services/api"
+import { resolveMediaUrl } from "@/lib/services/api/core"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -49,7 +50,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
     firstName?: string
     lastName?: string
     email?: string
-    phoneNumber?: number
+    phoneNumber?: string
     profilePicture?: string
     walletAddress?: string
     score?: number
@@ -285,23 +286,7 @@ export function PropertiesManagement({ filter }: PropertiesManagementProps) {
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/houses_placeholder.png"
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url
-    }
-    // Property images are stored in property-service (port 8081)
-    if (url.startsWith("/uploads")) {
-      return `http://localhost:8081${url}`
-    }
-    // Profile pictures are stored in user-service (port 8082)
-    if (url.startsWith("/profile-pictures") || url.startsWith("/user-images")) {
-      return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
-    }
-    // If it's a relative path starting with /, assume it's from user-service
-    if (url.startsWith("/") && !url.startsWith("/uploads")) {
-      return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
-    }
-    return url
+    return resolveMediaUrl(url, "/houses_placeholder.png")
   }
 
   if (isLoading) {

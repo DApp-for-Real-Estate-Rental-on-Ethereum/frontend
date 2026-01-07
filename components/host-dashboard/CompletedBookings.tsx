@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { apiClient } from "@/lib/services/api"
+import { resolveMediaUrl } from "@/lib/services/api/core"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -99,14 +100,7 @@ export function CompletedBookings({ ownerId }: CompletedBookingsProps) {
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/houses_placeholder.png"
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url
-    }
-    if (url.startsWith("/uploads")) {
-      return `http://localhost:8081${url}`
-    }
-    return url
+    return resolveMediaUrl(url, "/houses_placeholder.png")
   }
 
   if (isLoading) {

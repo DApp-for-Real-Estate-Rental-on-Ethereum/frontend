@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { apiClient } from "@/lib/services/api"
+import { resolveMediaUrl } from "@/lib/services/api/core"
 import { useAuth } from "@/lib/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -623,14 +624,7 @@ export default function MyBookingsPage() {
 
   // Helper function to build full image URL
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/placeholder.jpg"
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url
-    }
-    if (url.startsWith("/uploads")) {
-      return `http://localhost:8081${url}`
-    }
-    return url
+    return resolveMediaUrl(url, "/placeholder.jpg")
   }
 
   // Render beautiful booking card

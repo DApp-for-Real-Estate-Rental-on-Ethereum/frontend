@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { apiClient } from "@/lib/services/api"
+import { resolveMediaUrl } from "@/lib/services/api/core"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -38,17 +39,12 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState("")
   const [aiResult, setAiResult] = useState<{
-    predictedPriceMad: number
-    predictedPriceUsd: number
-    confidenceIntervalLower: number
-    confidenceIntervalUpper: number
-    city: string
-    season: string
-    modelVersion: string
-    predictionTimestamp: string
-    currentPriceMad?: number
-    priceDifferencePercent?: number
+    predictedPriceMad?: number
+    predictedPriceUsd?: number
+    predicted_price?: number // legacy field name
+    currency?: string
     recommendation?: string
+    priceDifferencePercent?: number
   } | null>(null)
 
   useEffect(() => {
@@ -361,14 +357,7 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/houses_placeholder.png"
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url
-    }
-    if (url.startsWith("/uploads")) {
-      return `http://localhost:8081${url}`
-    }
-    return url
+    return resolveMediaUrl(url, "/houses_placeholder.png")
   }
 
   const getStatusBadge = (status: string) => {
@@ -759,34 +748,26 @@ export function PropertiesList({ userId, onUpdate, filter = "all" }: PropertiesL
                   )}
                   {aiResult && (
                     <div className="mt-2 rounded-lg border border-teal-200 bg-teal-50 p-3 text-xs text-gray-800 space-y-1">
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-semibold text-teal-700">
-                          {aiResult.predictedPriceMad.toFixed(0)} MAD
-                        </span>
-                        <span className="text-gray-500">≈ {aiResult.predictedPriceUsd.toFixed(2)} USD / night</span>
-                      </div>
-                      <p className="text-gray-600">
-                        Confidence interval: {aiResult.confidenceIntervalLower.toFixed(0)} –{" "}
-                        {aiResult.confidenceIntervalUpper.toFixed(0)} MAD
-                      </p>
-                      {typeof aiResult.currentPriceMad === "number" && (
-                        <p className="text-gray-600">
-                          Current price (platform): {aiResult.currentPriceMad.toFixed(0)} MAD{" "}
-                          {typeof aiResult.priceDifferencePercent === "number" && (
-                            <span className="ml-1">
-                              ({aiResult.priceDifferencePercent.toFixed(2)}%)
+                      {(() => {
+                        const price = aiResult.predictedPriceMad ?? aiResult.predicted_price
+                        const currency = aiResult.currency || "MAD"
+                        return (
+                          <div className="flex items-baseline gap-1">
+                            <span className="font-semibold text-teal-700">
+                              {price !== undefined ? price.toFixed(0) : "N/A"} {currency}
                             </span>
-                          )}
-                        </p>
-                      )}
+                            <span className="text-gray-500">/ night (AI predicted)</span>
+                          </div>
+                        )
+                      })()}
                       {aiResult.recommendation && (
-                        <p className="font-semibold text-teal-800">
-                          Recommendation: {aiResult.recommendation}
-                        </p>
+                        <div className="text-gray-700">
+                          Recommendation: <span className="font-semibold text-teal-700">{aiResult.recommendation}</span>
+                          {aiResult.priceDifferencePercent !== undefined && (
+                            <span className="text-gray-500"> ({aiResult.priceDifferencePercent.toFixed(1)}%)</span>
+                          )}
+                        </div>
                       )}
-                      <p className="text-gray-500">
-                        Model {aiResult.modelVersion} • {aiResult.city}, {aiResult.season}
-                      </p>
                     </div>
                   )}
                 </div>

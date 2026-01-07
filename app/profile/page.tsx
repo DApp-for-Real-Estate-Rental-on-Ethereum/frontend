@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Camera, X, Eye, EyeOff, Loader2 } from "lucide-react"
 import { apiClient } from "@/lib/services/api"
+import { resolveMediaUrl } from "@/lib/services/api/core"
 
 export default function ProfilePage() {
   const { user, login, logout } = useAuth()
@@ -41,20 +42,9 @@ export default function ProfilePage() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
-  const mediaBaseUrl =
-    process.env.NEXT_PUBLIC_MEDIA_BASE_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    process.env.NEXT_PUBLIC_GATEWAY_URL ||
-    "http://localhost:8082"
 
   const resolveProfileImage = (url?: string | null) => {
-    if (!url) return "/placeholder.jpg"
-    if (url.startsWith("http://") || url.startsWith("https://")) return url
-    const relativePath = url.startsWith("/") ? url : `/${url}`
-
-    // Prefer direct user-service base for static media, fall back to gateway/media base
-    const apiMediaBase = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_MEDIA_BASE_URL || mediaBaseUrl
-    return `${apiMediaBase}${relativePath}`
+    return resolveMediaUrl(url, "/placeholder.jpg")
   }
 
   // Load user data from API on mount

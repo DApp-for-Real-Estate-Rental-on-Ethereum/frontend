@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { apiClient } from "@/lib/services/api"
+import { resolveMediaUrl } from "@/lib/services/api/core"
 import type { Property } from "@/lib/types"
 import Link from "next/link"
 import Image from "next/image"
@@ -183,14 +184,7 @@ export default function PropertiesPage() {
   }
 
   const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return "/houses_placeholder.png"
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url
-    }
-    if (url.startsWith("/uploads")) {
-      return `http://localhost:8081${url}`
-    }
-    return url
+    return resolveMediaUrl(url, "/houses_placeholder.png")
   }
 
   return (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, JSX } from "react"
 import { apiClient } from "@/lib/services/api"
+import { resolveMediaUrl } from "@/lib/services/api/core"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -384,22 +385,7 @@ export function UsersManagement({ filter }: UsersManagementProps) {
                         <div className="flex items-center gap-3">
                           {user.profilePicture ? (
                             <Image
-                              src={(() => {
-                                const url = user.profilePicture
-                                if (!url) return "/placeholder.jpg"
-                                if (url.startsWith("http://") || url.startsWith("https://")) {
-                                  return url
-                                }
-                                // Profile pictures are stored in user-service (port 8082)
-                                if (url.startsWith("/profile-pictures") || url.startsWith("/user-images")) {
-                                  return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
-                                }
-                                // If it's a relative path starting with /, assume it's from user-service
-                                if (url.startsWith("/")) {
-                                  return `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"}${url}`
-                                }
-                                return url
-                              })()}
+                              src={resolveMediaUrl(user.profilePicture)}
                               alt={`${user.firstName} ${user.lastName}`}
                               width={40}
                               height={40}

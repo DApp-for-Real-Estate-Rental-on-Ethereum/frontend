@@ -113,15 +113,11 @@ export const properties = {
         service: 'properties' as const
     }),
 
-    // Owner-scoped listing used in dashboards; falls back to auth user from storage headers
-    getMyProperties: (ownerId?: number | string) => {
-        const headers = getAuthHeaders()
-        const id = ownerId ?? headers['X-User-Id'] ?? ''
-        const query = id ? `?ownerId=${id}` : ''
-        return request<Property[]>(`/properties${query}`, {
+    // Owner-scoped listing used in dashboards - calls dedicated my-properties endpoint
+    getMyProperties: () => {
+        return request<Property[]>(`/properties/my-properties`, {
             method: "GET",
-            service: 'properties' as const,
-            headers
+            service: 'properties' as const
         }).then(toArray)
     },
 
@@ -140,10 +136,31 @@ export const properties = {
         }).then(toArray)
     },
 
+    // Admin endpoint to get all properties regardless of status
+    getAllForAdmin: () => request<Property[]>(`/properties/admin/all`, {
+        method: "GET",
+        service: 'properties' as const
+    }).then(toArray),
+
     // AI Pricing
-    predictPrice: (propertyId: string, startDate: string, endDate: string) => request<{ predicted_price: number; currency: string }>(`/properties/${propertyId}/predict-price`, {
-        method: "POST", // Originally it might seem like GET but usually prediction is POST or GET with params. Let's assume POST based on context or check original.
-        body: JSON.stringify({ startDate, endDate }),
+    predictPrice: (
+        propertyId: string,
+        checkInDate: string,
+        checkOutDate: string,
+    ) => request<{
+        predictedPriceMad?: number
+        predictedPriceUsd?: number
+        confidenceIntervalLower?: number
+        confidenceIntervalUpper?: number
+        currentPriceMad?: number
+        priceDifferencePercent?: number
+        recommendation?: string
+        // Backward compatibility with older field naming
+        predicted_price?: number
+        currency?: string
+    }>(`/properties/${propertyId}/predict-price`, {
+        method: "POST",
+        body: JSON.stringify({ checkInDate, checkOutDate }),
         service: 'properties' as const
     }),
 }

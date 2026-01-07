@@ -7,19 +7,16 @@ import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { resolveMediaUrl } from "@/lib/services/api/core"
 
 export function Header() {
   const { user, logout, isAuthenticated } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const mediaBaseUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8082"
 
   const resolveProfileImage = (url?: string | null) => {
-    if (!url) return "/placeholder.jpg"
-    if (url.startsWith("http://") || url.startsWith("https://")) return url
-    if (url.startsWith("/")) return `${mediaBaseUrl}${url}`
-    return url
+    return resolveMediaUrl(url, "/placeholder.jpg")
   }
 
   const handleLogout = () => {

@@ -253,7 +253,7 @@ export function Calendar({ ownerId }: CalendarProps) {
         <Card className="p-12 text-center">
           <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">No bookings</h2>
-          <p className="text-gray-600">You don't have any confirmed bookings to display.</p>
+          <p className="text-gray-600">You don&#39;t have any confirmed bookings to display.</p>
         </Card>
       )}
     </div>
